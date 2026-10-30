@@ -1143,12 +1143,12 @@ def chest(ctx, x, y, s, T, open_k=0.0):
 
 # ================================================================ UI
 def hud_timer(ctx, txt, bump=0.0, urgent=False, y=180):
-    """Screen-space timer pill at the top centre (dark; red when 4 or less)."""
+    """Screen-space timer pill at the top centre (dark; red when 4 or less). Widens for long text."""
     sc = 1 + 0.25 * bump
     ctx.save()
     ctx.translate(W / 2, y)
     ctx.scale(sc, sc)
-    w, h = 200, 62
+    w, h = max(200, text_width(ctx, txt, 38) + 116), 62
     rrect(ctx, -w / 2, -h / 2 + 4, w, h, h / 2)
     ctx.set_source_rgba(0, 0, 0, 0.35)
     ctx.fill()
@@ -1158,12 +1158,13 @@ def hud_timer(ctx, txt, bump=0.0, urgent=False, y=180):
     ctx.set_source_rgba(1, 1, 1, 0.25)
     ctx.set_line_width(3)
     ctx.stroke()
+    ix = -w / 2 + 42
     ctx.new_sub_path()
-    ctx.arc(-58, 2, 17, 0, 2 * PI)
-    ctx.move_to(-58, 2)
-    ctx.line_to(-58, -9)
-    ctx.move_to(-58, -19)
-    ctx.line_to(-58, -24)
+    ctx.arc(ix, 2, 17, 0, 2 * PI)
+    ctx.move_to(ix, 2)
+    ctx.line_to(ix, -9)
+    ctx.move_to(ix, -19)
+    ctx.line_to(ix, -24)
     ctx.set_source_rgb(1, 1, 1)
     ctx.set_line_width(4.5)
     ctx.stroke()
@@ -2087,3 +2088,435 @@ def lightbulb(ctx, x, y, s, k=1.0, T=0.0):
     ctx.set_line_width(6)
     ctx.stroke()
     ctx.restore()
+
+
+# ================================================================ more props (added for no_break.py)
+def stairs(ctx, T, x0=-60, y0=1180, n=9, dx=80, dy=-70, col="#a8743f", wall="#5a4a8a", light_col="#ffd27a"):
+    """Staircase seen from the side, climbing to the upper right; a warm lit room at the bottom left."""
+    ctx.rectangle(-3000, -5000, 7000, 10000)
+    ctx.set_source_rgb(*c_(wall))
+    ctx.fill()
+    glow(ctx, x0 + 60, y0 - 120, 380, c_(light_col), 0.55)
+    for i in range(n):
+        x = x0 + i * dx
+        y = y0 + i * dy
+        block(ctx, x, y, dx + 4, (n - i) * 0 + 1400, 4, c_(col), 4, gloss=False)
+        block(ctx, x, y, dx + 4, 18, 4, light(c_(col), 0.18), 3, gloss=False)
+    # banister
+    ctx.move_to(x0 + 20, y0 - 150)
+    ctx.line_to(x0 + n * dx, y0 + n * dy - 150)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(20)
+    ctx.stroke_preserve()
+    ctx.set_source_rgb(*hexc("#8a5a3a"))
+    ctx.set_line_width(12)
+    ctx.stroke()
+    for i in range(0, n, 2):
+        ctx.move_to(x0 + 40 + i * dx, y0 + i * dy)
+        ctx.line_to(x0 + 40 + i * dx, y0 + i * dy - 150)
+    ctx.set_source_rgb(*hexc("#8a5a3a"))
+    ctx.set_line_width(8)
+    ctx.stroke()
+
+
+def tablet(ctx, x, y, s, T, fn=None, tilt=0.0, smear=0.0, seed=2):
+    """Landscape tablet (centre x, y); smear 0..1 covers it in peanut-butter blobs."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    w, h = 420 * s, 300 * s
+    block(ctx, -w / 2, -h / 2, w, h, 30 * s, hexc("#2b2f45"), 5)
+    screen_rect(ctx, -w / 2 + 22 * s, -h / 2 + 20 * s, w - 44 * s, h - 40 * s, fn, T, 10 * s)
+    if smear > 0:
+        rnd = random.Random(seed)
+        for i in range(int(14 * smear)):
+            bx = rnd.uniform(-w / 2, w / 2)
+            by = rnd.uniform(-h / 2, h / 2)
+            r = rnd.uniform(25, 60) * s
+            peanut_smear(ctx, bx, by, r, seed + i)
+    ctx.restore()
+
+
+def peanut_smear(ctx, x, y, r, seed=0):
+    rnd = random.Random(seed)
+    n = 9
+    for i in range(n + 1):
+        a = i * 2 * PI / n
+        rr = r * rnd.uniform(0.7, 1.15)
+        (ctx.move_to if i == 0 else ctx.line_to)(x + math.cos(a) * rr, y + math.sin(a) * rr * 0.8)
+    ctx.close_path()
+    shape_fill(ctx, hexc("#c98a3e"), max(2, r * 0.06), y - r, y + r, outline=hexc("#8a5a2a"))
+    ctx.new_sub_path()
+    ctx.arc(x - r * 0.25, y - r * 0.25, r * 0.18, 0, 2 * PI)
+    ctx.set_source_rgba(1, 1, 1, 0.45)
+    ctx.fill()
+
+
+def pb_jar(ctx, x, y, s):
+    """Peanut butter jar (bottom centre x, y)."""
+    block(ctx, x - 80 * s, y - 190 * s, 160 * s, 190 * s, 30 * s, hexc("#c98a3e"), 5)
+    block(ctx, x - 70 * s, y - 230 * s, 140 * s, 50 * s, 12 * s, hexc("#e8323a"), 5)
+    rrect(ctx, x - 70 * s, y - 140 * s, 140 * s, 80 * s, 10 * s)
+    shape_fill(ctx, hexc("#fff4d0"), 4, y - 140 * s, y - 60 * s, outline=INK)
+    bold_text(ctx, "PEANUT", x, y - 115 * s, 26 * s, hexc("#8a5a2a"), outline=hexc("#fff4d0"), shadow=False, stroke=0.02)
+    bold_text(ctx, "BUTTER", x, y - 85 * s, 26 * s, hexc("#8a5a2a"), outline=hexc("#fff4d0"), shadow=False, stroke=0.02)
+
+
+def cobweb(ctx, x, y, r, k=1.0, corner=(1, 1)):
+    """Corner cobweb growing with k (0..1); corner = direction it spreads (sx, sy)."""
+    if k <= 0:
+        return
+    r *= k
+    sx, sy = corner
+    ctx.set_source_rgba(1, 1, 1, 0.75)
+    ctx.set_line_width(2.5)
+    for i in range(6):
+        a = i * (PI / 2) / 5
+        ctx.move_to(x, y)
+        ctx.line_to(x + sx * math.cos(a) * r, y + sy * math.sin(a) * r)
+    ctx.stroke()
+    for j in range(1, 5):
+        rr = r * j / 5
+        for i in range(6):
+            a = i * (PI / 2) / 5
+            px, py = x + sx * math.cos(a) * rr, y + sy * math.sin(a) * rr
+            (ctx.move_to if i == 0 else ctx.line_to)(px, py)
+        ctx.stroke()
+
+
+def zzz(ctx, x, y, T, size=50):
+    for k in range(3):
+        ph = (T * 0.8 + k / 3) % 1
+        bold_text(ctx, "Z", x + ph * 80 + k * 10, y - ph * 160, size * (0.6 + ph * 0.6), (1, 1, 1),
+                  stroke=0.18, shadow=False)
+
+
+def router(ctx, x, y, s, T, dead=0.0):
+    """Wi-Fi router (bottom centre x, y) with a face; dead 0..1 makes it X-eyed and smoking."""
+    for side in (-1, 1):
+        ctx.save()
+        ctx.translate(x + side * 110 * s, y - 120 * s)
+        ctx.rotate(side * (0.15 + 0.5 * dead))
+        block(ctx, -10 * s, -150 * s, 20 * s, 150 * s, 8 * s, hexc("#3b3f5a"), 4)
+        ctx.restore()
+    block(ctx, x - 170 * s, y - 140 * s, 340 * s, 140 * s, 26 * s, hexc("#f1f1f6"), 5)
+    for i in range(4):
+        ctx.new_sub_path()
+        ctx.arc(x - 90 * s + i * 60 * s, y - 35 * s, 9 * s, 0, 2 * PI)
+        on = dead < 0.5 and int(T * 6 + i) % 3
+        ctx.set_source_rgb(*(GREEN if on else hexc("#e8323a")))
+        ctx.fill()
+    ey = y - 95 * s
+    for side in (-1, 1):
+        ex = x + side * 45 * s
+        if dead > 0.5:
+            for a, b in ((-1, 1), (1, -1)):
+                ctx.move_to(ex - 14 * s, ey + a * 14 * s)
+                ctx.line_to(ex + 14 * s, ey + b * 14 * s)
+            ctx.set_source_rgb(*INK)
+            ctx.set_line_width(6 * s)
+            ctx.stroke()
+        else:
+            ellipse(ctx, ex, ey, 9 * s, 13 * s)
+            ctx.set_source_rgb(*INK)
+            ctx.fill()
+    if dead > 0.5:
+        for k in range(3):   # smoke
+            ph = (T * 0.9 + k / 3) % 1
+            ctx.new_sub_path()
+            ctx.arc(x + (k - 1) * 60 * s, y - 180 * s - ph * 220 * s, (25 + ph * 30) * s, 0, 2 * PI)
+            ctx.set_source_rgba(0.45, 0.45, 0.5, 0.7 * (1 - ph))
+            ctx.fill()
+
+
+def wifi_icon(ctx, x, y, r, col=(1, 1, 1), bars=3):
+    for i in range(3):
+        if i >= bars:
+            continue
+        rr = r * (0.35 + 0.32 * i)
+        ctx.new_sub_path()
+        ctx.arc(x, y, rr, -PI * 0.78, -PI * 0.22)
+        ctx.set_source_rgb(*c_(col))
+        ctx.set_line_width(r * 0.16)
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.stroke()
+    ctx.new_sub_path()
+    ctx.arc(x, y, r * 0.1, 0, 2 * PI)
+    ctx.fill()
+
+
+def wifi_list(ctx, x, y, s, T, rows, connected_t=None):
+    """Wi-Fi network list (top centre x, y); rows = names, the first one gets CONNECTED at connected_t."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    h = 120 + len(rows) * 100
+    block(ctx, -280, 0, 560, h, 30, hexc("#1f2236"), 6, outline=INK)
+    bold_text(ctx, "Wi-Fi", -240, 55, 44, (1, 1, 1), align="l", stroke=0.1)
+    for i, name in enumerate(rows):
+        yy = 120 + i * 100
+        on = connected_t is not None and i == 0 and T >= connected_t
+        block(ctx, -250, yy, 500, 84, 18, GREEN if on else hexc("#2c3a78"), 4, outline=INK, gloss=False)
+        wifi_icon(ctx, -205, yy + 58, 34)
+        bold_text(ctx, name, -160, yy + 42, 30, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+        if on:
+            bold_text(ctx, "CONNECTED", 150, yy + 42, 24, (1, 1, 1), shadow=False, stroke=0.0,
+                      scale=pop(T - connected_t))
+        else:
+            rrect(ctx, 195, yy + 30, 26, 24, 4)   # padlock
+            ctx.set_source_rgb(1, 1, 1)
+            ctx.fill()
+            ctx.new_sub_path()
+            ctx.arc(208, yy + 30, 9, PI, 0)
+            ctx.set_source_rgb(1, 1, 1)
+            ctx.set_line_width(4)
+            ctx.stroke()
+    ctx.restore()
+
+
+def pizza_box(ctx, x, y, w, h=34, tilt=0.0):
+    """One closed pizza box; (x, y) = bottom centre."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    block(ctx, -w / 2, -h, w, h, 5, hexc("#e8c48a"), 4, gloss=False)
+    ctx.move_to(-w / 2 + 6, -h + 9)
+    ctx.line_to(w / 2 - 6, -h + 9)
+    ctx.set_source_rgba(*hexc("#b8925a"), 1)
+    ctx.set_line_width(3)
+    ctx.stroke()
+    ctx.new_sub_path()
+    ctx.arc(0, -h / 2 + 2, h * 0.32, 0, 2 * PI)
+    ctx.set_source_rgb(*hexc("#e8323a"))
+    ctx.fill()
+    ctx.restore()
+
+
+def pizza_tower(ctx, x, y_base, n, w=260, T=0.0, h=34, seed=1):
+    """A wobbly tower of n pizza boxes standing on y_base. Returns the top y."""
+    rnd = random.Random(seed)
+    y = y_base
+    for i in range(int(n)):
+        off = rnd.uniform(-14, 14) + math.sin(T * 2 + i * 0.3) * i * 0.4
+        pizza_box(ctx, x + off, y, w * rnd.uniform(0.92, 1.0), h, tilt=rnd.uniform(-0.03, 0.03))
+        y -= h
+    return y
+
+
+def height_ruler(ctx, x, y_base, h, step=100, label_fn=None):
+    """Vertical measuring ruler standing on y_base, h px tall."""
+    block(ctx, x - 30, y_base - h, 60, h, 6, hexc("#ffe45c"), 4)
+    for i in range(int(h / step * 4) + 1):
+        yy = y_base - i * step / 4
+        ln = 30 if i % 4 == 0 else 14
+        ctx.move_to(x - 30, yy)
+        ctx.line_to(x - 30 + ln, yy)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(3)
+    ctx.stroke()
+
+
+def grad_cap(ctx, x, y, s, tilt=0.0, col="#1f2236"):
+    """Graduation mortarboard; (x, y) = where it sits on the head."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    ctx.scale(s, s)
+    block(ctx, -45, -30, 90, 40, 8, c_(col), 4)
+    ctx.move_to(-95, -40)
+    ctx.line_to(0, -75)
+    ctx.line_to(95, -40)
+    ctx.line_to(0, -5)
+    ctx.close_path()
+    shape_fill(ctx, light(c_(col), 0.1), 4, -75, -5, outline=INK)
+    ctx.move_to(0, -40)
+    ctx.line_to(70, -30)
+    ctx.line_to(72, 10)
+    ctx.set_source_rgb(*YELLOW)
+    ctx.set_line_width(5)
+    ctx.stroke()
+    ctx.restore()
+
+
+def diploma(ctx, x, y, s, tilt=0.0):
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    ctx.scale(s, s)
+    block(ctx, -70, -18, 140, 36, 18, hexc("#fbf3dc"), 4, outline=INK)
+    rrect(ctx, -10, -20, 20, 40, 4)
+    ctx.set_source_rgb(*RED)
+    ctx.fill()
+    ctx.restore()
+
+
+def delivery_box(ctx, x, y, s, open_k=0.0):
+    """Cardboard box (bottom centre x, y); open_k 0..1 swings the flaps open."""
+    w, h = 300 * s, 220 * s
+    block(ctx, x - w / 2, y - h, w, h, 10 * s, hexc("#c99a5e"), 5)
+    rrect(ctx, x - 20 * s, y - h, 40 * s, h, 4)
+    ctx.set_source_rgba(*hexc("#e8d0a0"), 1)
+    ctx.fill()
+    for side in (-1, 1):
+        ctx.save()
+        ctx.translate(x + side * w / 2, y - h)
+        ctx.rotate(-side * open_k * 2.2)
+        block(ctx, -w / 2 if side > 0 else 0, -14 * s, w / 2, 28 * s, 6 * s, hexc("#b8874a"), 4, gloss=False)
+        ctx.restore()
+
+
+def trophy(ctx, x, y, s, T=0.0, plaque=None):
+    """Golden trophy (bottom centre x, y) with an optional plaque text."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    glow(ctx, 0, -230, 300, (1, 0.85, 0.3), 0.55)
+    block(ctx, -110, -60, 220, 60, 10, hexc("#6b4430"), 5)
+    if plaque:
+        rrect(ctx, -90, -50, 180, 40, 6)
+        shape_fill(ctx, GOLD, 3, -50, -10, outline=INK)
+        bold_text(ctx, plaque, 0, -30, 18, INK, outline=GOLD, shadow=False, stroke=0.02)
+    block(ctx, -30, -130, 60, 75, 10, GOLD, 5, outline=INK)
+    for side in (-1, 1):   # handles
+        ctx.new_sub_path()
+        ctx.arc(side * 105, -270, 45, -PI / 2 if side > 0 else PI / 2, PI / 2 if side > 0 else 3 * PI / 2)
+        ctx.set_source_rgb(*INK)
+        ctx.set_line_width(26)
+        ctx.stroke_preserve()
+        ctx.set_source_rgb(*GOLD)
+        ctx.set_line_width(14)
+        ctx.stroke()
+    ctx.move_to(-115, -340)
+    ctx.line_to(115, -340)
+    ctx.curve_to(115, -200, 60, -130, 0, -130)
+    ctx.curve_to(-60, -130, -115, -200, -115, -340)
+    ctx.close_path()
+    shape_fill(ctx, GOLD, 6, -340, -130, outline=INK)
+    star_path(ctx, 0, -250, 45)
+    ctx.set_source_rgb(1, 1, 1)
+    ctx.fill()
+    ctx.move_to(-80, -320)
+    ctx.curve_to(-80, -250, -60, -200, -40, -180)
+    ctx.set_source_rgba(1, 1, 1, 0.5)
+    ctx.set_line_width(10)
+    ctx.stroke()
+    ctx.restore()
+    sparkles(ctx, T, x, y - 260 * s, spread=200 * s, n=6, seed=9, c=YELLOW, size=20 * s)
+
+
+def bathtub(ctx, x, y, s, T, bubbles=1.0):
+    """Bathtub (bottom centre x, y) overflowing with foam; draw the bather between bathtub_back and this."""
+    w, h = 520 * s, 230 * s
+    if bubbles > 0:
+        rnd = random.Random(5)
+        for i in range(int(22 * bubbles)):
+            bx = x + rnd.uniform(-w / 2, w / 2)
+            by = y - h - rnd.uniform(-10, 50) * s + math.sin(T * 2 + i) * 4 * s
+            r = rnd.uniform(28, 55) * s
+            ctx.new_sub_path()
+            ctx.arc(bx, by, r, 0, 2 * PI)
+            shape_fill(ctx, (1, 1, 1), 3, by - r, by + r, outline=hexc("#9fd0f0"))
+    block(ctx, x - w / 2, y - h, w, h, 70 * s, (1, 1, 1), 6, outline=INK)
+    for side in (-1, 1):
+        block(ctx, x + side * (w / 2 - 70 * s) - 22 * s, y - 20 * s, 44 * s, 50 * s, 10 * s, GOLD, 4, gloss=False)
+    rnd = random.Random(int(T * 3))
+    for i in range(6):   # floating bubbles
+        ph = (T * 0.6 + i / 6) % 1
+        bx = x - w / 2 + (i + 0.5) * w / 6 + math.sin(T * 3 + i) * 10
+        by = y - h - 60 * s - ph * 360 * s
+        ctx.new_sub_path()
+        ctx.arc(bx, by, (10 + 8 * (i % 3)) * s, 0, 2 * PI)
+        ctx.set_source_rgba(0.75, 0.9, 1, 0.8 * (1 - ph))
+        ctx.set_line_width(3)
+        ctx.stroke()
+
+
+def rubber_duck(ctx, x, y, s, T=0.0):
+    ctx.save()
+    ctx.translate(x, y + math.sin(T * 3) * 4 * s)
+    ctx.scale(s, s)
+    ellipse(ctx, 0, 0, 60, 38)
+    shape_fill(ctx, YELLOW, 4, -38, 38, outline=INK)
+    ctx.new_sub_path()
+    ctx.arc(-38, -40, 30, 0, 2 * PI)
+    shape_fill(ctx, YELLOW, 4, -70, -10, outline=INK)
+    ctx.move_to(-66, -40)
+    ctx.line_to(-90, -34)
+    ctx.line_to(-66, -28)
+    ctx.close_path()
+    ctx.set_source_rgb(*hexc("#ff8a3d"))
+    ctx.fill()
+    ctx.new_sub_path()
+    ctx.arc(-44, -46, 5, 0, 2 * PI)
+    ctx.set_source_rgb(*INK)
+    ctx.fill()
+    ctx.restore()
+
+
+def stink_lines(ctx, x, y, r, T, k=1.0, col="#7ccf3a"):
+    """Wavy green stink lines rising around (x, y)."""
+    if k <= 0:
+        return
+    for i in range(5):
+        ph = (T * 0.7 + i / 5) % 1
+        bx = x + (i - 2) * r * 0.45
+        by = y - ph * r * 1.3
+        ctx.move_to(bx, by)
+        for j in range(4):
+            ctx.curve_to(bx + 18, by - 15 - j * 30, bx - 18, by - 30 - j * 30, bx, by - 30 - (j + 1) * 30 + 30)
+        a = k * math.sin(ph * PI)
+        ctx.set_source_rgba(*c_(col), 0.9 * a)
+        ctx.set_line_width(9)
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.stroke()
+
+
+def flies(ctx, x, y, r, T, n=4):
+    for i in range(n):
+        a = T * (4 + i) + i * 1.7
+        fx, fy = x + math.cos(a) * r * (0.6 + 0.1 * i), y + math.sin(a * 1.3) * r * 0.5
+        ctx.new_sub_path()
+        ctx.arc(fx, fy, 7, 0, 2 * PI)
+        ctx.set_source_rgb(*INK)
+        ctx.fill()
+        for side in (-1, 1):
+            ellipse(ctx, fx + side * 8, fy - 8, 7, 5)
+            ctx.set_source_rgba(1, 1, 1, 0.8)
+            ctx.fill()
+
+
+def scroll(ctx, x, y, s, T, open_k=1.0, title="LEGEND"):
+    """Old parchment scroll unrolling vertically (centre x, y)."""
+    if s <= 0.01:
+        return
+    h = 560 * s * max(0.08, open_k)
+    w = 440 * s
+    rrect(ctx, x - w / 2, y - h / 2, w, h, 10)
+    shape_fill(ctx, hexc("#f2dca0"), 5, y - h / 2, y + h / 2, outline=hexc("#8a5a2a"))
+    for side in (-1, 1):
+        block(ctx, x - w / 2 - 20 * s, y + side * h / 2 - 22 * s, w + 40 * s, 44 * s, 22 * s, hexc("#c99a5e"), 5)
+    if open_k > 0.6:
+        bold_text(ctx, title, x, y - h / 2 + 70 * s, 50 * s, hexc("#8a5a2a"), outline=hexc("#f2dca0"),
+                  shadow=False, stroke=0.02)
+
+
+def screen_obby(ctx, x, y, w, h, T, avatar=None, stage="STAGE 1", fail=None):
+    """Monitor content: a small obby over lava with an avatar callback avatar(ctx, ax, ay, s, T)."""
+    g = cairo.LinearGradient(0, y, 0, y + h)
+    g.add_color_stop_rgb(0, *hexc("#84d4fb"))
+    g.add_color_stop_rgb(1, *hexc("#b8e8fb"))
+    ctx.rectangle(x, y, w, h)
+    ctx.set_source(g)
+    ctx.fill()
+    lava(ctx, y + h * 0.8, T)
+    for i in range(4):
+        px = x + w * (0.05 + i * 0.25)
+        platform(ctx, px, y + h * (0.62 - 0.04 * i), w * 0.14, ("#2cd5fc", "#fa3a9f", "#f7e04a", "#a694e1")[i],
+                 depth=w * 0.03, h=h * 0.08)
+    if avatar:
+        avatar(ctx, x + w * 0.15, y + h * 0.62, w / 900, T)
+    stage_pill(ctx, x + w / 2, y + h * 0.13, stage, s=w / 1100)
+    if fail:
+        bold_text(ctx, fail, x + w / 2, y + h * 0.35, h * 0.12, RED, stroke=0.14)

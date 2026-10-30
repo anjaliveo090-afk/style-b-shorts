@@ -15,8 +15,27 @@ Only the **style** is copied. The reference channel's characters, names, logos, 
 | Frame | 720x1280 (9:16). The references are 60 fps; we render 30 fps (motion reads the same) |
 | Safe zone (user's Shorts template) | The whole character and key props inside **x 38-680, y 149-1013**; below y 678 only up to x 599 (like/comment buttons). Enforced by `animator/safezone.py` |
 | HUD | Timer pill at the top centre, y 150-210 (inside the zone). Shots with a HUD use `top=250`, so characters sit below it |
-| Captions | The references burn in big word-by-word captions at y ≈ 830. **Our default is no captions** (the user adds them). If wanted: white Inter Black, about 70 px, dark outline, key word coloured |
+| Captions | The references burn in big captions at y ≈ 825. **Our default is no captions**; on request, use `assembler/captions.py` (measured look below) |
 | Transitions | Mostly **hard cuts**. Plus a few whip pans (motion-blur smear) and white shockwave rings on big cards. No soft dissolves |
+
+### Captions (when the user asks for them; measured from the references)
+- **Position:** centred at x 360, y ≈ 825.
+- **Size:** letters about 80 px tall including the outline (font size 92, Inter Display ExtraBold); scaled down if a caption would be wider than 600 px.
+- **Rendering:** flat fill, a thick black outline (~0.17 of the font size), and a soft dark drop shadow 8 px lower.
+- **Grouping:** **1-2 words per caption**, always breaking at punctuation. A caption appears on its first word with a pop (0.85 → 1.0, small overshoot) and stays until the next one; it is hidden during pauses longer than 0.6 s.
+- **Key words** are in CAPITALS (numbers, nouns that carry the joke, shouted words, the last word of a punchline), and the whole group takes one colour, e.g. "your MOM" is all pink.
+
+  | Colour | Hex | Used for |
+  |---|---|---|
+  | yellow | `#fccc0c` | chapter / time markers, numbers, rewards |
+  | green | `#3ce454` | success, game words |
+  | red | `#ff3b3b` | danger, "no", failures |
+  | pink | `#fc6ccc` | mom / family / cute |
+  | purple | `#cc84fc` | pleading, weird |
+  | orange | `#fcb40c` | food, gold |
+  | blue | `#54ccfc` | calm, tech, water |
+
+- **All other words** are white in normal case ("What if", "seconds.", "Then you").
 
 ## 2. Look in one line
 A flat **2D vector cartoon of blocky game avatars**: rounded-rectangle head, torso, arms and legs, with a thick outline in a dark shade of each part's own colour.

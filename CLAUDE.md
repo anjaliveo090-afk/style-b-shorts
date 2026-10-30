@@ -69,7 +69,10 @@ When the user gives a voiceover + SRT (or a script), follow this workflow withou
 8. **Fix requests:** patch only the shots or cues asked about. Edit those shot functions, keys or `SFX` entries, then re-render; a full render takes about 40 s per 20 s of video. `python3 <story>.py out.mp4 cues.json <first_frame> <last_frame>` renders only a frame range if needed. Never regenerate or redesign the rest.
 
 ## Defaults
-- **No captions.** The references burn them in, but the user adds their own. If asked: `assemble.py --srt subs.srt --words 1 --font "Inter Display Black"`.
+- **No captions** unless the user asks. When asked ("caption add karo", "like the reference"), burn reference-style captions onto the finished mp4 without re-rendering:
+  1. Write `animator/captions/<story>.json`: `[[first_word_index_or_time, "TEXT", colour or null], ...]`, one entry per caption, using the rules in `style_bible.md` section 1 (example: `animator/captions/no_break.json`).
+  2. Run `python3 assembler/captions.py $O/<story>_final.mp4 $O/words/aligned.json animator/captions/<story>.json $O/<story>_final_captions.mp4`. Use `auto` instead of the JSON for a quick automatic version.
+  3. Keep the scene labels out of the caption band (y 760-890): move any label there to the top.
 - **No lip-sync** (`engine.LIPSYNC = False`). The references change mouths by expression, not by phoneme.
 - **No camera whoosh.** Only `whip.wav` on the loop rewind, and `swish` on a physical throw or a panel sliding in.
 - **Hard cuts** (`render(xfade=0)`), grain 2, `vignette` 0.15 (flat vector look).

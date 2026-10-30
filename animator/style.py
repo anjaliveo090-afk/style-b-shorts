@@ -160,7 +160,7 @@ class Block:
     def __init__(self, shirt, pants=None, skin="#e6ddd6", hair="bowl", hair_col="#8d5e3b", outfit="shirt",
                  emblem=None, emblem_col="#ffffff", sleeves=None, shoes="white", headband=None, headset=None,
                  glasses=False, crown=False, cap=None, cap_text=None, lashes=False, curlers=None, shades=False,
-                 brow_col=None, accent=None):
+                 brow_col=None, accent=None, beard=None):
         self.shirt = col(shirt)
         self.pants = col(pants) if pants else dark(self.shirt, 0.08)
         self.skin = col(skin)
@@ -182,6 +182,7 @@ class Block:
         self.shades = shades
         self.brow = col(brow_col) if brow_col else mix(self.hair_col, INK, 0.75)
         self.accent = col(accent) if accent else hexc("#ffffff")
+        self.beard = col(beard) if beard else None
 
     # ------------------------------------------------------------------
     def draw(self, ctx, x, y, s=1.0, expr="neutral", t=0.0, talk=False,
@@ -444,6 +445,8 @@ class Block:
         skin = self.skin
         if expr in ("shock", "scared"):
             skin = mix(skin, PALE, 0.5)
+        elif expr == "disgust":
+            skin = mix(skin, hexc("#9fd86a"), 0.35)
         rrect(ctx, x0, y0, hw, hh, 0.2 * u)
         g = cairo.LinearGradient(0, y0, 0, y0 + hh)
         if expr == "angry":
@@ -466,6 +469,21 @@ class Block:
         ctx.set_line_width(lw)
         ctx.stroke()
         self._hair_front(ctx, cx, y0, u, lw, hh)
+        if self.beard is not None:   # full beard + moustache under the mouth (the mouth is drawn on top)
+            b = self.beard
+            ctx.move_to(cx - 0.48 * u, y0 + 0.5 * hh)
+            ctx.curve_to(cx - 0.5 * u, y0 + 1.2 * hh, cx - 0.2 * u, y0 + hh + 0.3 * u, cx, y0 + hh + 0.3 * u)
+            ctx.curve_to(cx + 0.2 * u, y0 + hh + 0.3 * u, cx + 0.5 * u, y0 + 1.2 * hh, cx + 0.48 * u, y0 + 0.5 * hh)
+            ctx.curve_to(cx + 0.3 * u, y0 + 0.72 * hh, cx - 0.3 * u, y0 + 0.72 * hh, cx - 0.48 * u, y0 + 0.5 * hh)
+            ctx.close_path()
+            shape_fill(ctx, b, lw, y0 + 0.5 * hh, y0 + hh + 0.3 * u)
+            for k in range(3):
+                ctx.move_to(cx - 0.25 * u + k * 0.25 * u, y0 + 0.95 * hh)
+                ctx.curve_to(cx - 0.22 * u + k * 0.25 * u, y0 + 1.05 * hh, cx - 0.2 * u + k * 0.25 * u,
+                             y0 + 1.1 * hh, cx - 0.22 * u + k * 0.25 * u, y0 + hh + 0.15 * u)
+            ctx.set_source_rgba(*dark(b, 0.15), 1)
+            ctx.set_line_width(lw * 0.8)
+            ctx.stroke()
         _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, self)
         self._accessories(ctx, cx, y0, u, lw, hh, t)
         # reaction FX around the head
@@ -734,6 +752,9 @@ def _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, ch):
     elif expr in ("cold", "tired", "sleepy"):
         for s_ in (-1, 1):
             brow(s_, -0.02, 0.0)
+    elif expr == "disgust":
+        for s_ in (-1, 1):
+            brow(s_, 0.0, 0.05)
     elif expr in HAPPY:
         for s_ in (-1, 1):
             brow(s_, 0.04, 0.0, arch=True)
@@ -788,6 +809,11 @@ def _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, ch):
         elif expr == "stars":
             star_path(ctx, ex, ey, 0.12 * u, inner=0.48, rot=-PI / 2 + math.sin(t * 6) * 0.15)
             shape_fill(ctx, hexc("#ffd84a"), 0.02 * u, ey - 0.1 * u, ey + 0.1 * u)
+        elif expr == "disgust":   # squeezed shut: > <
+            ctx.move_to(ex - side * 0.07 * u, ey - 0.05 * u)
+            ctx.line_to(ex + side * 0.05 * u, ey)
+            ctx.line_to(ex - side * 0.07 * u, ey + 0.05 * u)
+            stroke(EYE, 0.035 * u)
         elif expr in ("sleepy",):
             ctx.move_to(ex - 0.07 * u, ey)
             ctx.curve_to(ex - 0.03 * u, ey + 0.035 * u, ex + 0.03 * u, ey + 0.035 * u, ex + 0.07 * u, ey)
@@ -889,6 +915,17 @@ def _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, ch):
         ctx.fill()
     elif mouth in ("open", "talk"):
         dmouth(0.1 * u, 0.1 * u)
+    elif mouth == "disgust":   # wavy mouth with the tongue poking out
+        ctx.move_to(cx - 0.05 * u, my + 0.01 * u)
+        ctx.curve_to(cx - 0.05 * u, my + 0.12 * u, cx + 0.07 * u, my + 0.12 * u, cx + 0.07 * u, my + 0.01 * u)
+        ctx.close_path()
+        ctx.set_source_rgb(*TONGUE)
+        ctx.fill_preserve()
+        stroke(EYE, 0.018 * u)
+        ctx.move_to(cx - 0.15 * u, my)
+        for i in range(1, 7):
+            ctx.line_to(cx - 0.15 * u + i * 0.3 * u / 6, my + (-0.025 if i % 2 else 0.025) * u)
+        stroke(EYE, 0.028 * u)
     elif mouth == "scared":
         ctx.move_to(cx - 0.13 * u, my)
         for i in range(1, 7):
@@ -986,7 +1023,7 @@ def back_figure(ctx, x, y, s, hair_col="#8d5e3b", shirt="#e8573a", hair="bowl"):
 
 # ---------------------------------------------------------------- our own cast (style only, not the reference's people)
 EXPRESSIONS = ["neutral", "happy", "grin", "laugh", "smirk", "smug", "cold", "shock", "scared", "angry", "cry",
-               "sad", "worried", "crazy", "wink", "stars", "sleepy", "determined", "forced"]
+               "sad", "worried", "crazy", "wink", "stars", "sleepy", "determined", "forced", "disgust"]
 ARMS = ["down", "up", "point", "show", "hip", "hold", "cross", "wave", "shrug", "punch", "cover", "phone"]
 POSES = ["stand", "walk", "run", "jump", "sit", "feetup"]
 
