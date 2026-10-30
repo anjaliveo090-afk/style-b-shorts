@@ -17,9 +17,16 @@ Usage:
                    a float is an absolute time (for words the SRT missed, e.g. "EWW!").
   captions.py video.mp4 aligned.json auto out.mp4
     groups words 2 at a time, white, with a colour + capitals on numbers and on words ending in ! or ?
+  captions.py video.mp4 aligned.json spec.json out.mp4 animator/<story>.py
+    also skips text that is already on screen: the story's shots are replayed at each caption's
+    start / middle / end, every text they draw (labels, chapter cards, bubbles, HUD, UI) is recorded,
+    and caption words already visible are removed (a caption left with only filler words is dropped).
 The audio of video.mp4 is copied unchanged."""
+import importlib
 import json
 import math
+import os
+import re
 import subprocess
 import sys
 
@@ -117,10 +124,83 @@ def draw_caption(ctx, text, col, k):
     ctx.restore()
 
 
-def main(video, aligned, spec_path, out):
+NUMBERS = {"ONE": "1", "TWO": "2", "THREE": "3", "FOUR": "4", "FIVE": "5", "SIX": "6", "SEVEN": "7",
+           "EIGHT": "8", "NINE": "9", "TEN": "10", "TWENTY": "20", "FIFTY": "50", "HUNDRED": "100"}
+FILLER = {"A", "AN", "THE", "TO", "OF", "IN", "ON", "AT", "BY", "AND", "IS", "IT", "ITS", "SO", "FOR", "YOU",
+          "YOUR", "YOURE", "THAT", "THIS", "BUT", "OR", "WITH", "FROM"}
+
+
+def norm(word):
+    w = re.sub(r"[^A-Z0-9]", "", word.upper())
+    return NUMBERS.get(w, w)
+
+
+def onscreen_reader(story_path):
+    """Returns f(T) -> set of normalised words the story shows on screen at time T."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(story_path)))
+    story = importlib.import_module(os.path.splitext(os.path.basename(story_path))[0])
+    import sets
+    seen, inside = set(), [0]
+    orig_bold, orig_label = sets.bold_text, sets.label
+
+    def bold_text(ctx, s, *a, **kw):
+        if not inside[0] and kw.get("scale", 1.0) > 0.3 and s:
+            seen.update(norm(w) for w in str(s).split())
+        return orig_bold(ctx, s, *a, **kw)
+
+    def label(ctx, s, x, y, size, *a, **kw):
+        if kw.get("scale", 1.0) > 0.3:
+            seen.update(norm(w) for w in str(s).split())
+        inside[0] += 1
+        try:
+            return orig_label(ctx, s, x, y, size, *a, **kw)
+        finally:
+            inside[0] -= 1
+
+    sets.bold_text, sets.label = bold_text, label
+    if hasattr(story, "label"):
+        story.label = label
+    shots = story.SHOTS
+    surf = cairo.ImageSurface(cairo.FORMAT_RGB24, W, H)
+
+    def at(T):
+        seen.clear()
+        i = max(k for k, sh in enumerate(shots) if sh["start"] <= T or k == 0)
+        sh = shots[i]
+        t, d = T - sh["start"], sh["end"] - sh["start"]
+        ctx = cairo.Context(surf)
+        sh["draw"](ctx, t, d)
+        if sh.get("overlay"):
+            sh["overlay"](ctx, t, d)
+        return {w for w in seen if w}
+    return at
+
+
+def skip_onscreen(caps, at):
+    """Remove caption words that are already visible on screen while the caption shows."""
+    out, dropped = [], 0
+    for t0, t1, text, col in caps:
+        vis = set()
+        for T in (t0 + 0.04, (t0 + t1) / 2, max(t0 + 0.04, t1 - 0.04)):
+            vis |= at(T)
+        keep = [w for w in text.split() if norm(w) not in vis]
+        if len(keep) < len(text.split()) and (not keep or all(norm(w) in FILLER for w in keep)):
+            print(f"  {t0:6.2f}s  '{text}' skipped (on screen)")
+            dropped += 1
+            continue
+        if len(keep) < len(text.split()):
+            print(f"  {t0:6.2f}s  '{text}' -> '{' '.join(keep)}' (rest is on screen)")
+        out.append((t0, t1, " ".join(keep), col))
+    print(f"skipped {dropped} captions whose text is already on screen")
+    return out
+
+
+def main(video, aligned, spec_path, out, story=None):
     words = json.load(open(aligned))
     spec = auto_spec(words) if spec_path == "auto" else json.load(open(spec_path))
     caps = resolve(words, spec)
+    if story:
+        caps = skip_onscreen(caps, onscreen_reader(story))
     dur, fps = probe(video)
     n = int(round(dur * fps))
     cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", video,
@@ -151,6 +231,6 @@ def main(video, aligned, spec_path, out):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
+    if len(sys.argv) not in (5, 6):
         sys.exit(__doc__)
     main(*sys.argv[1:])

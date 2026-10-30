@@ -71,7 +71,10 @@ When the user gives a voiceover + SRT (or a script), follow this workflow withou
 ## Defaults
 - **No captions** unless the user asks. When asked ("caption add karo", "like the reference"), burn reference-style captions onto the finished mp4 without re-rendering:
   1. Write `animator/captions/<story>.json`: `[[first_word_index_or_time, "TEXT", colour or null], ...]`, one entry per caption, using the rules in `style_bible.md` section 1 (example: `animator/captions/no_break.json`).
-  2. Run `python3 assembler/captions.py $O/<story>_final.mp4 $O/words/aligned.json animator/captions/<story>.json $O/<story>_final_captions.mp4`. Use `auto` instead of the JSON for a quick automatic version.
+  2. Run `python3 assembler/captions.py $O/<story>_final.mp4 $O/words/aligned.json animator/captions/<story>.json $O/<story>_final_captions.mp4 animator/<story>.py`. Use `auto` instead of the JSON for a quick automatic version.
+     - The last argument (the story) is **always passed**: the user asked that text already on screen is never repeated in a caption.
+     - The tool replays the story, records every label, chapter card, bubble, HUD and UI text visible during each caption, and removes those words. A caption left with only filler words is dropped.
+     - It prints every caption it removed or shortened; check the list.
   3. Keep the scene labels out of the caption band (y 760-890): move any label there to the top.
 - **No lip-sync** (`engine.LIPSYNC = False`). The references change mouths by expression, not by phoneme.
 - **No camera whoosh.** Only `whip.wav` on the loop rewind, and `swish` on a physical throw or a panel sliding in.

@@ -50,7 +50,8 @@ STEP 3 - BUILD AND CHECK FRAMES
 
 STEP 4 - MY DEFAULTS
 - No captions unless I ask (do not pass --srt to assemble.py). If I ask for captions "like the reference",
-  burn them with assembler/captions.py (see CLAUDE.md Defaults). No lip-sync. No camera whoosh.
+  burn them with assembler/captions.py (see CLAUDE.md Defaults), never repeating text that is already
+  on screen at that moment. No lip-sync. No camera whoosh.
 - Hard cuts: render(xfade=0, grain=2, fade_in=0, fade_out=0), loop back to the first frame.
 - Music: audio.music_game() (the story's MUSIC dict, written as music.wav) at --music-volume 0.5.
 - SFX: about 1.1 per second on visual events, SFX_GAIN = 0.4 (real voice), hits 1.3, booms 1.6.

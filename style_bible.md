@@ -36,6 +36,7 @@ Only the **style** is copied. The reference channel's characters, names, logos, 
   | blue | `#54ccfc` | calm, tech, water |
 
 - **All other words** are white in normal case ("What if", "seconds.", "Then you").
+- **No duplicates** (the user's rule): if the same text is already on screen at that moment (a scene label, chapter card, speech bubble, HUD or UI text), it is left out of the caption. `assembler/captions.py ... animator/<story>.py` does this automatically.
 
 ## 2. Look in one line
 A flat **2D vector cartoon of blocky game avatars**: rounded-rectangle head, torso, arms and legs, with a thick outline in a dark shade of each part's own colour.
