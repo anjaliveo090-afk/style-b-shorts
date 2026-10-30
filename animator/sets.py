@@ -2031,3 +2031,59 @@ def staff_badge(ctx, x, y, s, txt="STAFF"):
     ctx.stroke()
     block(ctx, x - 50 * s, y - 35 * s, 100 * s, 70 * s, 10 * s, (1, 1, 1), 4 * s, outline=INK)
     bold_text(ctx, txt, x, y, 24 * s, BLUE, outline=(1, 1, 1), shadow=False, stroke=0.02)
+
+
+def arrow(ctx, x0, y0, x1, y1, col="#ff3b4a", w=26, k=1.0):
+    """Thick curved comic arrow from (x0, y0) to (x1, y1); k 0..1 draws it on."""
+    if k <= 0:
+        return
+    k = clamp(k)
+    mx, my = (x0 + x1) / 2 + (y1 - y0) * 0.25, (y0 + y1) / 2 - (x1 - x0) * 0.25
+    ex, ey = lerp(x0, x1, k), lerp(y0, y1, k)
+    ang = math.atan2(y1 - my, x1 - mx)
+    for lw, c in ((w + 12, INK), (w, c_(col))):
+        ctx.move_to(x0, y0)
+        ctx.curve_to(mx, my, mx, my, ex - math.cos(ang) * w * 0.8, ey - math.sin(ang) * w * 0.8)
+        ctx.set_source_rgb(*c)
+        ctx.set_line_width(lw)
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.stroke()
+    hs = w * 1.9
+    ctx.move_to(ex + math.cos(ang) * hs * 0.4, ey + math.sin(ang) * hs * 0.4)
+    ctx.line_to(ex + math.cos(ang + 2.4) * hs, ey + math.sin(ang + 2.4) * hs)
+    ctx.line_to(ex + math.cos(ang - 2.4) * hs, ey + math.sin(ang - 2.4) * hs)
+    ctx.close_path()
+    shape_fill(ctx, c_(col), 6, ey - hs, ey + hs, outline=INK)
+
+
+def lightbulb(ctx, x, y, s, k=1.0, T=0.0):
+    """Idea lightbulb (centre x, y), pops with k (s since), glowing rays."""
+    if k < 0:
+        return
+    sc = pop(k) * s
+    if sc <= 0.01:
+        return
+    glow(ctx, x, y, 200 * sc, (1, 0.95, 0.5), 0.8)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    for i in range(8):
+        a = i * PI / 4 + T * 0.5
+        ctx.move_to(math.cos(a) * 95, math.sin(a) * 95)
+        ctx.line_to(math.cos(a) * 130, math.sin(a) * 130)
+    ctx.set_source_rgb(*YELLOW)
+    ctx.set_line_width(12)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.stroke()
+    ctx.new_sub_path()
+    ctx.arc(0, -10, 70, 0, 2 * PI)
+    shape_fill(ctx, hexc("#fff3a8"), 6, -80, 60, outline=INK)
+    block(ctx, -32, 50, 64, 50, 10, hexc("#b8bcc8"), 5, outline=INK)
+    ctx.move_to(-20, 10)
+    ctx.line_to(-8, -20)
+    ctx.line_to(8, 10)
+    ctx.line_to(20, -20)
+    ctx.set_source_rgb(*hexc("#ffb02e"))
+    ctx.set_line_width(6)
+    ctx.stroke()
+    ctx.restore()

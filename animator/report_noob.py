@@ -66,34 +66,77 @@ def classic_world(ctx, T, old=False):
         st.baseplate(ctx, 760)
 
 
-# ================================================================ hook
+# ================================================================ hook (v2: big face, crime teaser, slam)
+HI_POPS = [(560, 300, 0.36, (-1, 1)), (165, 330, 0.5, (1, 1)), (600, 470, 0.64, (-1, 1)),
+           (140, 520, 0.78, (1, 1))]
+
+
 def s_hook(ctx, t, d, T0=0.0, frozen=False):
+    """0.00-0.95 "This noob is the": Kevin's crazy face slams into the frame, THIS NOOB + arrow,
+    angry players in the corners, HI! bubbles multiplying from "noob"."""
     T = T0 + (0.0 if frozen else t)
-    classic_world(ctx, T)
-    for i, (x, y, s) in enumerate(((130, 850, 0.75), (590, 850, 0.75), (200, 900, 0.85))):
-        P[i].draw(ctx, x, y, s, "angry" if i % 2 == 0 else "cold", T, arms=("hip", "hip"), look=0.5 - i * 0.4)
-    kevin(ctx, 370, 990, 1.45, keyed(T, [(0, "happy"), (0.36, "grin")]), T, arms=("down", "wave"))
-    st.speech_bubble(ctx, 520, 430, "HI!!", 48, T - 0.36, tail=(-1, 1))
+    st.burst(ctx, T, "#ffe27a", "#ff7a1a", cy=560, spin=0.4)
+    for x, i, look in ((-30, 0, 0.8), (750, 1, -0.8)):   # angry faces peeking in from the corners
+        P[i].draw(ctx, x, 1580, 2.6, "angry", T, arms=("hip", "hip"), look=look)
+    closeup(ctx, KEVIN, keyed(T, [(0, "crazy"), (0.36, "grin")]), T, arms=("down", "wave"))
+    for bx, by, tk, tail in HI_POPS:
+        st.speech_bubble(ctx, bx, by, "HI!", 46, T - tk, tail=tail)
+    st.arrow(ctx, 610, 300, 520, 400, k=0.6 + ease(T / 0.15) * 0.4)
+    label(ctx, "THIS NOOB", 340, 205, 74, fg=st.RED, scale=pop(T))
+
+
+def s_teaser(T_scene, fn, t_off):
+    """A 0.3 s flash of a later scene at its peak moment (the 'reason' montage)."""
+    def draw(ctx, t, d):
+        fn(ctx, t + t_off, d)
+        st.flash(ctx, 0.55 * math.exp(-25 * t))      # a white hit-frame on every cut
+    draw.__name__ = "teaser_" + fn.__name__
+    return draw
+
+
+def s_invented(ctx, t, d):
+    """1.85-2.38 "Roblox invented the": developer eureka close-up, lightbulb pops."""
+    T = 1.85 + t
+    st.burst(ctx, T, "#c4d8ff", "#3a4ab0", cy=520)
+    closeup(ctx, DEV, keyed(T, [(0, "shock"), (1.95, "crazy")]), T, arms=("down", "up"))
+    st.lightbulb(ctx, 560, 300, 0.8, T - 1.89, T)
+    label(ctx, "INVENTED", 300, 230, 64, fg=(1, 1, 1), scale=pop(T - 1.89))
 
 
 def s_button(ctx, t, d):
-    T = 1.35 + t
-    st.burst(ctx, T, "#ff8a7a", "#a8202e", cy=640)
-    k = T - 2.38
-    if k < 0:   # the empty idea of a button, dashed
-        st.rrect(ctx, 130, 520, 460, 220, 90)
-        ctx.set_source_rgba(1, 1, 1, 0.8)
-        ctx.set_dash([18, 14])
-        ctx.set_line_width(8)
-        ctx.stroke()
-        ctx.set_dash([])
-        label(ctx, "INVENTED...", 360, 330, 60, fg=(1, 1, 1), scale=pop(T - 1.89))
-    else:
-        st.shockwave(ctx, 360, 640, k / 0.6, r_max=420)
-        st.report_button(ctx, 360, 640, pop(k), T, pressed=1.0 if T > 2.79 else 0.0, glow_a=0.5)
-        if T > 2.6:
-            kk = ease((T - 2.6) / 0.19)
-            st.cursor(ctx, lerp(560, 400, kk), lerp(980, 600, kk), 2.0, click=1.0 if T > 2.79 else 0.0)
+    """2.38-3.18 "report button": the button slams down with Kevin riding on top; on "button" a giant
+    cursor presses it and Kevin is launched into the sky."""
+    T = 2.38 + t
+    classic_world(ctx, T)
+    bx, base = 320, 900
+    k = clamp((T - 2.38) / 0.08)
+    by = lerp(base - 160, base, k * k)              # short hard slam
+    if T >= 2.46:
+        st.shockwave(ctx, bx, base + 30, (T - 2.46) / 0.5, r_max=440)
+        st.dust(ctx, bx, base + 30, (T - 2.46) / 0.4, n=6, spread=90)
+    pressed = T > 2.79
+    st.report_button(ctx, bx, by, 1.1, T, pressed=1.0 if pressed else 0.0, glow_a=0.5)
+    top = by - 110 * 1.1 + (34 * 1.1 if pressed else 0)   # the button's top face
+    if T < 2.82:
+        kevin(ctx, bx + 60, top, 0.9, keyed(T, [(0, "grin"), (2.46, "shock")]), T,
+              arms=("up", "up") if T >= 2.46 else ("down", "wave"))
+    else:                                            # launched straight up, spinning
+        p = (T - 2.82) / 0.32
+        ky = top - p * p * 1300 - p * 300
+        kx = bx + 60 + p * 120
+        ctx.save()
+        ctx.translate(kx, ky - 130)
+        ctx.rotate(p * 8)
+        ctx.translate(-kx, -(ky - 130))
+        KEVIN.draw(ctx, kx, ky, 0.9, "scared", T, arms=("up", "up"), pose="jump")
+        ctx.restore()
+        st.speed_lines(ctx, T, kx, ky - 130, n=12, r0=120, r1=420, a=0.45)
+        st.impact_star(ctx, bx + 60, top - 40, 120, T - 2.82, "YEET!")
+    if 2.6 < T < 2.95:                               # a giant cursor slams the button on "button"
+        kk = ease((T - 2.6) / 0.19)
+        st.cursor(ctx, lerp(40, 160, kk), lerp(560, 800, kk), 2.4, click=1.0 if pressed else 0.0)
+    if T >= 2.46:
+        st.flash(ctx, 0.6 * math.exp(-18 * (T - 2.46)))
 
 
 # ================================================================ 2006
@@ -578,8 +621,8 @@ def punch(t0, z0, c0, t_key, z1, c1, m=0.16):
 
 C = (360, 700)
 CU = dict(closeup=True, keep=FACE_KEEP)
-shot(0.00, s_hook, punch(0.0, 1.0, (360, 700), 0.36, 1.1, (370, 690)), keep=[(420, 370, 620, 490)])
-shot(1.35, s_button, punch(1.35, 1.0, C, 2.38, 1.1, (360, 660), 0.12), shake=(1.03, 14))
+shot(0.00, s_hook, [(0.0, 1.3, (360, 600)), (0.12, 1.0, (360, 680), 0.12), (0.36, 1.12, (360, 620), 0.1)],
+     shake=(0.36, 12), closeup=True, keep=FACE_KEEP)
 shot(3.18, s_2006, punch(3.18, 1.0, C, 3.56, 1.08, (360, 680), 0.12), keep=[(130, 420, 590, 920)])
 shot(4.05, s_oldworld, [(4.05, 1.1, (360, 760)), (5.88, 1.0, (360, 720), 0.35)])
 shot(6.25, s_norules, punch(6.25, 1.0, C, 6.45, 1.08, (360, 680), 0.14), keep=[(60, 470, 660, 890)])
@@ -629,14 +672,26 @@ shot(56.55, s_works, punch(56.55, 1.0, (360, 760), 57.17, 1.08, (360, 720), 0.15
 shot(57.65, s_job, punch(57.65, 1.0, C, 57.72, 1.06, (360, 680), 0.1), **CU)
 shot(58.5, s_review, punch(58.5, 1.0, (360, 760), 59.05, 1.06, (380, 760), 0.15), shake=(0.04, 7))
 shot(59.75, s_end, [(59.75, 1.0, (360, 760))])
+# hook montage: reuse the later shots' framing at their peak moment
+_src = {sh["draw"]: sh for sh in S}
+for start, fn, t_off in ((0.95, s_thousand, 0.83), (1.25, s_lava, 0.7), (1.55, s_hug, 0.97)):
+    src = _src[fn]
+    keys = [(start, src["keys"][-1][1], src["keys"][-1][2])]
+    shot(start, s_teaser(src["start"], fn, t_off), keys, shake=(0.0, 14), keep=src.get("keep", []))
+shot(1.85, s_invented, punch(1.85, 1.0, C, 1.95, 1.1, (360, 660), 0.1), closeup=True,
+     keep=[(150, 230, 640, 760)])
+shot(2.38, s_button, punch(2.38, 1.0, (340, 700), 2.79, 1.06, (330, 680), 0.12), shake=(0.08, 18),
+     keep=[(45, 650, 595, 960)])
+S.sort(key=lambda sh: sh["start"])
 SHOTS = S
 for k, s in enumerate(SHOTS):
     s["end"] = SHOTS[k + 1]["start"] if k + 1 < len(SHOTS) else TOTAL
 
 # ---------------------------------------------------------------- SFX (time, file, volume before SFX_GAIN)
 SFX = [
-    (0.05, "pop.wav", 0.7), (0.36, "hit.wav", 1.3), (0.45, "pop.wav", 0.6), (1.4, "swish.wav", 0.6),
-    (1.89, "pop.wav", 0.7), (2.38, "boom.wav", 1.6), (2.79, "click.wav", 0.9),
+    (0.03, "boom.wav", 1.6), (0.36, "pop.wav", 0.8), (0.5, "pop.wav", 0.6), (0.78, "pop.wav", 0.6),
+    (0.95, "hit.wav", 1.3), (1.25, "boom.wav", 1.4), (1.55, "hit.wav", 1.3), (1.89, "ding.wav", 0.9),
+    (2.46, "boom.wav", 1.6), (2.79, "click.wav", 0.9), (2.82, "boing.wav", 0.8), (2.86, "whoosh.wav", 0.6),
     (3.25, "tick.wav", 0.6), (3.4, "tick.wav", 0.6), (3.56, "ding.wav", 0.8), (4.1, "pop.wav", 0.7),
     (4.6, "boing.wav", 0.5), (5.4, "pop.wav", 0.5), (6.45, "hit.wav", 1.3), (6.72, "swish.wav", 0.7),
     (7.7, "sparkle.wav", 0.7), (8.03, "hit.wav", 1.3), (8.57, "pop.wav", 0.8), (9.35, "pop.wav", 0.5),
