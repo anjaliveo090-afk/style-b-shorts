@@ -24,6 +24,7 @@ I am attaching a voiceover and its SRT. Run bash setup.sh, then read MASTER_PROM
 | `animator/style.py` | `Block` characters (19 expressions, 12 arm poses, 6 leg poses) and our own cast |
 | `animator/sets.py` | Rooms, game worlds, props, game UI, FX |
 | `animator/sample.py` | Template story (22 s sample) |
+| `animator/report_noob.py` | Full 60 s story on a real voiceover ("This noob is the reason Roblox invented the report button") |
 | `animator/contact.py` | Contact sheet of a story with the safe zone drawn, before rendering |
 | `animator/test_sheet.py`, `animator/set_sheet.py` | Style test sheets (characters × expressions × poses, all sets) |
 | `animator/engine.py`, `audio.py`, `safezone.py`, `thumbnail.py` | Render engine, synthesised sound + music, safe-zone fitter, thumbnail template |
@@ -43,6 +44,6 @@ cd animator && python3 sample.py ../output/sample/clips/animation.mp4 ../output/
 ```
 ```bash
 python3 assembler/assemble.py --clips output/sample/clips --voice <a 22 s voice file> \
-  --sfx output/sample/cues.json --sfx-dir output/sample/sfx --music output/sample/sfx/music_game.wav \
-  --music-volume 0.4 --out output/sample/sample_final.mp4
+  --sfx output/sample/cues.json --sfx-dir output/sample/sfx --music output/sample/music.wav \
+  --music-volume 0.5 --out output/sample/sample_final.mp4
 ```

@@ -32,7 +32,8 @@ When the user gives a voiceover + SRT (or a script), follow this workflow withou
    - Aim for a new visual every 1.1-1.6 s, never more than ~2.7 s.
    - Write the plan as a table (time | words | row | what is shown | camera | expression | SFX) before coding.
 3. **Build** `animator/<story>.py` by copying `animator/sample.py`:
-   - Keep its helpers: `shot`, `punch`, `kid_face` / `FACE_*` close-ups, `SFX_GAIN`, `TOTAL`, the loop ending (`s_end` = first frame), and the `__main__` block.
+   - Keep its helpers: `shot`, `punch`, `kid_face` / `FACE_*` close-ups, `SFX_GAIN`, `MUSIC`, `TOTAL`, the loop ending (`s_end` = first frame), and the `__main__` block (it writes `cues.json` and `music.wav`).
+   - `animator/report_noob.py` is a second, full 60 s example (48 shots). Its helpers include `closeup()`, a named game character with a name tag, a developer at a desk, and the report/ban props.
    - Add new places or props to `animator/sets.py` in the same style: `style.block` / `shape_fill`, self-coloured outlines, palette from `style_bible.md` section 5. Never copy the reference channel's characters, logos or text.
    - Use our cast from `style.py`, or new `Block(...)` looks.
 4. **Contact sheet with the safe zone** before the full render:
@@ -48,13 +49,17 @@ When the user gives a voiceover + SRT (or a script), follow this workflow withou
    python3 animator/audio.py $O/sfx <TOTAL>
    (cd animator && python3 <story>.py ../$O/clips/animation.mp4 ../$O/cues.json)
    python3 assembler/assemble.py --clips $O/clips --voice <voice> --sfx $O/cues.json --sfx-dir $O/sfx \
-     --music $O/sfx/music_game.wav --music-volume 0.4 --crf 20 --out $O/<story>_final.mp4
+     --music $O/music.wav --music-volume 0.5 --crf 20 --out $O/<story>_final.mp4
    ```
-   No `--srt`, so there are no captions. For a late music start or a dip, call `audio.music_game(total, start=..., dips=[...])` and save it with `audio.save`.
+   - No `--srt`, so there are no captions.
+   - The story writes `music.wav` from its `MUSIC` settings (a late start, dips under dramatic beats).
+   - A 60 s render takes about 1.5 min.
 6. **Measure** against the targets, and fix anything outside them before sending:
    - `python3 analysis/new_visuals.py $O/clips/animation.mp4`: a new visual every 1.1-1.6 s.
    - `python3 analysis/flow.py $O/clips/animation.mp4`: camera median 2-5, mean 6-11 (up to ~12 is fine), non-camera motion 5-8.
-   - `python3 analysis/audio_ref.py $O/<story>_final.mp4 <subs.srt> $O/check`, against `sound_design.md` section 3:
+   - `python3 analysis/audio_ref.py $O/<story>_final.mp4 <subs.srt> $O/check`, against `sound_design.md` section 3. If the SFX median is off, change only `SFX_GAIN`, rewrite `cues.json` and re-assemble; no re-render is needed:
+     `(cd animator && python3 -c "import json, <story> as r; json.dump([{'time': round(t, 3), 'file': f, 'volume': round(v * <GAIN>, 3)} for t, f, v in sorted(r.SFX)], open('../$O/cues.json', 'w'))")`.
+     Results:
      - music -10 ± 2.5 dB;
      - SFX 9-13 per 10 s;
      - SFX median -1 to -7 dB;
@@ -70,8 +75,8 @@ When the user gives a voiceover + SRT (or a script), follow this workflow withou
 - **Hard cuts** (`render(xfade=0)`), grain 2, `vignette` 0.15 (flat vector look).
 - `engine.DRIFT = (0.02, 5, -3)` and `engine.ENERGY = 3.0` (set at the top of the story).
 - **Loop:** `render(..., fade_in=0, fade_out=0)` and the last shot draws the first frame.
-- **Music:** `music_game` at `--music-volume 0.4`.
-- **SFX:** about 1.1 per second, `SFX_GAIN = 0.17`, hits 1.3, booms 1.6 (see `sound_design.md`).
+- **Music:** `music_game` (`MUSIC` dict in the story) at `--music-volume 0.5`.
+- **SFX:** about 1.1 per second, `SFX_GAIN = 0.4` for a real recorded voice (the TTS sample needed 0.17), hits 1.3, booms 1.6. Always measure and adjust (see `sound_design.md`).
 
 ## Limits to state honestly
 - This is 2D code animation. The references are hand-made vector animation with more drawing detail, bespoke props and smoother squash-and-stretch. We match the look (proportions, line, palette, shading, faces), and the pace, cuts, camera, phrase → visual logic and sound levels closely. Every new prop has to be drawn in code.

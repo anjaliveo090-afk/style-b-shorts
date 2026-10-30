@@ -18,7 +18,8 @@ SETUP
   GRANDMA / NOOB / BOSS, crowd_member). Places, props, game UI, FX: animator/sets.py.
 - Template to copy: animator/sample.py (hard cut per phrase, punch-in keys on key words,
   face close-ups with closeup=True + keep=FACE_KEEP, DAY/SECOND chapter text, game UI,
-  SFX list with SFX_GAIN, loop ending on the first frame).
+  SFX list with SFX_GAIN, MUSIC settings, loop ending on the first frame).
+  Full 60 s example with a real voice: animator/report_noob.py (48 shots).
   Do not change engine.py / style.py unless something is broken; add new places to sets.py.
 
 STEP 1 - WORDS
@@ -50,8 +51,9 @@ STEP 3 - BUILD AND CHECK FRAMES
 STEP 4 - MY DEFAULTS
 - No captions (do not pass --srt to assemble.py). No lip-sync. No camera whoosh.
 - Hard cuts: render(xfade=0, grain=2, fade_in=0, fade_out=0), loop back to the first frame.
-- Music: audio.music_game() → music_game.wav at --music-volume 0.4.
-- SFX: about 1.1 per second on visual events, SFX_GAIN = 0.17, hits 1.3, booms 1.6.
+- Music: audio.music_game() (the story's MUSIC dict, written as music.wav) at --music-volume 0.5.
+- SFX: about 1.1 per second on visual events, SFX_GAIN = 0.4 (real voice), hits 1.3, booms 1.6.
+  Measure, then adjust SFX_GAIN only (no re-render needed) until the SFX median is about -3 dB.
 - Synthesised SFX and music only (animator/audio.py).
 
 STEP 5 - MEASURE, THEN SEND
@@ -91,4 +93,4 @@ Style B has no white sticker outline around characters, so `--no-stroke` is the 
   - `analysis/ref_data/`
 - To skip `setup.sh` in every new chat, paste `bash setup.sh` into the cloud environment's
   **Setup script** (session title bar → environment menu → Edit).
-- A ~50 s video takes about 20-40 minutes in total: planning, new props, a ~1.5 min render, then checks.
+- A ~60 s video takes about 30-60 minutes in total: planning, new props, a ~1.5 min render, then checks.

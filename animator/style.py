@@ -501,10 +501,10 @@ class Block:
 
     def _hair_front(self, ctx, cx, y0, u, lw, hh):
         h, hc = self.hair, self.hair_col
-        if h in (None, "none", "bald"):
-            return
         if h == "cap" or self.cap is not None:
             self._cap(ctx, cx, y0, u, lw)
+            return
+        if h in (None, "none", "bald"):
             return
         if h == "bowl":
             # helmet-like cap with a jagged fringe; wavy light streaks on top

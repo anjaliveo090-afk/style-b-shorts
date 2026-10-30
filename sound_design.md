@@ -19,7 +19,7 @@ The raw data, including every SFX with its time and the line spoken, is in `anal
 | Tone | bass 53%, mid 30%, high 17% (centroid 1460 Hz) | bass 51%, mid 27%, high 22% (1680 Hz) | Bouncy bass + bright plucky lead (square/marimba-like) |
 | Shape | almost **silent for the first ~5 s** (-50 dB), comes in under "That's nothing" and dips under the slow-motion beat | constant, with dips under quiet beats | Start the bed under the hook or after it, at full level by ~3-5 s. Dip it 6-10 dB under a dramatic/slow-motion beat, and end on a short stinger |
 
-Our generator: `animator/audio.py music_game(total, start=..., dips=[(t0, t1), ...])`. It plays G major/minor with a chromatic walking bass, a staccato square/marimba lead, eighth-note hats and a soft kick, at 120 bpm. It is checked with `audio_ref.py` (section 4).
+Our generator: `animator/audio.py music_game(total, start=..., dips=[(t0, t1), ...])`. It plays a G | Gm | Eb | D7 swing with a soft root-fifth bass and a marimba + square lead at 120 bpm. All attacks are 8 ms or longer and there are no noise hats, so the analyser does not mistake the music for SFX. It is checked with `audio_ref.py` (section 4).
 
 ## 2. SFX
 | What | tensec | momplays | Rule |
@@ -55,11 +55,16 @@ Our generator: `animator/audio.py music_game(total, start=..., dips=[(t0, t1), .
 | Loop rewind | whoosh |
 
 ## 3. Defaults for every new video (animator)
-These were calibrated on `animator/sample.py` by measuring the assembled mp4 with `audio_ref.py` (section 4).
-1. **Music:** `audio.music_game(total)` (written as `music_game.wav` by `python3 animator/audio.py <sfx_dir> <total>`), mixed with **`--music-volume 0.4`**. That measures **-10.4 dB** under the voice. One track for the whole video.
-   - For a hook without music, use `music_game(total, start=3.0)`.
-   - For a slow-motion or dramatic beat, use `dips=[(t0, t1)]`.
-2. **SFX:** about 1.1 per second, in the story's `SFX` list (time, file, volume), written to `cues.json` with **`SFX_GAIN = 0.17`** (every volume × 0.17).
+These were calibrated by measuring assembled mp4s with `audio_ref.py` (section 4):
+- `animator/report_noob.py`: a real recorded voiceover, 60 s. **Use these numbers.**
+- `animator/sample.py`: a TTS test voice.
+
+1. **Music:** `audio.music_game(TOTAL, **MUSIC)`. The story's `__main__` writes it as `music.wav` next to `cues.json`. Mix it with **`--music-volume 0.5`**: that measures **-10.1 dB** under a real voiceover (the quieter TTS sample needed 0.4). One track for the whole video.
+   - For a hook without music, use `MUSIC = dict(start=3.0)`.
+   - For slow-motion or dramatic beats, use `MUSIC = dict(dips=[(t0, t1), ...])` (about 9 dB quieter).
+2. **SFX:** about 1.1 per second, in the story's `SFX` list (time, file, volume), written to `cues.json` with **`SFX_GAIN = 0.4`** for a real recorded voice (every volume × 0.4).
+   - The TTS sample needed only 0.17. Real speech makes the separation step pull part of each SFX into the voice stem, so the same mix measures ~9 dB quieter.
+   - **Always measure, then adjust `SFX_GAIN`** until the median sits around -3 dB. Only `cues.json` changes, so no re-render is needed.
    - Kind mix: about 40% pop, 25% tick/click, 20-30% hit, 10% ding.
    - No whoosh except the loop rewind (`whip.wav`).
    - Script volumes before the gain:
@@ -73,18 +78,18 @@ These were calibrated on `animator/sample.py` by measuring the assembled mp4 wit
      | dings / reveals | `ding`, `sparkle`, `success`, `chaching` | 0.7-0.9 |
      | error | `buzz` | 0.8 |
 
-   - With these settings the mix measures 9-11 SFX per 10 s at a median of about -2 dB vs the voice.
+   - With these settings `report_noob` measures 12.0 SFX per 10 s at a median of -2.8 dB vs the voice.
 3. **Captions:** none by default. Do not pass `--srt` to `assemble.py`; any SRT turns captions on.
 4. **Check** with `python3 analysis/audio_ref.py final.mp4 subs.srt /tmp/check`:
 
-| Measure | Target | Sample (`animator/sample.py`) |
-|---|---|---|
-| Music vs voice | **-10 ± 2.5 dB** | -10.4 dB |
-| Music key | G (major or minor) | G minor (fit 0.78) |
-| Music notes/s | 1.5-2.5 | 1.9 |
-| SFX per 10 s | **9-13** | 9.0 |
-| SFX median vs voice | **-1 to -7 dB** | -2.0 dB |
-| SFX on a visual change | above the random share | 0.65 vs 0.52 |
-| Kind mix | ~40% pop, 25% tick, 20-30% thud, ~10% ding | 55% / 15% / 25% / 5% |
+| Measure | Target | report_noob (real voice) | sample (TTS) |
+|---|---|---|---|
+| Music vs voice | **-10 ± 2.5 dB** | -10.1 dB | -10.4 dB |
+| Music key | G (major or minor) | G minor (fit 0.77) | G minor (fit 0.78) |
+| Music notes/s | 1.5-2.5 | 2.5 | 1.9 |
+| SFX per 10 s | **9-13** | 12.0 | 9.0 |
+| SFX median vs voice | **-1 to -7 dB** | -2.8 dB | -2.0 dB |
+| SFX on a visual change | above the random share | 0.57 vs 0.49 | 0.65 vs 0.52 |
+| Kind mix | ~40% pop, 25% tick, 20-30% thud, ~10% ding | 32% / 39% / 25% / 4% | 55% / 15% / 25% / 5% |
 
-Known gap: the references' music has a percussive share of 0.14-0.22. `music_game` has about 0.07, because noise hats and kicks get counted as SFX by the analyser, so they were left out.
+Known gap: the references' music has a percussive share of 0.14-0.22. `music_game` alone has about 0.07, because noise hats and kicks get counted as SFX by the analyser, so they were left out. In a full mix it reads 0.2, because SFX tails leak into the measure.

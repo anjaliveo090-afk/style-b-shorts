@@ -31,6 +31,7 @@ TOTAL = 22.3
 engine.LIPSYNC = False            # the references do not lip-sync
 engine.DRIFT = (0.02, 5, -3)      # calm creep while holding (measured camera median 2-5 % width/s)
 engine.ENERGY = 3.0               # livelier idle bounce/sway (non-camera motion target 5-8)
+MUSIC = {}                        # music_game() kwargs, e.g. dict(start=3.0, dips=[(t0, t1)])
 SFX_GAIN = 0.17                   # all cue volumes x this: SFX median ~-3 dB vs the voice (sound_design.md)
 
 KID, KID_GAME, MOM = style.KID, style.KID_GAME, style.MOM
@@ -361,9 +362,13 @@ SFX = [
 
 if __name__ == "__main__":
     import json
+    import os
+    import audio
     import safezone
     json.dump([{"time": round(t, 3), "file": f, "volume": round(v * SFX_GAIN, 3)} for t, f, v in sorted(SFX)],
               open(sys.argv[2], "w"), indent=1)
+    audio.save(os.path.join(os.path.dirname(os.path.abspath(sys.argv[2])), "music.wav"),
+               audio.music_game(TOTAL, **MUSIC))
     kw = {}
     if len(sys.argv) > 4:
         kw["frames"] = (int(sys.argv[3]), int(sys.argv[4]))

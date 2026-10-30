@@ -1498,3 +1498,536 @@ def comments_sheet(ctx, T, comments, typed="", y0=480, likes_t=None, count="12,8
                 hx = 520 + math.sin(i * 1.7) * 60
                 hy = iy - 40 - ph * 380
                 bold_text(ctx, "♥", hx, hy, 40, RED if i % 2 else BLUE, scale=1 - ph * 0.3)
+
+
+# ================================================================ more props / UI (added for report_noob.py)
+def nametag(ctx, x, y, name, size=30, col=(1, 1, 1)):
+    """Game name tag floating above a head (white text, dark outline)."""
+    bold_text(ctx, name, x, y, size, c_(col), stroke=0.2, shadow=False)
+
+
+def speech_bubble(ctx, x, y, txt, size=48, k=1.0, tail=(-1, 1), col=(1, 1, 1), fg=INK, tilt=-0.04):
+    """Comic speech bubble centred at (x, y); tail points toward (dx, dy) sign. k = pop time (s since)."""
+    if k < 0:
+        return
+    sc = pop(k) if k < 1 else 1.0
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    ctx.scale(sc, sc)
+    w = text_width(ctx, txt, size) + size * 1.1
+    h = size * 1.6
+    ctx.move_to(tail[0] * w * 0.15, h / 2 - 4)
+    ctx.line_to(tail[0] * w * 0.38, h / 2 + size * 0.7 * tail[1])
+    ctx.line_to(tail[0] * w * 0.32, h / 2 - 4)
+    ctx.close_path()
+    shape_fill(ctx, c_(col), size * 0.09, 0, h, outline=INK)
+    block(ctx, -w / 2, -h / 2, w, h, h * 0.45, c_(col), size * 0.09, outline=INK)
+    bold_text(ctx, txt, 0, 0, size, c_(fg), outline=c_(col), shadow=False, stroke=0.02)
+    ctx.restore()
+
+
+def spotlight(ctx, x, y, r, a=0.75):
+    """Darken everything except a soft circle (one character singled out of a crowd)."""
+    g = cairo.RadialGradient(x, y, r * 0.75, x, y, r * 1.25)
+    g.add_color_stop_rgba(0, 0, 0, 0, 0)
+    g.add_color_stop_rgba(1, 0.02, 0.02, 0.08, a)
+    ctx.set_source(g)
+    ctx.rectangle(-3000, -5000, 7000, 10000)
+    ctx.fill()
+    ctx.move_to(x - r * 0.55, -400)
+    ctx.line_to(x + r * 0.55, -400)
+    ctx.line_to(x + r, y + r * 0.6)
+    ctx.line_to(x - r, y + r * 0.6)
+    ctx.close_path()
+    ctx.set_source_rgba(1, 0.97, 0.8, 0.16)
+    ctx.fill()
+
+
+def calendar(ctx, x, y, s, top, big, col="#e8323a", flip=0.0):
+    """Tear-off calendar page (centre x, y): coloured header `top`, big number/text `big`.
+    flip > 0 shows the previous page peeling away."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -170, -190, 340, 380, 26, (1, 1, 1), 7, outline=INK)
+    rrect(ctx, -170, -190, 340, 110, 26)
+    ctx.rectangle(-170, -120, 340, 40)
+    shape_fill(ctx, c_(col), 0.1, -190, -80)
+    rrect(ctx, -170, -190, 340, 380, 26)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(7)
+    ctx.stroke()
+    for rx in (-90, 90):
+        rrect(ctx, rx - 10, -215, 20, 50, 10)
+        shape_fill(ctx, hexc("#c9cde0"), 4, -215, -165, outline=INK)
+    bold_text(ctx, top, 0, -135, 48, (1, 1, 1), stroke=0.12, shadow=False)
+    bold_text(ctx, big, 0, 55, 130 if len(big) <= 3 else 96, INK, outline=(1, 1, 1), shadow=False, stroke=0.02)
+    if 0 < flip < 1:
+        ctx.save()
+        ctx.translate(0, -80)
+        ctx.scale(1, 1 - flip)
+        ctx.rotate(-0.3 * flip)
+        block(ctx, -170, 0, 340, 270, 20, hexc("#f2ece0"), 6, outline=INK)
+        ctx.restore()
+    ctx.restore()
+
+
+def rule_book(ctx, x, y, s, T, title="RULES"):
+    """Open book with a heading and completely empty numbered lines."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -330, -220, 660, 440, 30, hexc("#8a3a2a"), 7, outline=INK)
+    for side in (-1, 1):
+        ctx.move_to(0, -190)
+        ctx.curve_to(side * 100, -215, side * 220, -210, side * 310, -195)
+        ctx.line_to(side * 310, 200)
+        ctx.curve_to(side * 220, 185, side * 100, 190, 0, 210)
+        ctx.close_path()
+        shape_fill(ctx, hexc("#fbf3dc"), 5, -210, 210, outline=INK)
+    bold_text(ctx, title, -160, -130, 50, hexc("#8a3a2a"), outline=hexc("#fbf3dc"), shadow=False, stroke=0.02)
+    for i in range(5):
+        yy = -60 + i * 52
+        bold_text(ctx, f"{i + 1}.", -270, yy, 30, hexc("#9a8a70"), outline=hexc("#fbf3dc"), shadow=False,
+                  stroke=0.02, align="l")
+        ctx.move_to(-225, yy + 12)
+        ctx.line_to(-40, yy + 12)
+        ctx.move_to(40, yy - 50 + 12)
+        ctx.line_to(270, yy - 50 + 12)
+    ctx.set_source_rgba(*hexc("#c9b99a"), 1)
+    ctx.set_line_width(3)
+    ctx.stroke()
+    ctx.restore()
+
+
+def friends_panel(ctx, x, y, s, n, T, title="FRIENDS"):
+    """Friend list panel with a count and empty slots."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -260, -200, 520, 400, 30, hexc("#1f2236"), 6, outline=INK)
+    bold_text(ctx, f"{title} ({n})", 0, -150, 44, (1, 1, 1), stroke=0.12)
+    for i in range(3):
+        yy = -70 + i * 95
+        rrect(ctx, -220, yy - 38, 440, 76, 18)
+        ctx.set_source_rgba(1, 1, 1, 0.08)
+        ctx.fill_preserve()
+        ctx.set_source_rgba(1, 1, 1, 0.3)
+        ctx.set_dash([12, 10])
+        ctx.set_line_width(4)
+        ctx.stroke()
+        ctx.set_dash([])
+        bold_text(ctx, "empty", 0, yy, 30, hexc("#7a7f90"), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def server_list(ctx, T, join_t, x0=40, y0=280, rows=6):
+    """Server browser: rows with player counts and JOIN buttons; join_t[i] = time row i is joined."""
+    block(ctx, x0, y0, 640, 120 + rows * 96, 26, hexc("#1f2236"), 5, outline=INK)
+    bold_text(ctx, "SERVERS", x0 + 40, y0 + 50, 40, (1, 1, 1), align="l", stroke=0.1)
+    for i in range(rows):
+        yy = y0 + 110 + i * 96
+        block(ctx, x0 + 20, yy, 600, 80, 16, hexc("#2c3a78"), 4, outline=INK, gloss=False)
+        bold_text(ctx, f"Server #{i + 1}", x0 + 50, yy + 40, 30, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+        bold_text(ctx, f"{8 + i % 4}/12", x0 + 330, yy + 40, 26, hexc("#9aa0b8"), shadow=False, stroke=0.0)
+        k = None if i >= len(join_t) or join_t[i] is None else T - join_t[i]
+        joined = k is not None and k >= 0
+        bc = GREEN if not joined else hexc("#ffb02e")
+        sc = 1 - 0.12 * math.exp(-12 * k) if joined else 1.0
+        ctx.save()
+        ctx.translate(x0 + 520, yy + 40)
+        ctx.scale(sc, sc)
+        block(ctx, -75, -28, 150, 56, 14, bc, 4, outline=INK)
+        bold_text(ctx, "JOINED" if joined else "JOIN", 0, 0, 24, (1, 1, 1), shadow=False, stroke=0.12)
+        ctx.restore()
+
+
+def chat_box(ctx, x, y, w, h, lines, T, size=28, title="Chat"):
+    """Game chat window; lines = [(name, text, colour), ...] (the newest at the bottom)."""
+    rrect(ctx, x, y, w, h, 18)
+    ctx.set_source_rgba(*UI_DARK, 0.88)
+    ctx.fill()
+    bold_text(ctx, title, x + 24, y + 30, 24, hexc("#9aa0b8"), align="l", shadow=False, stroke=0.0)
+    ctx.save()
+    ctx.rectangle(x, y + 50, w, h - 56)
+    ctx.clip()
+    n = int((h - 60) / (size * 1.45))
+    for i, (name, txt, c) in enumerate(lines[-n:]):
+        yy = y + 50 + (i + 0.6) * size * 1.45
+        bold_text(ctx, name + ":", x + 24, yy, size, c_(c), align="l", shadow=False, stroke=0.0)
+        bold_text(ctx, txt, x + 34 + text_width(ctx, name + ":", size), yy, size, (1, 1, 1), align="l",
+                  shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def void_bg(ctx, top="#84d4fb", bottom="#1b1f4a", y0=600, y1=1400):
+    """Sky that falls into a dark void (gaps under bridges)."""
+    g = cairo.LinearGradient(0, y0 - 800, 0, y1)
+    g.add_color_stop_rgb(0, *c_(top))
+    g.add_color_stop_rgb(0.55, *light(c_(top), 0.3))
+    g.add_color_stop_rgb(1, *c_(bottom))
+    ctx.rectangle(-3000, -5000, 7000, 10000)
+    ctx.set_source(g)
+    ctx.fill()
+
+
+def cliff(ctx, x, y, w, col="#51c844", side=1):
+    """Grass-topped cliff block; (x, y) = top-left corner."""
+    block(ctx, x, y + 40, w, 1200, 10, hexc("#9a6a3c"), 5, gloss=False)
+    block(ctx, x, y, w, 60, 12, c_(col), 5)
+
+
+def lava_bridge(ctx, x0, x1, y, T, built=1.0, lava=1.0, n=7):
+    """Bridge of blocks between two cliffs. built 0..1 = how many blocks exist; lava 0..1 turns them to lava."""
+    bw = (x1 - x0) / n
+    for i in range(n):
+        k = clamp(built * n - i)
+        if k <= 0:
+            continue
+        yy = y - (1 - ease(k)) * 120
+        c = mix(hexc("#b0b6c4"), hexc("#ff7a1a"), lava)
+        block(ctx, x0 + i * bw + 2, yy, bw - 4, 50, 6, c, 4, outline=INK if lava < 0.5 else hexc("#8a2a0a"))
+        if lava > 0.5:
+            for j in range(2):
+                bx = x0 + i * bw + bw * (0.3 + 0.4 * j)
+                ph = (T * 1.7 + i * 0.37 + j * 0.5) % 1
+                ctx.new_sub_path()
+                ctx.arc(bx, yy - ph * 40, 6 * (1 - ph) + 2, 0, 2 * PI)
+                ctx.set_source_rgba(1, 0.85, 0.3, 1 - ph)
+                ctx.fill()
+    if lava > 0.3:
+        glow(ctx, (x0 + x1) / 2, y + 20, (x1 - x0) * 0.7, (1, 0.5, 0.1), 0.35 * lava)
+
+
+def lemonade_stand(ctx, x, y, s, T, sign="LEMONADE"):
+    """Wooden lemonade stand; (x, y) = bottom centre."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    for px in (-150, 130):
+        block(ctx, px, -330, 20, 330, 4, hexc("#8a5a3a"), 4, gloss=False)
+    ctx.move_to(-190, -400)   # striped awning with a scalloped edge
+    ctx.line_to(190, -400)
+    ctx.line_to(200, -330)
+    for i in range(6, -1, -1):
+        ctx.curve_to(-190 + (i + 0.5) * 390 / 7, -300, -190 + (i + 0.5) * 390 / 7, -300, -190 + i * 390 / 7, -330)
+    ctx.close_path()
+    shape_fill(ctx, hexc("#ffe45c"), 5, -400, -300, outline=INK)
+    for i in range(0, 7, 2):
+        ctx.rectangle(-190 + i * 380 / 7 + 4, -398, 380 / 7, 66)
+    ctx.set_source_rgba(1, 1, 1, 0.65)
+    ctx.fill()
+    block(ctx, -200, -170, 400, 170, 10, hexc("#d9a46a"), 5)
+    for i in range(4):
+        ctx.move_to(-195, -130 + i * 40)
+        ctx.line_to(195, -130 + i * 40)
+    ctx.set_source_rgba(*hexc("#a8743f"), 1)
+    ctx.set_line_width(3)
+    ctx.stroke()
+    rrect(ctx, -150, -150, 300, 70, 12)
+    shape_fill(ctx, (1, 1, 1), 4, -150, -80, outline=INK)
+    bold_text(ctx, sign, 0, -115, 40, hexc("#e8b020"), outline=(1, 1, 1), shadow=False, stroke=0.02)
+    block(ctx, -40, -260, 80, 90, 14, hexc("#ffe45c"), 4, outline=INK)    # jug
+    for cx_ in (-140, 110):
+        block(ctx, cx_, -215, 34, 45, 6, (1, 1, 1), 3, outline=INK, gloss=False)
+    ctx.restore()
+
+
+def big_clock(ctx, x, y, r, hours, T=0.0, col="#ffffff", rim="#e8323a"):
+    """Analog wall clock showing `hours` (float, e.g. 2.5); spins fast in a time-lapse."""
+    ctx.new_sub_path()
+    ctx.arc(x, y, r, 0, 2 * PI)
+    shape_fill(ctx, c_(rim), r * 0.06, y - r, y + r, outline=INK)
+    ctx.new_sub_path()
+    ctx.arc(x, y, r * 0.82, 0, 2 * PI)
+    shape_fill(ctx, c_(col), r * 0.03, y - r, y + r, outline=INK)
+    for i in range(12):
+        a = i * PI / 6
+        ctx.move_to(x + math.cos(a) * r * 0.66, y + math.sin(a) * r * 0.66)
+        ctx.line_to(x + math.cos(a) * r * 0.74, y + math.sin(a) * r * 0.74)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(r * 0.04)
+    ctx.stroke()
+    for frac, ln, w in ((hours / 12, 0.42, 0.07), ((hours % 1), 0.62, 0.045)):
+        a = -PI / 2 + frac * 2 * PI
+        ctx.move_to(x, y)
+        ctx.line_to(x + math.cos(a) * r * ln, y + math.sin(a) * r * ln)
+        ctx.set_line_width(r * w)
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.stroke()
+    ctx.new_sub_path()
+    ctx.arc(x, y, r * 0.06, 0, 2 * PI)
+    ctx.fill()
+
+
+def settings_menu(ctx, x, y, s, T, missing_k=1.0, rows=("Volume", "Graphics", "Camera", "Chat")):
+    """Game settings panel; the last slot is an empty dashed box (no report button)."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -280, -330, 560, 660, 30, hexc("#1f2236"), 6, outline=INK)
+    bold_text(ctx, "SETTINGS", 0, -270, 46, (1, 1, 1), stroke=0.12)
+    for i, name in enumerate(rows):
+        yy = -180 + i * 95
+        block(ctx, -240, yy - 38, 480, 76, 16, hexc("#2c3a78"), 4, outline=INK, gloss=False)
+        bold_text(ctx, name, -210, yy, 30, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+        rrect(ctx, 80, yy - 10, 130, 20, 10)
+        ctx.set_source_rgb(*hexc("#4a4e6e"))
+        ctx.fill()
+        ctx.new_sub_path()
+        ctx.arc(80 + 30 + i * 22, yy, 16, 0, 2 * PI)
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.fill()
+    yy = -180 + len(rows) * 95
+    rrect(ctx, -240, yy - 38, 480, 76, 16)
+    ctx.set_source_rgba(1, 1, 1, 0.06 * missing_k)
+    ctx.fill_preserve()
+    ctx.set_source_rgba(1, 1, 1, 0.55)
+    ctx.set_dash([14, 10])
+    ctx.set_line_width(5)
+    ctx.stroke()
+    ctx.set_dash([])
+    bold_text(ctx, "?", 0, yy, 50, YELLOW, stroke=0.12, scale=missing_k)
+    ctx.restore()
+
+
+def report_button(ctx, x, y, s, T, pressed=0.0, glow_a=0.0):
+    """Big red REPORT button with a flag icon (pressed 0..1 squashes it)."""
+    if s <= 0.01:
+        return
+    if glow_a > 0:
+        glow(ctx, x, y, 420 * s, (1, 0.3, 0.25), glow_a)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -250, -40, 500, 150, 60, hexc("#8a1a24"), 7, outline=INK, gloss=False)   # base
+    dy = 34 * clamp(pressed)
+    block(ctx, -235, -110 + dy, 470, 170, 70, hexc("#ff3b4a"), 7, outline=INK)
+    fx = -150
+    fy = -25 + dy
+    ctx.move_to(fx, fy + 40)
+    ctx.line_to(fx, fy - 45)
+    ctx.set_source_rgb(1, 1, 1)
+    ctx.set_line_width(9)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.stroke()
+    ctx.move_to(fx, fy - 45)
+    ctx.line_to(fx + 55, fy - 30)
+    ctx.line_to(fx, fy - 12)
+    ctx.close_path()
+    ctx.fill()
+    bold_text(ctx, "REPORT", 40, fy, 76, (1, 1, 1), stroke=0.14)
+    ctx.restore()
+
+
+def like_button(ctx, x, y, s, pressed=0.0, count=None):
+    """Thumbs-up like button; pressed > 0.5 turns it blue."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s * (1 - 0.1 * math.sin(PI * clamp(pressed * 3))), s)
+    on = pressed > 0.5
+    block(ctx, -110, -90, 220, 180, 50, BLUE if on else hexc("#f1f1f6"), 6, outline=INK)
+    c = (1, 1, 1) if on else INK
+    rrect(ctx, -60, -10, 34, 70, 8)
+    ctx.set_source_rgb(*c)
+    ctx.fill()
+    ctx.move_to(-20, 60)
+    ctx.line_to(45, 60)
+    ctx.curve_to(65, 60, 70, 0, 60, -5)
+    ctx.line_to(15, -5)
+    ctx.line_to(25, -50)
+    ctx.curve_to(25, -70, 0, -70, -5, -50)
+    ctx.line_to(-20, -10)
+    ctx.close_path()
+    ctx.fill()
+    ctx.restore()
+    if count is not None:
+        bold_text(ctx, count, x, y + 130 * s, 40 * s, (1, 1, 1))
+
+
+def coffee_cup(ctx, x, y, s=1.0, steam_T=None):
+    block(ctx, x - 26 * s, y - 60 * s, 52 * s, 60 * s, 8 * s, (1, 1, 1), 3, outline=INK)
+    ctx.new_sub_path()
+    ctx.arc(x + 30 * s, y - 32 * s, 13 * s, -PI / 2, PI / 2)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(5 * s)
+    ctx.stroke()
+    rrect(ctx, x - 26 * s, y - 42 * s, 52 * s, 14 * s, 3)
+    ctx.set_source_rgb(*hexc("#8a5a3a"))
+    ctx.fill()
+    if steam_T is not None:
+        for k in range(2):
+            ph = (steam_T * 0.8 + k * 0.5) % 1
+            ctx.move_to(x - 8 * s + k * 16 * s, y - 70 * s - ph * 40 * s)
+            ctx.curve_to(x + 4 * s, y - 80 * s - ph * 40 * s, x - 12 * s, y - 95 * s - ph * 40 * s,
+                         x + k * 8 * s, y - 105 * s - ph * 40 * s)
+            ctx.set_source_rgba(1, 1, 1, 0.6 * (1 - ph))
+            ctx.set_line_width(4 * s)
+            ctx.stroke()
+
+
+def code_screen(ctx, x, y, w, h, T, typed=1.0, button_k=0.0):
+    """Screen content: dark editor with lines of code typing in; a red button preview forms."""
+    ctx.set_source_rgb(*hexc("#141a2e"))
+    ctx.rectangle(x, y, w, h)
+    ctx.fill()
+    cols = [GREEN, BLUE, PINK, YELLOW, hexc("#9aa0b8")]
+    n = int(typed * 14)
+    rnd = random.Random(3)
+    for i in range(n):
+        indent = (i % 4) * 0.06 * w
+        ww = rnd.uniform(0.2, 0.55) * w
+        rrect(ctx, x + 0.06 * w + indent, y + 0.08 * h + i * 0.06 * h, ww, 0.03 * h, 4)
+        ctx.set_source_rgb(*cols[i % len(cols)])
+        ctx.fill()
+    if button_k > 0:
+        report_button(ctx, x + w * 0.72, y + h * 0.6, 0.28 * w / 560 * 2 * button_k, T)
+
+
+def office(ctx, T, night=0.0, y_desk=980, sun=0.0):
+    """Developer office: wall, big window (night or sunrise), desk; night 0..1, sun 0..1 (sunrise)."""
+    wall = mix(hexc("#9fd0f0"), hexc("#2a2f6a"), night)
+    ctx.rectangle(-3000, -5000, 7000, 10000)
+    ctx.set_source_rgb(*wall)
+    ctx.fill()
+    wx, wy, ww, wh = 70, 170, 580, 420
+    rrect(ctx, wx - 14, wy - 14, ww + 28, wh + 28, 10)
+    shape_fill(ctx, hexc("#e9e4f5"), 5, wy, wy + wh, outline=INK)
+    ctx.save()
+    ctx.rectangle(wx, wy, ww, wh)
+    ctx.clip()
+    g = cairo.LinearGradient(0, wy, 0, wy + wh)
+    top = mix(mix(hexc("#6ec6ff"), hexc("#0b1040"), night), hexc("#ff9a5a"), sun * 0.6)
+    bot = mix(mix(hexc("#c4ecff"), hexc("#2a2f7a"), night), hexc("#ffd27a"), sun)
+    g.add_color_stop_rgb(0, *top)
+    g.add_color_stop_rgb(1, *bot)
+    ctx.set_source(g)
+    ctx.paint()
+    if sun > 0:
+        glow(ctx, wx + ww * 0.5, wy + wh * (1.05 - 0.4 * sun), 260, (1, 0.85, 0.4), 0.9 * sun)
+        ctx.new_sub_path()
+        ctx.arc(wx + ww * 0.5, wy + wh * (1.05 - 0.4 * sun), 70, 0, 2 * PI)
+        ctx.set_source_rgb(*hexc("#ffe27a"))
+        ctx.fill()
+    if night > 0.5:
+        _wall_stars(ctx, wx, wy, wx + ww, wy + wh * 0.6, seed=6, a=0.9 * night)
+    for i in range(7):   # city skyline
+        bx = wx + i * ww / 7
+        bh = wh * (0.25 + 0.15 * ((i * 37) % 3))
+        ctx.rectangle(bx, wy + wh - bh, ww / 7 - 6, bh)
+    ctx.set_source_rgb(*mix(hexc("#7a8ab8"), hexc("#1a1d52"), night))
+    ctx.fill()
+    ctx.restore()
+    ctx.move_to(wx + ww / 2, wy)
+    ctx.line_to(wx + ww / 2, wy + wh)
+    ctx.set_source_rgb(*hexc("#e9e4f5"))
+    ctx.set_line_width(8)
+    ctx.stroke()
+    block(ctx, -100, y_desk, 920, 50, 8, hexc("#b9b4d8"), 5)
+    block(ctx, -100, y_desk + 50, 920, 700, 0, hexc("#7a6aa8"), 5, gloss=False)
+    if night > 0:
+        tint(ctx, (0.04, 0.05, 0.2), 0.25 * night)
+
+
+def report_card(ctx, x, y, s, face="?", tilt=0.0, name=None):
+    """A report ticket: red header REPORT, a face slot ('?' or a face_icon-style fn), a name line."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    ctx.scale(s, s)
+    block(ctx, -110, -140, 220, 280, 18, (1, 1, 1), 5, outline=INK)
+    rrect(ctx, -110, -140, 220, 60, 18)
+    ctx.rectangle(-110, -100, 220, 20)
+    ctx.set_source_rgb(*hexc("#ff3b4a"))
+    ctx.fill()
+    bold_text(ctx, "REPORT", 0, -110, 32, (1, 1, 1), stroke=0.12, shadow=False)
+    if face == "?":
+        rrect(ctx, -55, -60, 110, 110, 20)
+        shape_fill(ctx, hexc("#c9cde0"), 4, -60, 50, outline=INK)
+        bold_text(ctx, "?", 0, -5, 80, (1, 1, 1), stroke=0.14, shadow=False)
+    elif face:
+        face(ctx, 0, -5, 48)
+    for i in range(2):
+        rrect(ctx, -80, 72 + i * 28, 160 - i * 50, 12, 6)
+        ctx.set_source_rgb(*hexc("#c9cde0"))
+        ctx.fill()
+    if name:
+        bold_text(ctx, name, 0, 78, 30, INK, outline=(1, 1, 1), shadow=False, stroke=0.02)
+    ctx.restore()
+
+
+def paper_pile(ctx, x, y, w, h, T, seed=5, face=None, n=None):
+    """A mountain of report cards (bottom centre x, y)."""
+    rnd = random.Random(seed)
+    n = n or int(w * h / 9000)
+    pts = []
+    for _ in range(n):
+        u = rnd.uniform(-1, 1)
+        pts.append((x + u * w / 2, y - rnd.uniform(0.1, 1) * h * (1 - u * u), rnd.uniform(-0.5, 0.5)))
+    for px, py, tl in sorted(pts, key=lambda p: p[1]):
+        report_card(ctx, px, py, 0.42, face=face or "?", tilt=tl)
+
+
+def stamp(ctx, x, y, txt, k, col="#e8323a", size=110, tilt=-0.18):
+    """Rubber-stamp text slamming down (k = time since the slam)."""
+    if k < 0:
+        return
+    sc = 1 + 1.4 * math.exp(-18 * k)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    ctx.scale(sc, sc)
+    ctx.push_group()
+    w = text_width(ctx, txt, size) + size * 0.6
+    rrect(ctx, -w / 2, -size * 0.75, w, size * 1.5, size * 0.18)
+    ctx.set_source_rgb(*c_(col))
+    ctx.set_line_width(size * 0.12)
+    ctx.stroke()
+    bold_text(ctx, txt, 0, 0, size, c_(col), outline=c_(col), shadow=False, stroke=0.0)
+    ctx.pop_group_to_source()
+    ctx.paint_with_alpha(min(1.0, k * 12) * 0.95)
+    ctx.restore()
+
+
+def ban_hammer(ctx, x, y, s, ang=0.0):
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(ang)
+    ctx.scale(s, s)
+    block(ctx, -16, -40, 32, 300, 10, hexc("#8a5a3a"), 5, outline=INK)
+    block(ctx, -110, -130, 220, 110, 20, hexc("#ff3b4a"), 6, outline=INK)
+    bold_text(ctx, "BAN", 0, -75, 54, (1, 1, 1), stroke=0.14, shadow=False)
+    ctx.restore()
+
+
+def profile_card(ctx, x, y, s, name, face=None, status=None):
+    """Player profile card (avatar slot + name)."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -230, -250, 460, 500, 34, hexc("#1f2236"), 6, outline=INK)
+    rrect(ctx, -150, -200, 300, 300, 30)
+    shape_fill(ctx, hexc("#84d4fb"), 5, -200, 100, outline=INK)
+    if face:
+        face(ctx, 0, -50, 110)
+    bold_text(ctx, name, 0, 160, 56, (1, 1, 1), stroke=0.12)
+    if status:
+        bold_text(ctx, status, 0, 215, 28, hexc("#9aa0b8"), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def staff_badge(ctx, x, y, s, txt="STAFF"):
+    """ID badge on a lanyard (hang it on a character's chest)."""
+    ctx.move_to(x - 40 * s, y - 120 * s)
+    ctx.line_to(x, y - 30 * s)
+    ctx.line_to(x + 40 * s, y - 120 * s)
+    ctx.set_source_rgb(*BLUE)
+    ctx.set_line_width(8 * s)
+    ctx.stroke()
+    block(ctx, x - 50 * s, y - 35 * s, 100 * s, 70 * s, 10 * s, (1, 1, 1), 4 * s, outline=INK)
+    bold_text(ctx, txt, x, y, 24 * s, BLUE, outline=(1, 1, 1), shadow=False, stroke=0.02)
