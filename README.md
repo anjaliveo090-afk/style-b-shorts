@@ -30,6 +30,7 @@ I am attaching a voiceover and its SRT. Run bash setup.sh, then read MASTER_PROM
 | `animator/engine.py`, `audio.py`, `safezone.py`, `thumbnail.py` | Render engine, synthesised sound + music, safe-zone fitter, thumbnail template |
 | `assembler/` | Joins animation + voice + music + SFX into the final mp4; `captions.py` burns reference-style captions onto it |
 | `animator/no_break.py` | Full 60 s story on a real voiceover ("How long could you survive playing Roblox without a break?"), with a playtime HUD; captions in `animator/captions/no_break.json` |
+| `animator/robux10.py` | 44 s "Second 10 → 5" countdown story (timer pill, SECOND cards, mystery box, refund twist); captions in `animator/captions/robux10.json` |
 | `analysis/` | Reference analysis tools (frame logs, SFX/music measure, pace, camera flow, word alignment) and `ref_data/` |
 | `reference_examples/` | The older toolkit (another style) this repo was bootstrapped from, kept as worked examples |
 

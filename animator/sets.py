@@ -2520,3 +2520,199 @@ def screen_obby(ctx, x, y, w, h, T, avatar=None, stage="STAGE 1", fail=None):
     stage_pill(ctx, x + w / 2, y + h * 0.13, stage, s=w / 1100)
     if fail:
         bold_text(ctx, fail, x + w / 2, y + h * 0.35, h * 0.12, RED, stroke=0.14)
+
+
+# ================================================================ more props (added for robux10.py)
+def mystery_box(ctx, x, y, s, T, open_k=0.0, glow_a=0.0):
+    """Purple gift box with a gold '?' (bottom centre x, y); open_k 0..1 lifts the lid off."""
+    if glow_a > 0:
+        glow(ctx, x, y - 160 * s, 360 * s, (1, 0.85, 0.3), glow_a)
+    w, h = 300 * s, 230 * s
+    block(ctx, x - w / 2, y - h, w, h, 18 * s, hexc("#7a3fd8"), 6)
+    rrect(ctx, x - 26 * s, y - h, 52 * s, h, 4)
+    ctx.set_source_rgb(*GOLD)
+    ctx.fill()
+    bold_text(ctx, "?", x + 85 * s, y - h / 2, 110 * s, GOLD, stroke=0.14)
+    ctx.save()
+    ctx.translate(x - open_k * 160 * s, y - h - open_k * 260 * s)
+    ctx.rotate(-open_k * 1.1)
+    block(ctx, -w / 2 - 18 * s, -60 * s, w + 36 * s, 66 * s, 16 * s, hexc("#9d5cff"), 6)
+    rrect(ctx, -26 * s, -60 * s, 52 * s, 66 * s, 4)
+    ctx.set_source_rgb(*GOLD)
+    ctx.fill()
+    for side in (-1, 1):   # bow
+        ellipse(ctx, side * 55 * s, -85 * s, 55 * s, 30 * s)
+        shape_fill(ctx, GOLD, 5, -115 * s, -55 * s, outline=INK)
+    ctx.restore()
+    if open_k > 0.3:
+        for i in range(5):   # light beams from the open box
+            a = -PI / 2 + (i - 2) * 0.28
+            ctx.move_to(x - 40 * s, y - h)
+            ctx.line_to(x + math.cos(a - 0.08) * 900, y - h + math.sin(a - 0.08) * 900)
+            ctx.line_to(x + math.cos(a + 0.08) * 900, y - h + math.sin(a + 0.08) * 900)
+            ctx.line_to(x + 40 * s, y - h)
+            ctx.close_path()
+        ctx.set_source_rgba(1, 0.92, 0.5, 0.22 * open_k)
+        ctx.fill()
+
+
+def golden_ticket(ctx, x, y, s, rot=0.0, flip=1.0):
+    """Golden ticket (centre x, y); flip -1..1 squashes it horizontally (spinning)."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(rot)
+    ctx.scale(s * max(0.08, abs(flip)), s)
+    w, h = 340, 170
+    ctx.move_to(-w / 2, -h / 2)
+    ctx.line_to(w / 2, -h / 2)
+    ctx.arc_negative(w / 2, 0, 26, -PI / 2, PI / 2)
+    ctx.line_to(-w / 2, h / 2)
+    ctx.arc_negative(-w / 2, 0, 26, PI / 2, -PI / 2)
+    ctx.close_path()
+    shape_fill(ctx, GOLD, 7, -h / 2, h / 2, outline=INK)
+    rrect(ctx, -w / 2 + 34, -h / 2 + 18, w - 68, h - 36, 10)
+    ctx.set_source_rgb(*hexc("#e6a92a"))
+    ctx.set_line_width(4)
+    ctx.set_dash([10, 8])
+    ctx.stroke()
+    ctx.set_dash([])
+    if flip > 0:
+        bold_text(ctx, "GOLDEN", 0, -22, 40, (1, 1, 1), stroke=0.16, shadow=False)
+        bold_text(ctx, "TICKET", 0, 26, 40, (1, 1, 1), stroke=0.16, shadow=False)
+    ctx.restore()
+
+
+def number_counter(ctx, x, y, s, value, T, spinning=False, col="#ffd84a", prefix="R$ "):
+    """Big slot-style counter panel (centre x, y). spinning blurs the digits."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -300, -95, 600, 190, 40, hexc("#1f2236"), 7, outline=GOLD)
+    txt = prefix + (f"{int(value):,}" if not spinning else f"{int(value):,}")
+    if spinning:
+        for k in (-1, 1):   # motion smear of rolling digits
+            bold_text(ctx, txt, 0, k * 26, 74, c_(col), outline=INK, shadow=False, stroke=0.1, scale=0.95)
+        ctx.set_source_rgba(0.12, 0.13, 0.21, 0.55)
+        ctx.rectangle(-290, -90, 580, 180)
+        ctx.fill()
+    bold_text(ctx, txt, 0, 0, 74, c_(col), stroke=0.14, shadow=False)
+    ctx.restore()
+
+
+def glitch(ctx, T, k=1.0, seed=0):
+    """RGB glitch bars + static over the whole frame (k = strength)."""
+    if k <= 0:
+        return
+    rnd = random.Random(int(T * 24) + seed)
+    for _ in range(int(10 * k)):
+        y = rnd.uniform(-200, 1500)
+        h = rnd.uniform(6, 60)
+        c = rnd.choice([(1, 0.1, 0.3), (0.1, 1, 0.9), (1, 1, 1), (0.3, 0.3, 1)])
+        ctx.rectangle(-3000 + rnd.uniform(-60, 60), y, 7000, h)
+        ctx.set_source_rgba(*c, 0.35 * k)
+        ctx.fill()
+
+
+def prize_wheel(ctx, x, y, r, T, angle=0.0):
+    """Prize wheel with coloured wedges and a pointer at the top."""
+    cols = [RED, YELLOW, GREEN, BLUE, PINK, PURPLE, hexc("#ff8a3d"), hexc("#2fbf8f")]
+    n = len(cols)
+    for i in range(n):
+        a0 = angle + i * 2 * PI / n
+        ctx.move_to(x, y)
+        ctx.arc(x, y, r, a0, a0 + 2 * PI / n)
+        ctx.close_path()
+        ctx.set_source_rgb(*cols[i])
+        ctx.fill_preserve()
+        ctx.set_source_rgb(*INK)
+        ctx.set_line_width(5)
+        ctx.stroke()
+        am = a0 + PI / n
+        star_path(ctx, x + math.cos(am) * r * 0.66, y + math.sin(am) * r * 0.66, r * 0.09)
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.fill()
+    ctx.new_sub_path()
+    ctx.arc(x, y, r, 0, 2 * PI)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(12)
+    ctx.stroke()
+    ctx.new_sub_path()
+    ctx.arc(x, y, r * 0.14, 0, 2 * PI)
+    shape_fill(ctx, GOLD, 5, y - r * 0.14, y + r * 0.14, outline=INK)
+    ctx.move_to(x - r * 0.12, y - r - 30)
+    ctx.line_to(x + r * 0.12, y - r - 30)
+    ctx.line_to(x, y - r + 40)
+    ctx.close_path()
+    shape_fill(ctx, RED, 5, y - r - 30, y - r + 40, outline=INK)
+
+
+def credit_card(ctx, x, y, s, rot=0.0, col="#2f6bd8"):
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(rot)
+    ctx.scale(s, s)
+    block(ctx, -170, -105, 340, 210, 22, c_(col), 6, outline=INK)
+    block(ctx, -130, -50, 70, 52, 8, GOLD, 4, outline=INK, gloss=False)
+    bold_text(ctx, "**** 4021", 20, 50, 34, (1, 1, 1), shadow=False, stroke=0.0)
+    bold_text(ctx, "MOM", 110, -60, 30, (1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def pet_puppy(ctx, x, y, s, T, col="#ffcc33"):
+    """Legendary golden blocky puppy (bottom centre x, y)."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y + math.sin(T * 6) * -6 * s)
+    ctx.scale(s, s)
+    c = c_(col)
+    for lx in (-60, 40):
+        block(ctx, lx, -70, 34, 70, 8, c, 5)
+    block(ctx, -100, -170, 200, 110, 30, c, 6)
+    ctx.move_to(100, -150)
+    ctx.curve_to(150, -200, 150, -230, 130, -250)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(26)
+    ctx.stroke_preserve()
+    ctx.set_source_rgb(*c)
+    ctx.set_line_width(14)
+    ctx.stroke()
+    block(ctx, -150, -290, 170, 150, 40, c, 6)
+    for ex in (-150, 0):   # ears
+        ctx.save()
+        ctx.translate(ex + 10, -270)
+        ctx.rotate(-0.5 if ex < 0 else 0.5)
+        block(ctx, -22, -10, 44, 90, 20, dark(c, 0.15), 5, gloss=False)
+        ctx.restore()
+    for ex in (-110, -30):
+        ellipse(ctx, ex, -220, 13, 18)
+        ctx.set_source_rgb(*INK)
+        ctx.fill()
+        ctx.new_sub_path()
+        ctx.arc(ex + 5, -227, 5, 0, 2 * PI)
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.fill()
+    ellipse(ctx, -70, -185, 16, 11)
+    ctx.set_source_rgb(*INK)
+    ctx.fill()
+    ctx.move_to(-95, -168)
+    ctx.curve_to(-80, -150, -60, -150, -45, -168)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(5)
+    ctx.stroke()
+    ctx.restore()
+    sparkles(ctx, T, x, y - 200 * s, spread=180 * s, n=6, seed=12, c=YELLOW, size=18 * s)
+
+
+def tap_ripple(ctx, x, y, k):
+    if not 0 < k < 1:
+        return
+    for j in range(2):
+        kk = clamp(k - j * 0.2)
+        ctx.new_sub_path()
+        ctx.arc(x, y, 20 + kk * 120, 0, 2 * PI)
+        ctx.set_source_rgba(1, 1, 1, 0.9 * (1 - kk))
+        ctx.set_line_width(8)
+        ctx.stroke()
