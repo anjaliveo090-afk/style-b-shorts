@@ -55,9 +55,8 @@ STEP 3 - BUILD AND CHECK FRAMES
   and look at it. Fix anything small, cut off, hidden, empty or outside the red safe-zone outline.
 
 STEP 4 - MY DEFAULTS
-- No captions unless I ask (do not pass --srt to assemble.py). If I ask for captions "like the reference",
-  burn them with assembler/captions.py (see CLAUDE.md Defaults), never repeating text that is already
-  on screen at that moment. Lip-sync only when a character speaks dialogue (not the narrator). No camera whoosh.
+- Always add reference-style captions with assembler/captions.py (see CLAUDE.md Defaults), never repeating
+  text that is already on screen at that moment. Send me ONLY the captioned mp4, one file, no caption-free copy. Lip-sync only when a character speaks dialogue (not the narrator). No camera whoosh.
 - Hard cuts: render(xfade=0, grain=2, fade_in=0, fade_out=0), loop back to the first frame.
 - Music: audio.music_game() (the story's MUSIC dict, written as music.wav) at --music-volume 0.5.
 - SFX: about 1.1 per second on visual events, SFX_GAIN = 0.4 (real voice), hits 1.3, booms 1.6.
@@ -78,7 +77,7 @@ STEP 5 - MEASURE, THEN SEND
   | SFX on a visual change | above the random share |
 
 - analysis/frame_log.py on the final mp4: look at every sheet.
-- Send me the final mp4, and commit and push the code (output/ is git-ignored).
+- Send me only the captioned final mp4, and commit and push the code (output/ is git-ignored).
 - Tell me honestly what could not match the reference.
 - For fixes later: patch only the needed shots, never regenerate everything.
 ```
