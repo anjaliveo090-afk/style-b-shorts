@@ -6,12 +6,24 @@ Everything is drawn in code: pycairo frames → ffmpeg. There is no AI video mod
 
 When the user gives a voiceover + SRT (or a script), follow this workflow without being asked.
 
+## Titles and scripts (before any voice exists)
+Read `script_guide.md` first. It was learned from 6 reference videos: who speaks when, the emotions, the beat sheet and the silent parts.
+- **"Title do" / "titles":**
+  - Give 10 titles from the formulas in section 1, and mark the 3 strongest.
+  - Our own ideas only; never the reference channel's titles.
+- **"Is title se script likho":**
+  - Write a script in the user's format (`Narrator: [emotion] … [break] …`, then `Mom: [angry] …` blocks).
+  - Follow the 14-beat sheet (section 2): 120-145 words, emotion tags from section 4, and pause tags kept short (section 3).
+  - After the script, give a 1-line speaker list and the estimated length.
+- **Another topic or script:** bend it into the reference topic world with section 5 (Roblox + family antagonist + Day ladder + zero-crash + twist + loop). Keep the user's core idea.
+
 ## Read first
 | File | What it holds |
 |---|---|
 | `style_bible.md` | Look: format and safe zone, characters in head-widths, faces and the 19 expressions, palette, sets, STYLE LOCK |
 | `visual_grammar.md` | Measured pace and camera; **section 2 = phrase type → what is shown → camera → reaction** (rows 1-20) |
 | `sound_design.md` | Measured music and SFX, the mix defaults and the target numbers |
+| `script_guide.md` | Titles, the script format with characters and emotions, the 14-beat sheet, bending other topics, and the measured silent parts (what is on screen during them) |
 | `animator/sample.py` | **The template story.** Copy it for every new video |
 | `animator/style.py` | Characters: `Block` (same `draw()` signature as the old `style2.Char2`), the cast `KID`, `KID_GAME`, `MOM`, `MOM_ROBE`, `DAD`, `GRANDMA`, `NOOB`, `BOSS`, `crowd_member(i)`, `back_figure`, and the FX `sweat`, `anger_mark`, `shake_lines`, `sparkle` |
 | `animator/sets.py` | Places, props, game UI and FX (list at the top of the file) |
@@ -22,6 +34,10 @@ When the user gives a voiceover + SRT (or a script), follow this workflow withou
 `reference_examples/` is the older toolkit this repo was built from (another style). Read it only for method; never import from it.
 
 ## Workflow for a new voice + SRT
+0. **Silences.** Run `python3 analysis/silences.py - <voice> - <subs.srt> output/<story>/silences`.
+   - If any gap is over 0.8 s, or the voice runs below ~88% of the time, tighten it first: `python3 assembler/tighten_voice.py <voice> <subs.srt> output/<story>/voice.wav output/<story>/subs.srt --max 0.6`.
+   - Then use the tightened voice and SRT from here on.
+   - Plan a visual for every gap (`script_guide.md` section 6): the next cut or card starts in the gap, a reaction snap plus one SFX goes on the punchline, and a reveal gets a creeping push.
 1. **Words.** Strip any "(Transcribed by ...)" text from the SRT, then run
    `python3 analysis/align_words.py <voice> <subs.srt> output/<story>/words`.
    This gives a time for every word. Where pocketsphinx misplaces a word, trust the SRT line start.
@@ -83,7 +99,10 @@ When the user gives a voiceover + SRT (or a script), follow this workflow withou
 - **No camera whoosh.** Only `whip.wav` on the loop rewind, and `swish` on a physical throw or a panel sliding in.
 - **Hard cuts** (`render(xfade=0)`), grain 2, `vignette` 0.15 (flat vector look).
 - `engine.DRIFT = (0.02, 5, -3)` and `engine.ENERGY = 3.0` (set at the top of the story).
-- **Loop:** `render(..., fade_in=0, fade_out=0)` and the last shot draws the first frame.
+- **Loop:** `render(..., fade_in=0, fade_out=0)`. The last 0.5-1.0 s after the final word is a REWIND montage, as in the references:
+  - `draw, ov = sets.rewind_shot(SHOTS, [t1, t2, …, 0.0])` plays 4-6 earlier shot times backwards and lands exactly on the first frame.
+  - Use it as the last shot with keys `[(start, 1.0, (360, 640))]`, `overlay=ov`, `blur=False`, `closeup=True`, `keep=[]`.
+  - Add `whip.wav` at its start.
 - **Music:** `music_game` (`MUSIC` dict in the story) at `--music-volume 0.5`.
 - **SFX:** about 1.1 per second, `SFX_GAIN = 0.4` for a real recorded voice (the TTS sample needed 0.17), hits 1.3, booms 1.6. Always measure and adjust (see `sound_design.md`).
 

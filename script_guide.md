@@ -1,0 +1,216 @@
+# Script guide: titles, scripts, emotions and silent parts (Style B)
+
+This guide was learned from 6 reference videos (~50-56 s each):
+- What If Your MOM Started Playing Roblox
+- What If MOM Gave You 10 Seconds of Roblox
+- What If Your DAD Became the NOOB KING
+- What If You Got 1 ROBUX Every Time You Blinked
+- What If You HACKED Roblox
+- the robux10 voice the user made
+
+**How they were analysed:**
+- Every video was read at 4 fps (`analysis/frame_log.py`).
+- The voice was separated from the music and SFX (`analysis/separate.py`).
+- Every silent gap was measured (`analysis/silences.py`).
+- The speaker of each line was identified by its pitch and by who is on screen.
+- The data is in `analysis/ref_data/set2_*`.
+
+Use this guide for three jobs:
+1. **Titles:** when the user asks for titles, give them in this style (section 1).
+2. **Scripts:** write a script from a title, with a character and an emotion on every line, in the user's format (sections 2-5).
+3. **Videos:** when the user uploads the voice of that script, make the video, handling the silent parts as in section 6.
+
+The style is copied, never the text: do not reuse the reference channel's lines, names or jokes.
+
+---
+
+## 1. Titles
+
+**Formula:** `What If` + **who** + **a power / rule / change** + `Roblox`, with **ONE or two key words in CAPITALS**.
+
+| Pattern | Reference shape | Fresh examples (ours) |
+|---|---|---|
+| A family member does a gamer thing | What If Your MOM Started Playing Roblox | What If Your GRANDMA Became a Pro Gamer · What If Your DAD Joined Your Obby Team |
+| A family member becomes a game role | What If Your DAD Became the NOOB KING | What If Your MOM Became a Roblox ADMIN · What If Your SISTER Became the Final BOSS |
+| A strict limit / rule from mom | What If MOM Gave You 10 Seconds of Roblox | What If MOM Banned the JUMP Button · What If MOM Made Roblox Cost 1 CHORE Per Minute |
+| You get a strange superpower | What If You HACKED Roblox | What If You Could PAUSE Roblox · What If You Had Infinite ADMIN Commands |
+| You earn money for a body action | What If You Got 1 ROBUX Every Time You Blinked | What If You Got 1 ROBUX Every Time You Sneezed · What If Every Step Gave You 100 ROBUX |
+| A big number in a short time | 1,000,000 Robux in 10 seconds (robux10) | What If You Had 1 TRILLION Robux for One Day · What If You Got 10 Seconds of ADMIN |
+
+**Rules:**
+- **4-9 words**, and always a question ("What if…?").
+- It must promise a **clear, visual, absurd idea** that can grow over 5 days.
+- The CAPS word is the one that would be the thumbnail text: MOM, DAD, NOOB KING, HACKED, ROBUX, ADMIN, BOSS.
+- A **family member** (mom, dad, grandma, sister) or **"you"** is the subject. Mom is the most common antagonist.
+- **Spoken, the title is the first line of the script.**
+- When asked for titles, give **10**: two per pattern, plus one wild card. Mark the 3 strongest; the most visual and easiest to escalate wins.
+
+---
+
+## 2. Script shape (measured)
+
+| What | Measured in the references | Rule |
+|---|---|---|
+| Length | 122-143 words, 50-56 s of voice | **120-145 words** (about 50-55 s) |
+| Speed | 142-155 words/min overall, 180-190 while talking | Short lines, nothing that needs a slow read |
+| Line length | 1-10 words, many 1-3 word fragments ("Tablet. Off. NOW.", "Robux, zero.") | Most lines 3-8 words; a few 1-2 word punches |
+| Voice running | 89-93% of the video | Barely any silence (section 6) |
+| Speakers | a Narrator plus 1-3 characters; **4-7 character lines** in total | Characters speak the hook reply, the conflict and the ending |
+| Chapters | "Day 1 … Day 5" in 4/6 videos, "Second 10 … 5" in 2/6 | Always a counted ladder; the chapter word is a line of its own |
+| Call to action | "Everyone who subscribes gets/joins ___" at 26-28 s in every video | Exactly one, right after chapter 4 |
+| Ending | "Comment ___ if you ___" around 47-53 s, then a final twist or character line that **loops to the start** | Both, in this order |
+
+### The beat sheet (every reference follows it)
+
+| # | Time | Beat | Who | Emotion | What it does | Reference shapes (paraphrased) |
+|---|---|---|---|---|---|---|
+| 1 | 0-2.5 s | **Hook**: the title as a question | Narrator | curious | States the absurd idea | "What if your dad became the Noob King?" |
+| 2 | 2.5-7 s | **Setup**: a quick exchange or a cool line | a character (or the narrator) | pleading / smug / confident / whispering | Shows the characters and the conflict | kid begs dad to change his avatar, dad: "Nope."; "Watch this."; "I'm in!" |
+| 3 | 7-12 s | **Chapter 1**: the first small, funny result | Narrator + a 1-line character reaction | excited / chuckling | The power works, clumsily | can't even jump; blink → DING, it's real |
+| 4 | 12-17 s | **Chapter 2**: a surprising escalation | Narrator | excited / gasping | Bigger and stranger | a golden crown drops; /GIANT |
+| 5 | 17-23 s | **Chapter 3**: a huge number | Narrator | excited, emphasis on the number | 1,000,000 / trillion / everything free | "One million noobs join his army" |
+| 6 | 23-26 s | **Chapter 4**: it goes public | Narrator | excited | The whole server or class sees it | take over every obby; everyone's staring |
+| 7 | 26-29 s | **CTA**: "Everyone who subscribes gets ___" (always tied to the power) | Narrator | cheerful | A subscribe button gets pressed on screen | gets ADMIN / joins the noob army / one free blink |
+| 8 | 29-35 s | **Chapter 5 = the conflict**: mom or dad steps in | Narrator ("Mom says…") + a character | soft → suspicious / angry | The authority figure arrives | "Tablet. Off. NOW."; "Staring contest, sweetie." |
+| 9 | 35-42 s | **Showdown**: the power vs the parent | the characters | pleading / confident / shocked | One clever move each | freeze mom; "Kneel before the King!" |
+| 10 | 42-47 s | **Punishment**: everything goes to zero | Narrator | deadpan → sad | The loss, item by item | "Your Robux… Zero."; "Pet, gone."; turns into a noob |
+| 11 | 47-49 s | **The parent's sweet ending line** | Mom / Dad | sweet / smug | Irony | "Bedtime, sweetie."; "No more Roblox, sweetie." |
+| 12 | 49-52 s | **Twist**: "But then…" one more turn | Narrator | whispering → excited | Opens a new problem | the game updated…; mom forgot one thing… |
+| 13 | 50-53 s | **Comment CTA** with ONE keyword | Narrator | cheerful | "Comment HACK if you'd…" | the keyword is the title's power word |
+| 14 | 53-56 s | **Loop line**: leads back into the hook | a character | confused / sneaky | Ends mid-action, so the video restarts | "Slash… REWIND!"; "Wait, which button goes back?" |
+
+### Escalation rules
+- **Numbers climb by orders of magnitude**: 1 → 100 → 1,000,000 → 900 trillion, then crash to **zero**.
+- **Every chapter is something the camera can show literally**: an object, a UI panel, a crowd, a counter. No abstract lines.
+- **A running gag** comes back 2-3 times: DING!, "sweetie", the slipper, the noob, the button.
+- **The parent's last word is "sweetie"** (warm words, cold meaning). It appears in 4 of 6 videos.
+
+---
+
+## 3. Script format (the user's format, for the voice tool)
+
+```
+Narrator: [curious] What if ... ? [break] [whispering] Watch this. [break] [excited] Day 1, ...
+
+Mom: [suspicious] ...?
+
+Kid: [confident] [chuckling] ...
+
+Narrator: [soft] ... [break] [deadpan] ... [long pause] [whispering] But ... [break] [cheerful] Comment "WORD" if ...
+```
+
+**Format rules:**
+- **One block per speaker turn**: `Speaker: [emotion] text`, with a blank line between blocks. Narrator blocks can be long; character blocks are 1-2 short lines.
+- **1-2 emotion tags** right before each sentence or fragment. Change the tag whenever the feeling changes, even inside a block.
+- **Pause tags** decide the silence (section 6), so use them carefully:
+  - `[break]` between beats or chapters: ≈0.2-0.4 s, the reference norm.
+  - `[pause]` once or twice, right before a big reveal number: ≈0.5 s.
+  - `[long pause]` **at most once**, before the final twist: ≈0.6-0.7 s, never more.
+- **Emphasis**: `[emphasis]` plus CAPS on the single key word or phrase ("[emphasis] ONE MILLION ROBUX!"). That word becomes a coloured caption and the visual's punch.
+- **Write numbers as words** where the voice should say them ("a hundred thousand"), and CAPITALISE shouted words.
+- **Stage directions are never written**: only spoken text and tags. The visuals come from the words.
+
+---
+
+## 4. Emotions (what each tag is used for)
+
+| Speaker | Tag | Use it on | Example shape |
+|---|---|---|---|
+| Narrator | [curious] | The hook question | "What if you … ?" |
+| Narrator | [whispering] | Secrets, "watch this", "mom walks in", "but then…" | low and sneaky, right before a turn |
+| Narrator | [excited] | Every win and chapter result | "Day 3. A MILLION…" |
+| Narrator | [gasping] / [shocked] | A surprise drop / a glitch | "a golden ticket falls out!" |
+| Narrator | [suspense] | A counter spinning, a countdown | "the counter starts spinning…" |
+| Narrator | [chuckling] / [laughing] | An ironic detail | "…while folding laundry." |
+| Narrator | [cheerful] | Both calls to action | "Everyone who subscribes…", "Comment…" |
+| Narrator | [soft] | The calm before the parent arrives | "Day 5…" |
+| Narrator | [deadpan] | The punishment list | "Refund complete. Robux, zero." |
+| Narrator | [sad] | The loss | "Pet, gone." |
+| Mom | [suspicious] → [angry] → [sweet] | Questioning, the order, the ironic sign-off | "Whose card…?", "Tablet. Off. NOW.", "…sweetie." |
+| Dad | [proud] / [deadpan] / [confused] | Silly pride, a flat "Nope.", the loop question | "Nope.", "Wait, which button…?" |
+| Kid ("you") | [pleading] / [confident] / [panicked] / [crying] | Begging, smug wins, the loss | "Just five more minutes!", "Mine, obviously.", "My Robux!" |
+| Grandma / sibling / noob / crowd | [excited] / [mocking] | One-line cameos | "Come on…!", "LOL noob" |
+
+Measured voices: the kid's lines sit high (320-520 Hz), dad's low (~100 Hz), mom in the middle (~200-240 Hz), and the narrator calm and low on facts (100-140 Hz) but rising on wins (220-330 Hz). Pick voices with that contrast.
+
+### Who speaks when (speaker maps measured with pitch + the face on screen)
+| Video | Narrator | Character lines (in order) |
+|---|---|---|
+| Dad Noob King | hook, Day 1-5, CTA, "One bonk…", "Comment…" | Kid: "Dad, you have to change your avatar!" · Dad: "Nope." · Dad: "Classic." · Dad: "Kneel before…!" · Kid: "Dad, no! I spent all my Robux…" · Kid: "My Robux!" · Dad: "Now, who knows how to jump?" · Dad: "Wait, which button goes back?" |
+| Blink Robux | hook, Day lines, "Mom thinks…", "Mom has never lost…", "Then mom blows…", twist, CTA | Kid: "It's real!" · Kid: "100 Robux!" · Mom: "Why do you keep winking at me?" · Mom: "Staring contest, sweetie. If you blink, no more Robux." · Kid: "Must. Not. Blink." · Kid: "No!" · Mom: "No more Robux, sweetie!" |
+| Mom plays | hook, Day lines, CTA | Mom: "What's so special about this blocky game? Give me that." · Mom: "Which button is jump?" · Kid: "It's 3 a.m. Mom." · Mom: "Just one more round." · Kid: "Did you spend my Robux?" · Mom: "It was for a pet. For you, sweetie." |
+| Hacked | hook, Day lines, CTA, "Mom froze. Mid-sentence." | Kid: "I'm in!" · Mom: "Tablet. Off. NOW." · Kid: "Slash… freeze…" · Mom: "Bedtime, sweetie." · Kid: "Slash… REWIND!" |
+
+**The pattern:**
+- **The kid reacts in the first person** to his own wins ("It's real!", "100 Robux!").
+- **The parent gets the orders and the "sweetie" lines.**
+- **The narrator owns** the hook, the chapter words, the facts, both calls to action and the punishment list.
+- **SFX words are not spoken.** "Blink… DING!", "BONK!", "POOF!", "SLAM!" are on-screen text over an SFX, filling a 0.5-1.5 s visual beat while the voice pauses or keeps going. Write them in the script only as a `[break]`; the video adds them.
+
+---
+
+## 5. Bending any topic or script into this style
+
+When the user gives another topic, or a script from another niche, keep its **core idea** and rebuild it on the beat sheet:
+
+1. **Find the power or rule.** What changes? (a superpower, a limit, a role, money per action)
+2. **Move it into Roblox**: obby, server, avatar, Robux, admin commands, pets, the noob, the shop, the leaderboard.
+3. **Add the family antagonist**: mom (default), dad, grandma or a sibling. The parent wins at the end, with a "sweetie" line.
+4. **Ladder it over Day 1-5** (or Second 10-1 when the topic is about time), with numbers climbing by ×100.
+5. **Make every line visual**: replace explanations with a thing that happens on screen.
+6. **Add the two calls to action, the zero-crash, the "But then…" twist and a loop line** that leads back into the hook.
+7. **Title**: put it in a section 1 pattern.
+
+**Example of bending.** Topic given: "a kid who never does homework".
+- Title: *What If HOMEWORK Gave You Robux?*
+- Day 1: one page = 1 Robux. Day 2: you finish the whole book. Day 3: you do your class's homework, a million Robux. Day 4: the teacher gives you an A+++ trophy.
+- CTA: "Everyone who subscribes gets a free homework pass."
+- Day 5: mom: "If you're so smart… do the dishes, sweetie."
+- Twist: the game updates; now Robux cost homework. Comment "HOMEWORK…".
+- Loop: "Wait… is this on the test?"
+
+---
+
+## 6. Silent parts: how long they are, and what is on screen
+
+### Measured (`analysis/silences.py` on the voice stem)
+
+| Video | Voice running | Gaps per 10 s (≥0.25 s) | Gap median | Longest gap | Gaps with an SFX hit | Silence after the last word |
+|---|---|---|---|---|---|---|
+| Dad Noob King | 93% | 0.4 | 0.28 s | 0.29 s | 2/2 | 1.03 s |
+| Mom plays | 92% | 1.0 | 0.29 s | 0.53 s | 3/5 | 0.36 s |
+| Blink Robux (SRT given) | 91% | 1.6 (gaps ≥0.2 s) | 0.24 s | 0.33 s | 0/9 | 0.53 s |
+| Hacked | 89% | 0.7 | 0.37 s | 0.71 s | 2/4 | 0.70 s |
+| robux10 (user's voice) | 91% | 0.2 | 0.55 s | 0.55 s | (no SFX in a voice file) | 0 s |
+
+**The rules that follow:**
+- **There is almost no silence.** The voice starts on the first frame (0-0.4 s) and runs 89-93% of the time.
+- Gaps between lines are **0.2-0.4 s**; the longest anywhere is **0.71 s**.
+- **Nothing is ever still in a gap.** The picture keeps moving: idle bounce, a cut, a pop. Half or more of the gaps carry an SFX.
+- The caption of the last words **stays on screen through the gap**.
+
+### What happens on screen in each kind of gap (read frame by frame)
+
+| Where the gap is | Length | What the picture does | Sound |
+|---|---|---|---|
+| Before a chapter word ("Day 3.", "Second 7") | 0.2-0.4 s | **Cut to the new place; the painted DAY card starts drawing inside the gap**, so it is fully in when the word is said | Swoosh/pop on the card, then a hit on the word |
+| After a punchline / result | 0.25-0.5 s | **Reaction hold**: the face snaps to a new expression (tears, sweat, star eyes), a crowd reacts, a counter finishes rolling | Hit, ding or pop |
+| Between two speakers | 0.2-0.3 s | **Cut to the next speaker's close-up already in the gap** (reaction shot) | Usually none, or a small pop |
+| Before the big reveal (`[pause]`) | 0.4-0.6 s | **Push-in / suspense**: the camera creeps toward the object, shake lines, light builds; the reveal pops on the word | Riser or tick, then a boom |
+| Before the twist (`[long pause]`) | 0.6-0.7 s | **The scene darkens or freezes** (a pause icon, a red screen, a spotlight); slow push on a face | Music dips; one low hit |
+| After the last word | 0.4-1.0 s | **REWIND montage**: "◀◀ REWIND" label and scanlines, the previous shots flash **backwards** (~0.15-0.25 s each), landing exactly on the first frame | Whoosh / rewind sweep |
+
+### Rules for our videos (when the user uploads a voice)
+
+1. **Measure the voice first:** `python3 analysis/silences.py - <voice> - <subs.srt> output/<story>/silences`. It lists every gap with the line before and after.
+2. **If any gap is over 0.8 s**, or the voice runs below ~88% of the time, tighten the voice before planning:
+   `python3 assembler/tighten_voice.py <voice> <subs.srt> output/<story>/voice.wav output/<story>/subs.srt --max 0.6`.
+   This trims each long pause to 0.6 s and shifts the SRT to match. Then align the words on the tightened voice.
+3. **Plan a visual for every gap**, using the table above:
+   - Start the next shot in the gap (the cut lands 0.1-0.25 s before the next line's first word).
+   - Put a reaction or expression snap on the previous shot's last 0.2 s.
+   - Place one SFX in the gap (pop, hit or ding), except between two speakers.
+4. **A `[pause]` reveal** gets a short creeping push (key 0.4-0.6 s) that lands on the reveal word.
+5. **A `[long pause]` twist** gets `MUSIC dips=[(t0, t1)]`, a darker tint or a spotlight, and a slow push on the face.
+6. **The ending:** the last 0.5-1.0 s after the final word is a `sets.rewind_shot` montage of 4-6 earlier shots played backwards, ending on the first frame. This replaces the plain `s_end` freeze.
+7. **The captions** (when asked for) stay on the last words through a gap; `assembler/captions.py` already holds each caption until the next unless the pause is longer than 0.6 s.

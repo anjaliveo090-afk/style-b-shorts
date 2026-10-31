@@ -21,6 +21,7 @@ I am attaching a voiceover and its SRT. Run bash setup.sh, then read MASTER_PROM
 | `style_bible.md` | The look: proportions in head-widths, faces and expressions, palette, sets |
 | `visual_grammar.md` | Measured pace and camera, and the phrase type → shot → reaction table |
 | `sound_design.md` | Measured music and SFX, mix defaults and check targets |
+| `script_guide.md` | How to write titles and scripts (characters + emotions) in the reference style, bend other topics, and handle silent parts |
 | `animator/style.py` | `Block` characters (19 expressions, 12 arm poses, 6 leg poses) and our own cast |
 | `animator/sets.py` | Rooms, game worlds, props, game UI, FX |
 | `animator/sample.py` | Template story (22 s sample) |
@@ -31,6 +32,7 @@ I am attaching a voiceover and its SRT. Run bash setup.sh, then read MASTER_PROM
 | `assembler/` | Joins animation + voice + music + SFX into the final mp4; `captions.py` burns reference-style captions onto it |
 | `animator/no_break.py` | Full 60 s story on a real voiceover ("How long could you survive playing Roblox without a break?"), with a playtime HUD; captions in `animator/captions/no_break.json` |
 | `animator/robux10.py` | 44 s "Second 10 → 5" countdown story (timer pill, SECOND cards, mystery box, refund twist); captions in `animator/captions/robux10.json` |
+| `analysis/silences.py`, `assembler/tighten_voice.py` | Measure the pauses in a voice; shorten pauses that are too long |
 | `analysis/` | Reference analysis tools (frame logs, SFX/music measure, pace, camera flow, word alignment) and `ref_data/` |
 | `reference_examples/` | The older toolkit (another style) this repo was bootstrapped from, kept as worked examples |
 

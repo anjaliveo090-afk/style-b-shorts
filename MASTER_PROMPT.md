@@ -22,6 +22,12 @@ SETUP
   Full 60 s example with a real voice: animator/report_noob.py (48 shots).
   Do not change engine.py / style.py unless something is broken; add new places to sets.py.
 
+STEP 0 - SILENCES
+- Run analysis/silences.py on my voice (script_guide.md section 6). If a pause is over 0.8 s, tighten it
+  with assembler/tighten_voice.py (max 0.6 s) and use the tightened voice and SRT.
+- Every pause gets a visual: the next cut or chapter card starts in the gap, a reaction snap + SFX goes on
+  punchlines, a creeping push before a reveal. End with the sets.rewind_shot REWIND montage back to the first frame.
+
 STEP 1 - WORDS
 - Strip any "(Transcribed by ...)" text from the SRT.
 - Run `python3 analysis/align_words.py <voice> <subs.srt> output/<story_name>/words` for word timings.
@@ -96,3 +102,11 @@ Style B has no white sticker outline around characters, so `--no-stroke` is the 
 - To skip `setup.sh` in every new chat, paste `bash setup.sh` into the cloud environment's
   **Setup script** (session title bar → environment menu → Edit).
 - A ~60 s video takes about 30-60 minutes in total: planning, new props, a ~1.5 min render, then checks.
+
+## Titles and scripts (before recording the voice)
+Send one of these in a new chat on this repo:
+- `Read script_guide.md and give me 10 titles.`
+- `Read script_guide.md and write the script for this title: <title>`
+- `Read script_guide.md and bend this topic/script into our style: <text>`
+
+The script comes back in the voice-tool format (`Narrator: [curious] … [break] …`, `Mom: [angry] …`), with characters and emotions.

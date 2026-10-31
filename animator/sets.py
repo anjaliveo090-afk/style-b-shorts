@@ -2716,3 +2716,49 @@ def tap_ripple(ctx, x, y, k):
         ctx.set_source_rgba(1, 1, 1, 0.9 * (1 - kk))
         ctx.set_line_width(8)
         ctx.stroke()
+
+
+# ================================================================ ending: REWIND montage (script_guide.md section 6)
+def rewind_shot(shots, picks):
+    """The references' loop ending: after the last word, earlier shots flash BACKWARDS
+    (~0.15-0.25 s each) under a '<< REWIND' label and scanlines, landing exactly on the first frame.
+
+    shots : the story's SHOTS list (read at draw time, so safezone.fit's camera keys are used)
+    picks : absolute story times to flash, in playing order, e.g. [41.0, 33.4, 24.5, 12.6, 0.0];
+            end with 0.0 so the last frame equals the first frame.
+    Returns (draw, overlay) for a shot with keys [(start, 1.0, (W / 2, H / 2))]:
+      shot(t_end, draw, [(t_end, 1.0, (360, 640))], overlay=overlay, blur=False, closeup=True, keep=[])"""
+    import engine
+
+    def source(T):
+        i = max(k for k, s in enumerate(shots) if s["start"] <= T or k == 0)
+        return shots[i]
+
+    def pick(t, d):
+        k = min(len(picks) - 1, int(t / max(d, 1e-6) * len(picks)))
+        seg = d / len(picks)
+        back = (t - k * seg) * 2.0                   # play each flash backwards at double speed
+        return max(0.0, picks[k] - back) if k < len(picks) - 1 else picks[-1], k
+
+    def draw(ctx, t, d):
+        T, _ = pick(t, d)
+        src = source(T)
+        z, (cx, cy) = engine.key_camera(src["keys"], T)
+        ctx.save()
+        ctx.translate(W / 2, H / 2)
+        ctx.scale(z, z)
+        ctx.translate(-cx, -cy)
+        src["draw"](ctx, T - src["start"], src["end"] - src["start"])
+        ctx.restore()
+
+    def overlay(ctx, t, d):
+        T, k = pick(t, d)
+        src = source(T)
+        if src.get("overlay"):
+            src["overlay"](ctx, T - src["start"], src["end"] - src["start"])
+        if k < len(picks) - 1:                       # the last flash is the clean first frame
+            ctx.rectangle(0, 0, W, H)
+            ctx.set_source_rgba(0.1, 0.12, 0.3, 0.18)
+            ctx.fill()
+            rewind_bars(ctx, 0.3 + 0.4 * ((t * 7) % 1))   # flickering scanlines + the '<< REWIND' label
+    return draw, overlay

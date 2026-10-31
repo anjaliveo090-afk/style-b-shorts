@@ -1,0 +1,78 @@
+{
+ "summary": {
+  "video": "momplays.mp4",
+  "duration": 50.74,
+  "speech_share": 0.918,
+  "gaps_total": 5,
+  "gaps_per_10s": 1.0,
+  "gap_median": 0.29,
+  "gap_p90": 0.45,
+  "gap_max": 0.53,
+  "gaps_over_0_6s": 0,
+  "gaps_with_sfx": 3,
+  "lead_in": 0.0,
+  "tail": 0.36
+ },
+ "gaps": [
+  {
+   "t0": 6.86,
+   "t1": 7.12,
+   "dur": 0.26,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 7.8,
+   "before": "Give me that.",
+   "after": "Day 1."
+  },
+  {
+   "t0": 12.63,
+   "t1": 13.16,
+   "dur": 0.53,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 13.3,
+   "before": "a wall for 10 minutes.",
+   "after": "Which button is jump?"
+  },
+  {
+   "t0": 35.7,
+   "t1": 35.99,
+   "dur": 0.29,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 7.9,
+   "before": "Then you go to bed.",
+   "after": "Just one more round."
+  },
+  {
+   "t0": 38.0,
+   "t1": 38.25,
+   "dur": 0.25,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 9.3,
+   "before": "Just one more round.",
+   "after": "Did you spend my Robux?"
+  },
+  {
+   "t0": 44.5,
+   "t1": 44.84,
+   "dur": 0.34,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 12.1,
+   "before": "And then grandma logged in.",
+   "after": "Come on, Gigi."
+  },
+  {
+   "t0": 50.38,
+   "t1": 50.74,
+   "dur": 0.36,
+   "position": "end",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 5.7,
+   "before": "If your mom would destroy you at Roblox.",
+   "after": ""
+  }
+ ]
+}
