@@ -3,17 +3,27 @@
   "video": "hacked.mp4",
   "duration": 55.01,
   "speech_share": 0.887,
-  "gaps_total": 4,
-  "gaps_per_10s": 0.7,
-  "gap_median": 0.37,
-  "gap_p90": 0.62,
+  "gaps_total": 8,
+  "gaps_per_10s": 1.5,
+  "gap_median": 0.28,
+  "gap_p90": 0.51,
   "gap_max": 0.71,
   "gaps_over_0_6s": 1,
-  "gaps_with_sfx": 2,
+  "gaps_with_sfx": 3,
   "lead_in": 0.0,
   "tail": 0.7
  },
  "gaps": [
+  {
+   "t0": 5.43,
+   "t1": 5.63,
+   "dur": 0.2,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 5.8,
+   "before": "I'm in!",
+   "after": "Day one, you type slash fly and soar"
+  },
   {
    "t0": 14.08,
    "t1": 14.79,
@@ -21,8 +31,8 @@
    "position": "middle",
    "sfx_in_gap": true,
    "peak_vs_music_db": 21.1,
-   "before": "",
-   "after": ""
+   "before": "Now you're bigger than the map.",
+   "after": "The counter explodes."
   },
   {
    "t0": 26.4,
@@ -31,8 +41,18 @@
    "position": "middle",
    "sfx_in_gap": true,
    "peak_vs_music_db": 13.7,
-   "before": "",
-   "after": ""
+   "before": "Everyone who subscribes gets admin.",
+   "after": "Day five, mom says it's bedtime."
+  },
+  {
+   "t0": 32.01,
+   "t1": 32.24,
+   "dur": 0.23,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 10.3,
+   "before": "Tablet, off, now, slash, freeze, mom.",
+   "after": "Mom froze, mid-sentence."
   },
   {
    "t0": 35.12,
@@ -41,8 +61,8 @@
    "position": "middle",
    "sfx_in_gap": false,
    "peak_vs_music_db": 0.8,
-   "before": "",
-   "after": ""
+   "before": "Tablet, off, now, slash, freeze, mom.",
+   "after": "Mom froze, mid-sentence."
   },
   {
    "t0": 37.57,
@@ -51,8 +71,28 @@
    "position": "middle",
    "sfx_in_gap": false,
    "peak_vs_music_db": -1.5,
-   "before": "",
-   "after": ""
+   "before": "Mom froze, mid-sentence.",
+   "after": "Then the screen turned red."
+  },
+  {
+   "t0": 41.26,
+   "t1": 41.46,
+   "dur": 0.2,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 2.9,
+   "before": "Your avatar turns into a noob.",
+   "after": "Your Robux, zero."
+  },
+  {
+   "t0": 49.04,
+   "t1": 49.27,
+   "dur": 0.23,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 4.4,
+   "before": "Bedtime, sweetie.",
+   "after": "Comment hack if you'd rewind it too."
   },
   {
    "t0": 54.31,
@@ -61,7 +101,7 @@
    "position": "end",
    "sfx_in_gap": true,
    "peak_vs_music_db": 12.7,
-   "before": "",
+   "before": "Slash, rewind!",
    "after": ""
   }
  ]

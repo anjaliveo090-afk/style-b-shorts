@@ -139,12 +139,13 @@ Measured voices: the kid's lines sit high (320-520 Hz), dad's low (~100 Hz), mom
 | Dad Noob King | hook, Day 1-5, CTA, "One bonk…", "Comment…" | Kid: "Dad, you have to change your avatar!" · Dad: "Nope." · Dad: "Classic." · Dad: "Kneel before…!" · Kid: "Dad, no! I spent all my Robux…" · Kid: "My Robux!" · Dad: "Now, who knows how to jump?" · Dad: "Wait, which button goes back?" |
 | Blink Robux | hook, Day lines, "Mom thinks…", "Mom has never lost…", "Then mom blows…", twist, CTA | Kid: "It's real!" · Kid: "100 Robux!" · Mom: "Why do you keep winking at me?" · Mom: "Staring contest, sweetie. If you blink, no more Robux." · Kid: "Must. Not. Blink." · Kid: "No!" · Mom: "No more Robux, sweetie!" |
 | Mom plays | hook, Day lines, CTA | Mom: "What's so special about this blocky game? Give me that." · Mom: "Which button is jump?" · Kid: "It's 3 a.m. Mom." · Mom: "Just one more round." · Kid: "Did you spend my Robux?" · Mom: "It was for a pet. For you, sweetie." |
-| Hacked | hook, Day lines, CTA, "Mom froze. Mid-sentence." | Kid: "I'm in!" · Mom: "Tablet. Off. NOW." · Kid: "Slash… freeze…" · Mom: "Bedtime, sweetie." · Kid: "Slash… REWIND!" |
+| Hacked (SRT + pitch) | hook, "Just one line of code.", Day lines, CTA, "Mom froze, mid-sentence.", "Then the screen turned red.", "Your avatar turns into a noob. Your Robux, zero.", "Comment…" | Kid: "I'm in!" (429 Hz) · Mom: "Tablet. Off. NOW." (~207 Hz) · Kid: "Slash… freeze… Mom." (376 Hz) · Kid: "Hacker detected!" (408 Hz, shocked close-up) · Mom: "Unfrozen!" (437 Hz shout; the SRT misheard it as "I'm frozen") · Mom: "Bedtime, sweetie." (302 Hz) · Kid: "Slash, rewind!" (432 Hz, the loop line) |
 
 **The pattern:**
 - **The kid reacts in the first person** to his own wins ("It's real!", "100 Robux!").
 - **The parent gets the orders and the "sweetie" lines.**
 - **The narrator owns** the hook, the chapter words, the facts, both calls to action and the punishment list.
+- **Two speakers can share one breath**: "Tablet, off, now, slash, freeze, mom" is mom's order cut off by the kid's command, with a 0.2 s gap. Write it as two blocks; the video cuts between their close-ups in that gap.
 - **SFX words are not spoken.** "Blink… DING!", "BONK!", "POOF!", "SLAM!" are on-screen text over an SFX, filling a 0.5-1.5 s visual beat while the voice pauses or keeps going. Write them in the script only as a `[break]`; the video adds them.
 
 ---
@@ -180,7 +181,7 @@ When the user gives another topic, or a script from another niche, keep its **co
 | Dad Noob King | 93% | 0.4 | 0.28 s | 0.29 s | 2/2 | 1.03 s |
 | Mom plays | 92% | 1.0 | 0.29 s | 0.53 s | 3/5 | 0.36 s |
 | Blink Robux (SRT given) | 91% | 1.6 (gaps ≥0.2 s) | 0.24 s | 0.33 s | 0/9 | 0.53 s |
-| Hacked | 89% | 0.7 | 0.37 s | 0.71 s | 2/4 | 0.70 s |
+| Hacked (SRT given) | 89% | 1.5 (gaps ≥0.2 s) | 0.28 s | 0.71 s (the gap before "Day three", filled by the DAY card + SFX) | 3/8 | 0.70 s |
 | robux10 (user's voice) | 91% | 0.2 | 0.55 s | 0.55 s | (no SFX in a voice file) | 0 s |
 
 **The rules that follow:**
