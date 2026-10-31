@@ -2859,3 +2859,219 @@ def vs_banner(ctx, x, y, k, left="YOU", right="GRANDMA"):
     shape_fill(ctx, YELLOW, 6, -95, 95, outline=INK)
     bold_text(ctx, "VS", 0, 0, 70, RED, stroke=0.14, shadow=False)
     ctx.restore()
+
+
+# ================================================================ more props (added for sneeze.py)
+def pepper_jar(ctx, x, y, s, open_k=0.0):
+    """Black-pepper shaker jar (bottom centre x, y); open_k tips the lid off."""
+    block(ctx, x - 60 * s, y - 170 * s, 120 * s, 170 * s, 24 * s, hexc("#e9e4f5"), 5)
+    rrect(ctx, x - 50 * s, y - 120 * s, 100 * s, 100 * s, 14 * s)
+    ctx.set_source_rgb(*hexc("#2a2430"))
+    ctx.fill()
+    rrect(ctx, x - 50 * s, y - 95 * s, 100 * s, 40 * s, 6 * s)
+    shape_fill(ctx, (1, 1, 1), 3, y - 95 * s, y - 55 * s, outline=INK)
+    bold_text(ctx, "PEPPER", x, y - 75 * s, 22 * s, INK, outline=(1, 1, 1), shadow=False, stroke=0.02)
+    ctx.save()
+    ctx.translate(x + open_k * 90 * s, y - 170 * s - open_k * 80 * s)
+    ctx.rotate(open_k * 0.8)
+    block(ctx, -62 * s, -40 * s, 124 * s, 44 * s, 14 * s, hexc("#e8323a"), 5)
+    for k in range(3):
+        ctx.new_sub_path()
+        ctx.arc((k - 1) * 30 * s, -18 * s, 5 * s, 0, 2 * PI)
+        ctx.set_source_rgb(*INK)
+        ctx.fill()
+    ctx.restore()
+
+
+def particle_cloud(ctx, x, y, r, T, col="#3a3040", n=40, seed=1, k=1.0):
+    """Floating specks (pepper / dust) around (x, y); k 0..1 = how much has spread."""
+    if k <= 0:
+        return
+    rnd = random.Random(seed)
+    for i in range(n):
+        a = rnd.uniform(0, 2 * PI)
+        d = rnd.uniform(0.1, 1.0) * r * k
+        px = x + math.cos(a) * d + math.sin(T * 2 + i) * 8
+        py = y + math.sin(a) * d * 0.8 + math.cos(T * 1.7 + i) * 8
+        ctx.new_sub_path()
+        ctx.arc(px, py, rnd.uniform(3, 8), 0, 2 * PI)
+        ctx.set_source_rgba(*c_(col), 0.85)
+        ctx.fill()
+
+
+def dust_cloud(ctx, x, y, r, k, col="#b8aa98"):
+    """A big grey-brown dust puff that billows out (k 0..1)."""
+    if not 0 < k < 1.5:
+        return
+    kk = min(k, 1.0)
+    for i in range(11):
+        a = i * 2 * PI / 11
+        ctx.new_sub_path()
+        ctx.arc(x + math.cos(a) * r * (0.3 + 0.7 * kk), y + math.sin(a) * r * 0.7 * (0.3 + 0.7 * kk),
+                r * (0.35 + 0.25 * math.sin(i)), 0, 2 * PI)
+    a_ = 0.95 * (1 - clamp(k - 0.8) / 0.7)
+    ctx.set_source_rgba(*c_(col), a_)
+    ctx.fill_preserve()
+    ctx.set_source_rgba(*dark(c_(col), 0.3), a_)
+    ctx.set_line_width(4)
+    ctx.stroke()
+
+
+def sneeze_blast(ctx, x, y, k, direction=1, txt="ACHOO!", size=90):
+    """A sneeze: spray cone + droplets + big ACHOO! text from a nose at (x, y); k = time since (s)."""
+    if k < 0 or k > 0.9:
+        return
+    p = ease(min(1.0, k / 0.25))
+    fade = 1 - clamp((k - 0.5) / 0.4)
+    for i in range(7):
+        a = (i - 3) * 0.13
+        ln = 380 * p
+        ctx.move_to(x, y)
+        ctx.line_to(x + direction * math.cos(a) * ln, y + math.sin(a) * ln)
+        ctx.set_source_rgba(1, 1, 1, 0.75 * fade)
+        ctx.set_line_width(10 - abs(i - 3) * 2)
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.stroke()
+    rnd = random.Random(7)
+    for i in range(14):
+        a = rnd.uniform(-0.5, 0.5)
+        d = rnd.uniform(0.3, 1.1) * 420 * p
+        ctx.new_sub_path()
+        ctx.arc(x + direction * math.cos(a) * d, y + math.sin(a) * d, rnd.uniform(5, 11), 0, 2 * PI)
+        ctx.set_source_rgba(*hexc("#bfe6ff"), 0.9 * fade)
+        ctx.fill()
+    bold_text(ctx, txt, x + direction * 170, y - 120, size, YELLOW, scale=pop(k) * fade, tilt=-0.12 * direction)
+
+
+def cat(ctx, x, y, s, T, dusty=0.0, expr="happy", col="#9aa0a8"):
+    """Blocky cat sitting (bottom centre x, y); dusty 0..1 greys it and adds dust specks + flies of dust."""
+    c = mix(c_(col), hexc("#b8aa98"), dusty)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    ctx.move_to(70, -40)   # tail
+    ctx.curve_to(150, -60, 140, -170, 100 + math.sin(T * 4) * 20, -200)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(30)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.stroke_preserve()
+    ctx.set_source_rgb(*c)
+    ctx.set_line_width(18)
+    ctx.stroke()
+    block(ctx, -90, -150, 180, 150, 40, c, 6)
+    block(ctx, -110, -290, 220, 170, 50, c, 6)
+    for side in (-1, 1):   # ears
+        ctx.move_to(side * 95, -260)
+        ctx.line_to(side * 80, -340)
+        ctx.line_to(side * 30, -285)
+        ctx.close_path()
+        shape_fill(ctx, c, 6, -340, -260)
+    for side in (-1, 1):
+        ex = side * 45
+        if expr == "happy":
+            ctx.move_to(ex - 18, -205)
+            ctx.curve_to(ex - 8, -222, ex + 8, -222, ex + 18, -205)
+            ctx.set_source_rgb(*INK)
+            ctx.set_line_width(7)
+            ctx.stroke()
+        else:
+            ellipse(ctx, ex, -210, 12, 18)
+            ctx.set_source_rgb(*INK)
+            ctx.fill()
+        for k in range(2):   # whiskers
+            ctx.move_to(side * 70, -175 + k * 14)
+            ctx.line_to(side * 125, -182 + k * 22)
+        ctx.set_source_rgb(*INK)
+        ctx.set_line_width(4)
+        ctx.stroke()
+    ctx.move_to(-12, -185)
+    ctx.line_to(12, -185)
+    ctx.line_to(0, -172)
+    ctx.close_path()
+    ctx.set_source_rgb(*hexc("#ff8fa3"))
+    ctx.fill()
+    ctx.restore()
+    if dusty > 0:
+        particle_cloud(ctx, x, y - 180 * s, 170 * s, T, col="#8a7a68", n=int(30 * dusty), seed=3)
+
+
+def vacuum(ctx, x, y, s, T, on=1.0):
+    """Upright vacuum cleaner (the floor head at x, y)."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    jig = math.sin(T * 40) * 3 * on
+    block(ctx, -110, -40 + jig, 220, 50, 20, hexc("#e8323a"), 5)
+    block(ctx, -15, -330, 30, 300, 10, hexc("#c9cde0"), 4, gloss=False)
+    block(ctx, -70, -240 + jig, 140, 170, 40, hexc("#ff5f5f"), 5)
+    rrect(ctx, -60, -380, 120, 50, 20)
+    shape_fill(ctx, INK, 4, -380, -330, outline=INK)
+    ctx.restore()
+    if on:
+        speed_lines(ctx, T, x, y - 10, n=10, r0=60 * s, r1=260 * s, a=0.35, col=(0.85, 0.85, 0.9))
+
+
+def street(ctx, T, y_ground=1000):
+    """Sunny suburb: sky, block clouds, three blocky houses with roofs, a fence and grass."""
+    game_sky(ctx)
+    block_clouds(ctx, T, n=4)
+    for i, (x, w, h, wall, roof) in enumerate(((-80, 260, 260, "#ffd27a", "#e8574a"), (230, 280, 300, "#9fd0f0", "#2f6bd8"),
+                                                (560, 260, 250, "#c4f0b0", "#7a3fd8"))):
+        block(ctx, x, y_ground - h, w, h, 8, hexc(wall), 5)
+        ctx.move_to(x - 20, y_ground - h)
+        ctx.line_to(x + w / 2, y_ground - h - 130)
+        ctx.line_to(x + w + 20, y_ground - h)
+        ctx.close_path()
+        shape_fill(ctx, hexc(roof), 5, y_ground - h - 130, y_ground - h)
+        block(ctx, x + w * 0.38, y_ground - 120, w * 0.24, 120, 6, hexc("#8a5a3a"), 4, gloss=False)
+        for wx in (x + 25, x + w - 75):
+            block(ctx, wx, y_ground - h + 50, 50, 50, 6, hexc("#e9f6ff"), 4, gloss=False)
+    ctx.rectangle(-3000, y_ground, 7000, 3000)
+    ctx.set_source_rgb(*hexc("#51c844"))
+    ctx.fill()
+    for i in range(-3, 14):   # white picket fence
+        block(ctx, i * 60, y_ground - 70, 30, 90, 6, (1, 1, 1), 3, gloss=False)
+    block(ctx, -200, y_ground - 50, 1200, 16, 4, (1, 1, 1), 3, gloss=False)
+
+
+def attic(ctx, T, y_floor=1080, light=1.0):
+    """Dusty attic: slanted wooden roof beams, boxes, an old trunk, cobwebs, a beam of light."""
+    ctx.rectangle(-3000, -5000, 7000, 10000)
+    ctx.set_source_rgb(*hexc("#3a2a24"))
+    ctx.fill()
+    for side in (-1, 1):   # slanted roof
+        ctx.move_to(360, -300)
+        ctx.line_to(360 + side * 1200, 900)
+        ctx.line_to(360 + side * 1200, -800)
+        ctx.close_path()
+        ctx.set_source_rgb(*hexc("#5a3a2a"))
+        ctx.fill()
+        for k in range(6):
+            ctx.move_to(360 + side * (60 + k * 150), -300 + k * 150)
+            ctx.line_to(360 + side * (60 + k * 150) + side * 40, -300 + k * 150 + 40)
+        ctx.set_source_rgb(*hexc("#7a5238"))
+        ctx.set_line_width(26)
+        ctx.stroke()
+    ctx.rectangle(-3000, y_floor, 7000, 3000)
+    ctx.set_source_rgb(*hexc("#6b4a34"))
+    ctx.fill()
+    if light > 0:
+        ctx.move_to(300, -200)
+        ctx.line_to(420, -200)
+        ctx.line_to(620, y_floor)
+        ctx.line_to(100, y_floor)
+        ctx.close_path()
+        ctx.set_source_rgba(1, 0.9, 0.6, 0.18 * light)
+        ctx.fill()
+    for bx, by, w, h in ((20, y_floor, 200, 150), (60, y_floor - 150, 140, 110), (500, y_floor, 220, 170)):
+        block(ctx, bx, by - h, w, h, 6, hexc("#c99a5e"), 5)
+        ctx.move_to(bx + w / 2, by - h)
+        ctx.line_to(bx + w / 2, by)
+        ctx.set_source_rgb(*hexc("#a87a44"))
+        ctx.set_line_width(5)
+        ctx.stroke()
+    block(ctx, 230, y_floor - 140, 250, 140, 20, hexc("#7a3f2a"), 5)   # old trunk
+    block(ctx, 230, y_floor - 160, 250, 50, 20, hexc("#8a4a32"), 5)
+    cobweb(ctx, -10, 360, 220, 1.0, corner=(1, 1))
+    cobweb(ctx, 730, 360, 220, 1.0, corner=(-1, 1))
+    particle_cloud(ctx, 360, 500, 300, T, col="#d8c8a8", n=30, seed=9)

@@ -184,7 +184,10 @@ def skip_onscreen(caps, at):
         for T in (t0 + 0.04, (t0 + t1) / 2, max(t0 + 0.04, t1 - 0.04)):
             vis |= at(T)
         keep = [w for w in text.split() if norm(w) not in vis]
-        if len(keep) < len(text.split()) and (not keep or all(norm(w) in FILLER for w in keep)):
+        # a cut-down caption is dropped when what is left is only filler or a lone short lowercase word
+        # ("got PAID?!" with PAID?! on screen would leave just "got")
+        leftover_weak = all(norm(w) in FILLER or (not w.isupper() and len(norm(w)) <= 4) for w in keep)
+        if len(keep) < len(text.split()) and (not keep or leftover_weak):
             print(f"  {t0:6.2f}s  '{text}' skipped (on screen)")
             dropped += 1
             continue

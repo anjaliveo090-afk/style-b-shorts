@@ -34,7 +34,9 @@ def main(video, voice, inst, srt, prefix, min_gap=0.25):
     rm = db(librosa.feature.rms(y=m, frame_length=400, hop_length=HOP)[0])
     n = min(len(rv), len(rm))
     rv, rm = rv[:n], rm[:n]
-    speech_floor = np.percentile(rv[rv > -80], 90) - 30
+    # 22 dB under the loud speech: voice-tool files keep breaths and room tone (-32..-40 dB) between
+    # words, which a deeper threshold counts as speech (it read 99% "speech" on the user's voices)
+    speech_floor = np.percentile(rv[rv > -80], 90) - 22
     on = rv > speech_floor
     # close tiny dropouts inside words (< 80 ms)
     k = 8

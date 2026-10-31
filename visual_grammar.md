@@ -63,6 +63,7 @@ The energy comes from the cuts, the pops and the faces, not from camera travel.
 
 ## 4. Performance
 - Expressions snap on the key word, often 2-3 changes in one sentence.
+- **Face close-ups use a calm idle sway (`bob≈0.35`).** At close-up scale the full sway moves the whole frame, and on sneeze.py it pushed the measured camera mean to 14.4.
 - Bodies: blocky limbs swing in big, readable poses (arms up, arm thrust forward, crossed arms, a leaning point). There is a constant small bounce/idle sway; nothing is ever fully still.
 - Squash on landing; jump arcs; impacts get a 2-frame white flash and a shake.
 - **No lip-sync** in the references: mouths change shape by expression, not phoneme by phoneme. Our default is `engine.LIPSYNC = False`.

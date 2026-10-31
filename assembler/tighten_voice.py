@@ -46,7 +46,7 @@ def main():
     n = len(x) // hop
     rms = np.sqrt((x[:n * hop].reshape(n, hop) ** 2).mean(1))
     db = 20 * np.log10(rms + 1e-7)
-    on = db > np.percentile(db[db > -90], 90) - 30
+    on = db > np.percentile(db[db > -90], 90) - 22   # same threshold as analysis/silences.py
     on = np.convolve(on.astype(float), np.ones(8) / 8, mode="same") > 0.01
     cuts = []   # (t_start, seconds removed)
     i = 0
