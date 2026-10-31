@@ -6,6 +6,18 @@ Everything is drawn in code: pycairo frames → ffmpeg. There is no AI video mod
 
 When the user gives a voiceover + SRT (or a script), follow this workflow without being asked.
 
+**Always read `lessons.md` first** (before any title, script or video). It holds the rules learned from the user's YouTube analytics. They override the other guides, so the same boring part never comes back.
+
+## YouTube analytics (retention / swipe-away points)
+When the user sends a video's name with its retention, the times where viewers swiped and the lines there (with or without the reason), follow "How to handle an analytics message" in `lessons.md`:
+1. Find the story in `videos.md`.
+2. Run `python3 analysis/drop_point.py <story> <time>` for every drop and look at the frames.
+3. Name the reason. Use the checklist if the user did not give one, and say how sure you are.
+4. Add a lesson plus a **rule** to `lessons.md`, and update the guide or tool that caused it.
+5. Commit, push, and explain in Hinglish.
+
+Every delivered video gets a row in `videos.md`.
+
 ## Titles and scripts (before any voice exists)
 Read `script_guide.md` first. It was learned from 6 reference videos: who speaks when, the emotions, the beat sheet and the silent parts.
 - **"Title do" / "titles":**
@@ -24,6 +36,8 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
 ## Read first
 | File | What it holds |
 |---|---|
+| `lessons.md` | **Read first.** Rules learned from the user's YouTube retention data (they override the other guides), the drop-diagnosis checklist and the log |
+| `videos.md` | Every delivered video: story name, title, YouTube title, whether analytics came back |
 | `style_bible.md` | Look: format and safe zone, characters in head-widths, faces and the 19 expressions, palette, sets, STYLE LOCK |
 | `visual_grammar.md` | Measured pace and camera; **section 2 = phrase type → what is shown → camera → reaction** (rows 1-20) |
 | `sound_design.md` | Measured music and SFX, the mix defaults and the target numbers |
@@ -85,7 +99,7 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
      - SFX median -1 to -7 dB;
      - the music key reads G.
    - `python3 analysis/frame_log.py $O/<story>_final.mp4 <subs.srt> $O/fl 4`: look at every sheet.
-7. **Burn the captions** (see Defaults), then **send only `<story>_final_captions.mp4`** to the user (SendUserFile), one file. Commit and push the story code; `output/` is git-ignored. Say honestly what could not match.
+7. **Burn the captions** (see Defaults), then **send only `<story>_final_captions.mp4`** to the user (SendUserFile), one file. Add the video to `videos.md`. Commit and push the story code; `output/` is git-ignored. Say honestly what could not match.
 8. **Fix requests:** patch only the shots or cues asked about. Edit those shot functions, keys or `SFX` entries, then re-render; a full render takes about 40 s per 20 s of video. `python3 <story>.py out.mp4 cues.json <first_frame> <last_frame>` renders only a frame range if needed. Never regenerate or redesign the rest.
 
 ## Defaults

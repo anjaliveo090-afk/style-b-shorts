@@ -11,6 +11,7 @@ hard cuts, punch-ins on key words, loud punchy SFX, cheeky G-centred game music)
 
 SETUP
 - Run `bash setup.sh` (installs packages, ffmpeg, fonts and the analysis model).
+- Read lessons.md FIRST: its rules come from my YouTube retention data and override everything else.
 - Read these first and follow them strictly:
   CLAUDE.md, style_bible.md, visual_grammar.md (all sections, especially 2 and 3),
   sound_design.md (section 3 = mix defaults and targets), assembler/README.md.
@@ -109,3 +110,9 @@ Send one of these in a new chat on this repo:
 - `Read script_guide.md and bend this topic/script into our style: <text>`
 
 The script comes back in the voice-tool format (`Narrator: [curious] … [break] …`, `Mom: [angry] …`), with characters and emotions.
+
+## Sending YouTube analytics (after uploading)
+Send in a chat on this repo:
+`Analytics for "<YouTube title>": retention <x>%, drops at <time> ("<line>") [reason if you know it]`
+
+Claude finds the video in videos.md and checks each drop point with analysis/drop_point.py. It names the reason, writes a rule in lessons.md, and changes the guides or tools so the next videos avoid that mistake.

@@ -17,6 +17,7 @@ I am attaching a voiceover and its SRT. Run bash setup.sh, then read MASTER_PROM
 | Path | What |
 |---|---|
 | `CLAUDE.md` | The workflow Claude follows for every voice + SRT |
+| `lessons.md`, `videos.md`, `analysis/drop_point.py` | Learning from YouTube analytics: rules from swipe-away points, the list of delivered videos, and the tool that shows what was on screen at a drop |
 | `MASTER_PROMPT.md` | The full prompt (voice + SRT → video), defaults and measured targets |
 | `style_bible.md` | The look: proportions in head-widths, faces and expressions, palette, sets |
 | `visual_grammar.md` | Measured pace and camera, and the phrase type → shot → reaction table |
