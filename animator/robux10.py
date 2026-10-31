@@ -19,7 +19,8 @@ from sets import label
 from style import Block
 
 TOTAL = 43.95
-engine.LIPSYNC = False
+engine.LIPSYNC = True              # only characters drawn with talk=True move their mouths
+DIALOGUE = {"mom": [(27.27, 28.57), (30.65, 31.75)], "kid": [(28.57, 30.15)]}   # who speaks when (SRT)
 engine.DRIFT = (0.035, 9, -6)       # livelier hold (no_break measured a low camera median with 0.02)
 engine.ENERGY = 3.0
 SFX_GAIN = 0.26                     # this voice is quieter (-19.5 dB): measured SFX median +0.8 dB at 0.4
@@ -37,8 +38,12 @@ FACE_S = 4.2
 FACE_KEEP = [(165, 300, 555, 760)]
 
 
-def closeup(ctx, ch, expr, T, x=360, look=0.0, arms=("down", "down"), s=FACE_S):
-    ch.draw(ctx, x, 560 + 2.5 * U1 * s, s, expr, T, arms=arms, look=look)
+def closeup(ctx, ch, expr, T, x=360, look=0.0, arms=("down", "down"), s=FACE_S, talk=False):
+    ch.draw(ctx, x, 560 + 2.5 * U1 * s, s, expr, T, arms=arms, look=look, talk=talk)
+
+
+def talking(who, T):
+    return any(a <= T <= b for a, b in DIALOGUE[who])
 
 
 def game_bg(ctx, T):
@@ -255,7 +260,7 @@ def s_momin(ctx, t, d):
 def s_card(ctx, t, d):
     T = 27.2 + t
     st.night_wall(ctx, 2000)
-    closeup(ctx, MOM, keyed(T, [(0, "cold"), (28.03, "angry")]), T, arms=("down", "show"))
+    closeup(ctx, MOM, keyed(T, [(0, "cold"), (28.03, "angry")]), T, arms=("down", "show"), talk=talking("mom", T))
     st.credit_card(ctx, 560, 420, 0.9 * pop(T - 27.29), rot=-0.15)
     label(ctx, "WHOSE CARD?", 330, 300, 60, fg=(1, 1, 1), scale=pop(T - 28.03))
 
@@ -263,7 +268,7 @@ def s_card(ctx, t, d):
 def s_mine(ctx, t, d):
     T = 28.55 + t
     st.burst(ctx, T, "#a8e6ff", "#4fb0e8", cy=560)
-    closeup(ctx, KID_SH, keyed(T, [(0, "smirk"), (29.21, "smug")]), T, arms=("down", "show"))
+    closeup(ctx, KID_SH, keyed(T, [(0, "smirk"), (29.21, "smug")]), T, arms=("down", "show"), talk=talking("kid", T))
     label(ctx, "OBVIOUSLY", 360, 300, 66, fg=st.YELLOW, scale=pop(T - 29.21))
 
 
@@ -272,7 +277,8 @@ def s_yoink(ctx, t, d):
     st.night_bedroom(ctx, T)
     grab = T > 30.82
     KID.draw(ctx, 220, 1060, 1.2, "shock" if grab else "smug", T, arms=("hold", "hold") if not grab else ("up", "up"))
-    MOM.draw(ctx, 520, 1060, 1.2, "angry", T, arms=("down", "point") if not grab else ("show", "down"))
+    MOM.draw(ctx, 520, 1060, 1.2, "angry", T, arms=("down", "point") if not grab else ("show", "down"),
+             talk=talking("mom", T))
     tx = lerp(240, 500, ease((T - 30.82) / 0.15)) if grab else 240
     ty = lerp(870, 660, ease((T - 30.82) / 0.15)) if grab else 870
     st.tablet(ctx, tx, ty, 0.45, T, None)
@@ -474,6 +480,7 @@ if __name__ == "__main__":
     kw = {}
     if len(sys.argv) > 4:
         kw["frames"] = (int(sys.argv[3]), int(sys.argv[4]))
+    engine.set_voice(os.path.join(os.path.dirname(os.path.abspath(sys.argv[2])), "voice.mp3"))
     safezone.fit(SHOTS, sys.modules[__name__])
     SHOTS[-1]["keys"] = [(SHOTS[-1]["start"], SHOTS[0]["keys"][0][1], SHOTS[0]["keys"][0][2])]
     render(SHOTS, TOTAL, sys.argv[1], xfade=0.0, grain=2, fade_out=0.0, fade_in=0.0, **kw)

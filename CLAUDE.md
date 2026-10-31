@@ -76,7 +76,10 @@ When the user gives a voiceover + SRT (or a script), follow this workflow withou
      - The tool replays the story, records every label, chapter card, bubble, HUD and UI text visible during each caption, and removes those words. A caption left with only filler words is dropped.
      - It prints every caption it removed or shortened; check the list.
   3. Keep the scene labels out of the caption band (y 760-890): move any label there to the top.
-- **No lip-sync** (`engine.LIPSYNC = False`). The references change mouths by expression, not by phoneme.
+- **Lip-sync only on character dialogue** (the user's rule): narrator lines get no mouth movement, but when a character speaks (quotes in the script, e.g. "Whose card did you use?"), that character's mouth follows the voice.
+  - Set `engine.LIPSYNC = True` and a `DIALOGUE = {"mom": [(t0, t1)], ...}` dict from the SRT.
+  - Draw the speaker with `talk=talking("mom", T)` and call `engine.set_voice(voice)` in `__main__` (see `animator/robux10.py`).
+  - Mouths snap between closed, half open and wide open.
 - **No camera whoosh.** Only `whip.wav` on the loop rewind, and `swish` on a physical throw or a panel sliding in.
 - **Hard cuts** (`render(xfade=0)`), grain 2, `vignette` 0.15 (flat vector look).
 - `engine.DRIFT = (0.02, 5, -3)` and `engine.ENERGY = 3.0` (set at the top of the story).

@@ -859,10 +859,10 @@ def _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, ch):
 
     # ---- mouth
     mouth = expr
-    if talk and engine.LIPSYNC:
+    if talk and engine.LIPSYNC:   # mouth follows the voice loudness: closed / half open / wide open
         lvl = engine.voice_level()
         if lvl > 0.15 and expr not in ("laugh", "shock", "scream"):
-            mouth = "open"
+            mouth = "talk_l" if lvl > 0.8 else "talk_s"
 
     def dmouth(w, d, teeth=False, tongue=True, bottom_teeth=False, x=cx):
         ctx.move_to(x - w, my - 0.02 * u)
@@ -915,6 +915,10 @@ def _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, ch):
         ctx.fill()
     elif mouth in ("open", "talk"):
         dmouth(0.1 * u, 0.1 * u)
+    elif mouth == "talk_s":
+        dmouth(0.1 * u, 0.075 * u, teeth=expr in ("angry", "smug", "smirk"))
+    elif mouth == "talk_l":
+        dmouth(0.14 * u, 0.15 * u, teeth=True)
     elif mouth == "disgust":   # wavy mouth with the tongue poking out
         ctx.move_to(cx - 0.05 * u, my + 0.01 * u)
         ctx.curve_to(cx - 0.05 * u, my + 0.12 * u, cx + 0.07 * u, my + 0.12 * u, cx + 0.07 * u, my + 0.01 * u)
