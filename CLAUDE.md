@@ -15,6 +15,10 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
   - Write a script in the user's format (`Narrator: [emotion] … [break] …`, then `Mom: [angry] …` blocks).
   - Follow the 14-beat sheet (section 2): 120-145 words, emotion tags from section 4, and pause tags kept short (section 3).
   - After the script, give a 1-line speaker list and the estimated length.
+- **"Voice banao" (test voice):**
+  - Run `python3 assembler/make_voice.py <script.txt> output/<story> --model <kokoro.onnx> --voices <voices.bin>`. The model files come from github.com/thewh1teagle/kokoro-onnx releases `model-files-v1.0`; install with `pip install kokoro-onnx`.
+  - It writes `voice.mp3`, `subs.srt` and `speakers.json` (who speaks when, used for lip-sync), with one voice per character and the pauses kept short.
+  - Kokoro cannot act emotions: the tags only change speed, volume and pitch. Say so; the user's own voice tool is better for final videos.
 - **Another topic or script:** bend it into the reference topic world with section 5 (Roblox + family antagonist + Day ladder + zero-crash + twist + loop). Keep the user's core idea.
 
 ## Read first
