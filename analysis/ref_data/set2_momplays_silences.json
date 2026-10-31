@@ -3,17 +3,27 @@
   "video": "momplays.mp4",
   "duration": 50.74,
   "speech_share": 0.918,
-  "gaps_total": 5,
-  "gaps_per_10s": 1.0,
-  "gap_median": 0.29,
-  "gap_p90": 0.45,
+  "gaps_total": 8,
+  "gaps_per_10s": 1.6,
+  "gap_median": 0.26,
+  "gap_p90": 0.4,
   "gap_max": 0.53,
   "gaps_over_0_6s": 0,
-  "gaps_with_sfx": 3,
+  "gaps_with_sfx": 4,
   "lead_in": 0.0,
   "tail": 0.36
  },
  "gaps": [
+  {
+   "t0": 2.57,
+   "t1": 2.78,
+   "dur": 0.21,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 6.3,
+   "before": "What if your mom started playing Roblox?",
+   "after": "What's so special about this blocky game"
+  },
   {
    "t0": 6.86,
    "t1": 7.12,
@@ -33,6 +43,26 @@
    "peak_vs_music_db": 13.3,
    "before": "a wall for 10 minutes.",
    "after": "Which button is jump?"
+  },
+  {
+   "t0": 24.97,
+   "t1": 25.21,
+   "dur": 0.24,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 4.3,
+   "before": "Day 4.",
+   "after": "She's number one on every leaderboard."
+  },
+  {
+   "t0": 32.25,
+   "t1": 32.46,
+   "dur": 0.21,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 11.9,
+   "before": "It's 3 a.m. Mom.",
+   "after": "10 seconds."
   },
   {
    "t0": 35.7,

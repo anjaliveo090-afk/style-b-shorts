@@ -181,6 +181,7 @@ When the user gives another topic, or a script from another niche, keep its **co
 | Dad Noob King | 93% | 0.4 | 0.28 s | 0.29 s | 2/2 | 1.03 s |
 | Mom plays | 92% | 1.0 | 0.29 s | 0.53 s | 3/5 | 0.36 s |
 | Blink Robux (SRT given) | 91% | 1.6 (gaps ≥0.2 s) | 0.24 s | 0.33 s | 0/9 | 0.53 s |
+| 10 Seconds (SRT given) | 89% | 1.6 | 0.29 s | 0.54 s | 4/8 | 0.54 s |
 | Hacked (SRT given) | 89% | 1.5 (gaps ≥0.2 s) | 0.28 s | 0.71 s (the gap before "Day three", filled by the DAY card + SFX) | 3/8 | 0.70 s |
 | robux10 (user's voice) | 91% | 0.2 | 0.55 s | 0.55 s | (no SFX in a voice file) | 0 s |
 
@@ -200,6 +201,74 @@ When the user gives another topic, or a script from another niche, keep its **co
 | Before the big reveal (`[pause]`) | 0.4-0.6 s | **Push-in / suspense**: the camera creeps toward the object, shake lines, light builds; the reveal pops on the word | Riser or tick, then a boom |
 | Before the twist (`[long pause]`) | 0.6-0.7 s | **The scene darkens or freezes** (a pause icon, a red screen, a spotlight); slow push on a face | Music dips; one low hit |
 | After the last word | 0.4-1.0 s | **REWIND montage**: "◀◀ REWIND" label and scanlines, the previous shots flash **backwards** (~0.15-0.25 s each), landing exactly on the first frame | Whoosh / rewind sweep |
+
+### Every silent part in all 5 references (41 gaps ≥ 0.2 s, read frame by frame)
+Each gap was looked at in 3 frames (start, middle, end); the SFX column comes from the music+SFX stem. The per-gap frames are made by `analysis/silences.py` (data in `analysis/ref_data/*_silences.json`).
+
+| Video | Time | Length | Line before → line after | What the picture does in the gap | SFX |
+|---|---|---|---|---|---|
+| 10 Seconds | 6.03 | 0.21 | "…go to bed." → "10 seconds?" | Mom's "BED." caption holds, then a **hard cut to the kid's shocked close-up** before he speaks | – |
+| 10 Seconds | 13.69 | 0.37 | "…in one jump." → "Second 9…" | **Celebration hold**: the kid at STAGE 100 with confetti; the "JUMP." caption stays | – |
+| 10 Seconds | 17.28 | 0.22 | "One punch, KO!" → "Second 8…" | **K.O. sticker holds**, the boss flies off-screen, POW fades | – |
+| 10 Seconds | 24.46 | 0.30 | "…into a toaster." → "Second 6…" | Toaster gag holds with "DING!", then a **cut to the crowd** for the next line | – |
+| 10 Seconds | 30.99 | 0.28 | "…whole game." → "4…" | LEGENDARY pet holds, then a **cut to mom's red-lit face with "FOUR…"** already on screen | hit |
+| 10 Seconds | 32.29 | 0.28 | "4…" → "3…" | Countdown: **cut to the kid scared, the timer pill turns red "0:03"**, shake lines | hit |
+| 10 Seconds | 43.49 | 0.41 | "…speedrunner." → "Plus 10 seconds." | The **+10 SECONDS shop card slides in, a finger taps BUY**, "KA-CHING!" | ka-ching |
+| 10 Seconds | 49.41 | 0.54 | last word → end | **◀◀ REWIND**: shots flash backwards and land on the first frame | rewind |
+| Mom plays | 2.57 | 0.21 | hook → "What's so special…" | Mom's crazy close-up holds, then a **cut to mom grabbing the tablet** | – |
+| Mom plays | 6.86 | 0.26 | "Give me that." → "Day 1." | The tablet close-up **zooms into the screen**, landing in the game world | – |
+| Mom plays | 12.63 | 0.53 | "…for 10 minutes." → "Which button is jump?" | The noob **bonks into the wall again** (impact star, dizzy stars), then a cut to mom's angry face | thud |
+| Mom plays | 24.97 | 0.24 | "Day 4." → "She's number one…" | The K.O. card holds, then a **cut to the leaderboard** | – |
+| Mom plays | 32.25 | 0.21 | "It's 3 a.m. Mom." → "10 seconds." | Mom gaming at night: **shake lines and sweat**, the "3 A.M." caption holds | pop |
+| Mom plays | 35.70 | 0.29 | "Then you go to bed." → "Just one more round." | The kid walks into frame with the clock: a **two-shot reaction** | – |
+| Mom plays | 38.00 | 0.25 | "Just one more round." → "Did you spend my Robux?" | **The Robux counter drops 3,807 → −12,500 → 0** | tick/hit |
+| Mom plays | 44.50 | 0.34 | "…grandma logged in." → "Come on, Gigi." | BONK on the kid, "sweetie!", then a **cut to a dark silhouette** (grandma reveal) | bonk |
+| Mom plays | 50.38 | 0.36 | last word → end | **REWIND** blur back to the first frame | whoosh |
+| Dad Noob King | 29.66 | 0.29 | "…joins the noob army." → "Day 5." | The NOOB ARMY card holds, then a **cut to the throne room**, where the DAY card starts drawing | swoosh |
+| Dad Noob King | 40.64 | 0.20 | "…on this skin!" → "One bonk…" | **Cut to the wide shot**: the king raises his scepter over the kid | – |
+| Dad Noob King | 45.43 | 0.20 | "…a noob now." → "My Robux!" | **Cut to the kid at home, shocked**, sweat appearing | – |
+| Dad Noob King | 49.97 | 0.26 | "…how to jump?" → "Comment noob…" | "*CRICKET NOISES*" banner and a sweat drop on dad's face (**an awkward-silence gag**), then a cut to the comments | crickets |
+| Dad Noob King | 54.94 | 1.03 | last word → end | **REWIND montage** of 3-4 earlier shots, ending on the first frame | rewind |
+| Blink | 10.10 | 0.22 | "100 Robux!" → "Day 2." | The coin pile holds, then a **cut to the kitchen** (DAY card next) | – |
+| Blink | 22.14 | 0.21 | "…in the game!" → "Day 4." | **Cut to the classroom** | – |
+| Blink | 28.95 | 0.24 | "…one free blink." → "Day 5." | Cut to mom and kid at the table with **mom's angry crossed arms** | – |
+| Blink | 37.00 | 0.33 | "…no more Robux." → "Mom has never lost…" | ROBLOX vs face split, then a **whip-pan to the trophy shelf** | – |
+| Blink | 39.53 | 0.27 | "…staring contest." → "One hour…" | The staring two-shot holds (eyes sparkling), then a **blur transition to the clock** | – |
+| Blink | 40.77 | 0.24 | "One hour…" → "three hours" | **Time-lapse**: the clock hand spins, blurred | – |
+| Blink | 41.96 | 0.21 | "THREE hours…" → "Must." | The two-shot at night: **lighting changed to dark blue** (time passed) | – |
+| Blink | 50.20 | 0.33 | "…sweetie!" → "But then the game updated." | The tablet put away ("sweetie."), then a **cut to the kid's sad face** | – |
+| Blink | 54.17 | 0.24 | "…costs one Robux." → "Comment blink…" | The kid rubs his red eyes; **the counter keeps ticking down** | tick |
+| Blink | 56.15 | 0.53 | last word → end | **REWIND** blur back to the first frame | rewind |
+| Hacked | 5.43 | 0.20 | "I'm in!" → "Day one…" | **Cut to the game spawn pad** with the avatar | – |
+| Hacked | 14.08 | 0.71 | "…bigger than the map." → "Day three…" | The giant's "HEHE!" **laughing close-up**, then a cut to the spawn where the DAY 3 card draws | laugh pop |
+| Hacked | 26.40 | 0.42 | "…gets admin." → "Day five…" | The ADMIN wink holds, then a **cut to the night bedroom**, the DAY 5 card drawing | swoosh |
+| Hacked | 32.01 | 0.23 | mom "…NOW." → kid "Slash…" | **Cut from mom's close-up to the kid's smug close-up** (the turn change) | pop |
+| Hacked | 35.12 | 0.32 | "…freeze, mom." → "Mom froze…" | The kid's grin, then a **cut to mom in an ice block** | ice crack |
+| Hacked | 37.57 | 0.32 | "Mid-sentence." → "Then the screen turned red." | **Frozen frame with a ⏸ pause icon** on mom's face, then back to the room | – |
+| Hacked | 41.26 | 0.20 | "…into a noob." → "Your Robux…" | "DETECTED?!" close-up, then a **cut to the avatar at spawn** | – |
+| Hacked | 49.04 | 0.23 | "Bedtime, sweetie." → "Comment hack…" | Mom leaves with hearts; the **kid peeks from under the blanket** | – |
+| Hacked | 54.31 | 0.70 | last word → end | **◀◀ REWIND** ("Roblox?" hook shot flashes), landing on the first frame | rewind |
+
+### What the 41 gaps show (patterns)
+1. **The voice never really stops.** 39 of 41 gaps are 0.20-0.54 s. Only two run longer: Hacked "Day three" (0.71 s) and the Dad ending (1.03 s). There is no gap before the first word (voice from 0.35-0.4 s) and no music-only intro.
+2. **Where the gaps fall:**
+
+   | Position | Gaps | Share |
+   |---|---|---|
+   | Before a chapter word ("Day N" / "Second N") | 11 | 27% |
+   | Between two speakers | 9 | 22% |
+   | After a punchline or result | 9 | 22% |
+   | Countdown / time-lapse steps | 5 | 12% |
+   | The ending | 5 | 12% |
+   | A turn ("But then…") | 2 | 5% |
+3. **Something always changes in the gap.**
+   - In 30 of 36 middle gaps there is a **hard cut inside the gap**: the next shot appears before its words.
+   - The other 6 are **reaction holds**: an expression snap, the counter rolling, the "*CRICKET NOISES*" gag.
+4. **The caption of the last words stays on screen** through the gap. It is never empty.
+5. **SFX:** about 40% of the gaps carry one (a hit on the countdown, ka-ching, bonk, crickets, rewind). The rest are covered by the music. There is no total silence anywhere.
+6. **The ending is always a REWIND**, 0.36-1.03 s after the last word: 3-5 earlier shots flash backwards, with "◀◀ REWIND" and scanlines, landing on the first frame.
+7. **Time passing** (one hour → three hours, 3 a.m.) uses the gaps for a **clock time-lapse plus a lighting change** (day → night blue).
+8. **An intentional awkward silence** is shown as a gag: the "*CRICKET NOISES*" banner, a sweat drop and a cricket SFX. Use it after a character's dumb question.
 
 ### Rules for our videos (when the user uploads a voice)
 
