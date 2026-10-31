@@ -32,6 +32,7 @@ I am attaching a voiceover and its SRT. Run bash setup.sh, then read MASTER_PROM
 | `assembler/` | Joins animation + voice + music + SFX into the final mp4; `captions.py` burns reference-style captions onto it |
 | `animator/no_break.py` | Full 60 s story on a real voiceover ("How long could you survive playing Roblox without a break?"), with a playtime HUD; captions in `animator/captions/no_break.json` |
 | `animator/robux10.py` | 44 s "Second 10 → 5" countdown story (timer pill, SECOND cards, mystery box, refund twist); captions in `animator/captions/robux10.json` |
+| `animator/grandma_pro.py` | 47 s story written with `script_guide.md` (Day ladder, lip-sync on Grandma/Kid, REWIND ending); captions in `animator/captions/grandma_pro.json` |
 | `assembler/make_voice.py` | Test voiceover + SRT from a script in the `Narrator: [emotion] …` format (Kokoro TTS, one voice per character) |
 | `analysis/silences.py`, `assembler/tighten_voice.py` | Measure the pauses in a voice; shorten pauses that are too long |
 | `analysis/` | Reference analysis tools (frame logs, SFX/music measure, pace, camera flow, word alignment) and `ref_data/` |

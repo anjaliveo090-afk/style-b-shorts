@@ -2762,3 +2762,100 @@ def rewind_shot(shots, picks):
             ctx.fill()
             rewind_bars(ctx, 0.3 + 0.4 * ((t * 7) % 1))   # flickering scanlines + the '<< REWIND' label
     return draw, overlay
+
+
+# ================================================================ more props (added for grandma_pro.py)
+def walking_stick(ctx, x, y, s, ang=0.0, col="#8a5a3a"):
+    """Wooden walking cane; (x, y) = the handle top, ang rotates it about the handle."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(ang)
+    ctx.scale(s, s)
+    ctx.new_sub_path()
+    ctx.arc(-30, 0, 30, PI, 2 * PI)
+    ctx.line_to(0, 300)
+    for lw, c in ((26, INK), (16, c_(col))):
+        ctx.set_source_rgb(*c)
+        ctx.set_line_width(lw)
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.stroke_preserve()
+    ctx.new_path()
+    block(ctx, -12, 290, 24, 24, 8, hexc("#3b3550"), 3, gloss=False)
+    ctx.restore()
+
+
+def yarn_ball(ctx, x, y, r, col="#e8323a", needles=True, T=0.0):
+    ctx.new_sub_path()
+    ctx.arc(x, y, r, 0, 2 * PI)
+    shape_fill(ctx, c_(col), max(2, r * 0.08), y - r, y + r)
+    ctx.save()
+    ctx.new_sub_path()
+    ctx.arc(x, y, r * 0.95, 0, 2 * PI)
+    ctx.clip()
+    for k in range(5):
+        ctx.new_sub_path()
+        ctx.arc(x - r * 0.6 + k * r * 0.3, y, r * 0.9, -1.2, 1.2)
+    ctx.set_source_rgba(*dark(c_(col), 0.3), 1)
+    ctx.set_line_width(max(2, r * 0.06))
+    ctx.stroke()
+    ctx.restore()
+    if needles:
+        for a in (-0.5 + 0.08 * math.sin(T * 12), 0.4 - 0.08 * math.sin(T * 12)):
+            ctx.move_to(x, y)
+            ctx.line_to(x + math.sin(a) * r * 2.2, y - math.cos(a) * r * 2.2)
+            ctx.set_source_rgb(*hexc("#c9cde0"))
+            ctx.set_line_width(max(3, r * 0.1))
+            ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+            ctx.stroke()
+
+
+def cookie(ctx, x, y, r, rot=0.0):
+    """Chocolate-chip cookie."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(rot)
+    ctx.new_sub_path()
+    ctx.arc(0, 0, r, 0, 2 * PI)
+    shape_fill(ctx, hexc("#e0a85a"), max(2, r * 0.08), -r, r, outline=hexc("#8a5a2a"))
+    for dx, dy in ((-0.4, -0.3), (0.35, -0.4), (0.1, 0.15), (-0.3, 0.45), (0.5, 0.3)):
+        ctx.new_sub_path()
+        ctx.arc(dx * r, dy * r, r * 0.13, 0, 2 * PI)
+        ctx.set_source_rgb(*hexc("#5a3020"))
+        ctx.fill()
+    ctx.restore()
+
+
+def veggie_plate(ctx, x, y, s):
+    """A plate piled with broccoli (bottom centre x, y)."""
+    ellipse(ctx, x, y, 170 * s, 40 * s)
+    shape_fill(ctx, (1, 1, 1), 5, y - 40 * s, y + 40 * s, outline=INK)
+    for dx in (-80, 0, 80):
+        bx = x + dx * s
+        block(ctx, bx - 14 * s, y - 70 * s, 28 * s, 60 * s, 8 * s, hexc("#9bd36a"), 4, gloss=False)
+        for ox, oy in ((-30, -90), (0, -110), (30, -90), (-15, -125), (18, -125)):
+            ctx.new_sub_path()
+            ctx.arc(bx + ox * s, y + oy * s, 26 * s, 0, 2 * PI)
+        shape_fill(ctx, hexc("#3fa84a"), 4, y - 150 * s, y - 60 * s, outline=hexc("#1f5a28"))
+
+
+def vs_banner(ctx, x, y, k, left="YOU", right="GRANDMA"):
+    """'YOU VS GRANDMA' fight banner that slams in (k = time since)."""
+    if k < 0:
+        return
+    sc = pop(k)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(-0.05)
+    ctx.scale(sc, sc)
+    for side, txt, col in ((-1, left, BLUE), (1, right, PINK)):
+        ctx.move_to(side * 20, -60)
+        ctx.line_to(side * 320, -60)
+        ctx.line_to(side * 290, 60)
+        ctx.line_to(side * -10, 60)
+        ctx.close_path()
+        shape_fill(ctx, col, 6, -60, 60, outline=INK)
+        bold_text(ctx, txt, side * 165, 0, 44, (1, 1, 1), stroke=0.14, shadow=False)
+    star_path(ctx, 0, 0, 95, inner=0.55, n=10)
+    shape_fill(ctx, YELLOW, 6, -95, 95, outline=INK)
+    bold_text(ctx, "VS", 0, 0, 70, RED, stroke=0.14, shadow=False)
+    ctx.restore()
