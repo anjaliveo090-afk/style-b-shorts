@@ -1,0 +1,98 @@
+{
+ "summary": {
+  "video": "tensec.mp4",
+  "duration": 49.95,
+  "speech_share": 0.902,
+  "gaps_total": 7,
+  "gaps_per_10s": 1.4,
+  "gap_median": 0.28,
+  "gap_p90": 0.39,
+  "gap_max": 0.41,
+  "gaps_over_0_6s": 0,
+  "gaps_with_sfx": 3,
+  "lead_in": 0.0,
+  "tail": 0.54
+ },
+ "gaps": [
+  {
+   "t0": 6.03,
+   "t1": 6.24,
+   "dur": 0.21,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 7.0,
+   "before": "10 seconds, then you go to bed.",
+   "after": "10 seconds?"
+  },
+  {
+   "t0": 13.69,
+   "t1": 14.06,
+   "dur": 0.37,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 5.2,
+   "before": "and beat it in one jump.",
+   "after": "Second 9, the Noob King spawns."
+  },
+  {
+   "t0": 17.28,
+   "t1": 17.5,
+   "dur": 0.22,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 7.1,
+   "before": "One punch, KO!",
+   "after": "Second 8, he drops a billion Robux."
+  },
+  {
+   "t0": 24.46,
+   "t1": 24.76,
+   "dur": 0.3,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 4.8,
+   "before": "into a toaster.",
+   "after": "Second 6, everyone who subscribes gets a"
+  },
+  {
+   "t0": 30.99,
+   "t1": 31.27,
+   "dur": 0.28,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 16.7,
+   "before": "the whole game.",
+   "after": "4..."
+  },
+  {
+   "t0": 32.29,
+   "t1": 32.57,
+   "dur": 0.28,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 10.0,
+   "before": "4...",
+   "after": "3..."
+  },
+  {
+   "t0": 43.49,
+   "t1": 43.9,
+   "dur": 0.41,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 14.8,
+   "before": "But you're a speedrunner.",
+   "after": "Plus 10 seconds."
+  },
+  {
+   "t0": 49.41,
+   "t1": 49.95,
+   "dur": 0.54,
+   "position": "end",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 9.4,
+   "before": "once.",
+   "after": ""
+  }
+ ]
+}
