@@ -9,7 +9,9 @@ Groups:
   rooms     night_bedroom, day_room, kitchen, doorway, gamer_desk, desk_close
   props     laptop, monitor, keyboard, alarm_clock, phone, cake, padlock, sticky_note, fridge, energy_can
   game      game_sky, block_clouds, baseplate, spawn_pad, brick_wall, lava, platform, obby, finish_flag,
-            arena, throne_room, coin, coin_pile, egg, pet, chest
+            arena, throne_room, coin, coin_pile, egg, pet, chest, map_slab (map cross-section over the void)
+  reset     vending_machine, chips_bag, price_tag, race_car, crane, rocket, reset_button, clipboard,
+            employee_frame, wand (added for reset_noob.py)
   UI        hud_timer, second_card, stage_pill, health_bar, damage_text, ko_sticker, toast, login_screen,
             leaderboard, shop_grid, gamepass_card, comments_sheet, subscribe_button, joystick_ui, cursor
   FX        burst, glow, tint, flash, vignette, speed_lines, shockwave, impact_star, sparkles, confetti,
@@ -3075,3 +3077,379 @@ def attic(ctx, T, y_floor=1080, light=1.0):
     cobweb(ctx, -10, 360, 220, 1.0, corner=(1, 1))
     cobweb(ctx, 730, 360, 220, 1.0, corner=(-1, 1))
     particle_cloud(ctx, 360, 500, 300, T, col="#d8c8a8", n=30, seed=9)
+
+
+# ================================================================ more props (added for reset_noob.py)
+def chips_bag(ctx, x, y, s=1.0, col="#ff8a3d", tilt=0.0):
+    """Puffy chips bag (centre x, y) with crimped ends and a round label."""
+    if s <= 0.01:
+        return
+    c = c_(col)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    ctx.scale(s, s)
+    w, h = 64, 84
+    ctx.move_to(-w / 2, -h / 2)
+    for i in range(5):                                  # crimped top
+        ctx.line_to(-w / 2 + (i + 0.5) * w / 5, -h / 2 - 7)
+        ctx.line_to(-w / 2 + (i + 1) * w / 5, -h / 2)
+    ctx.curve_to(w / 2 + 8, -h / 6, w / 2 + 8, h / 6, w / 2, h / 2)
+    for i in range(5):                                  # crimped bottom
+        ctx.line_to(w / 2 - (i + 0.5) * w / 5, h / 2 + 7)
+        ctx.line_to(w / 2 - (i + 1) * w / 5, h / 2)
+    ctx.curve_to(-w / 2 - 8, h / 6, -w / 2 - 8, -h / 6, -w / 2, -h / 2)
+    ctx.close_path()
+    shape_fill(ctx, c, 4, -h / 2, h / 2)
+    ctx.new_sub_path()
+    ctx.arc(0, 4, 19, 0, 2 * PI)
+    ctx.set_source_rgb(*YELLOW)
+    ctx.fill_preserve()
+    ctx.set_source_rgb(*line_of(c))
+    ctx.set_line_width(3)
+    ctx.stroke()
+    ellipse(ctx, 0, 4, 10, 7)                            # a chip on the label
+    ctx.set_source_rgb(*hexc("#e8a23a"))
+    ctx.fill()
+    ctx.restore()
+
+
+CHIP_COLS = ("#ff8a3d", "#4fd16a", "#2f6bd8", "#ff4f5a", "#9d5cff", "#ffd84a")
+
+
+def vending_machine(ctx, x, y, s, T, inside=None, n_rows=4, gone=(), col="#e8323a", glass_a=0.32):
+    """Snack vending machine; (x, y) = bottom centre. inside(ctx, gx, gy, gw, gh) draws behind the glass
+    (after the chips); gone = (row, col) chips already taken. Returns the glass rect (gx, gy, gw, gh)."""
+    if s <= 0.01:
+        return (x, y, 0, 0)
+    c = c_(col)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -190, -660, 380, 660, 18, c, 6)                          # body
+    block(ctx, -170, -720, 340, 80, 20, hexc("#ffd84a"), 5)            # top sign
+    bold_text(ctx, "SNACKS", 0, -680, 46, c, outline=(1, 1, 1), shadow=False, stroke=0.12)
+    gx, gy, gw, gh = -160, -610, 230, 420                              # glass window
+    block(ctx, gx - 8, gy - 8, gw + 16, gh + 16, 10, hexc("#3a3f55"), 4, gloss=False)
+    ctx.rectangle(gx, gy, gw, gh)
+    ctx.set_source_rgb(*hexc("#bfe6ff"))
+    ctx.fill()
+    for r in range(n_rows):                                              # shelves + chips
+        sy = gy + (r + 1) * gh / n_rows
+        for k in range(3):
+            if (r, k) in gone:
+                continue
+            chips_bag(ctx, gx + 40 + k * 75, sy - 52, 0.72, CHIP_COLS[(r * 3 + k) % len(CHIP_COLS)])
+        block(ctx, gx, sy - 10, gw, 10, 2, hexc("#8a90a8"), 2, gloss=False)
+        for k in range(3):                                               # spiral coils
+            ctx.move_to(gx + 20 + k * 75, sy - 12)
+            for j in range(6):
+                ctx.line_to(gx + 24 + k * 75 + j * 7, sy - 12 - (j % 2) * 10)
+        ctx.set_source_rgb(*hexc("#c9cde0"))
+        ctx.set_line_width(2.5)
+        ctx.stroke()
+    if inside:
+        ctx.save()
+        ctx.rectangle(gx, gy, gw, gh)
+        ctx.clip()
+        inside(ctx, gx, gy, gw, gh)
+        ctx.restore()
+    ctx.move_to(gx + 30, gy + 20)                                        # glass shine
+    ctx.line_to(gx + 90, gy + 20)
+    ctx.line_to(gx + 20, gy + 200)
+    ctx.line_to(gx, gy + 200)
+    ctx.close_path()
+    ctx.set_source_rgba(1, 1, 1, glass_a)
+    ctx.fill()
+    px = 112                                                             # keypad panel
+    block(ctx, px - 32, -600, 74, 110, 8, hexc("#1e2230"), 4, gloss=False)
+    bold_text(ctx, "1 R$", px + 5, -575, 20, GREEN, shadow=False, stroke=0.0)
+    for i in range(3):
+        for j in range(3):
+            block(ctx, px - 22 + i * 21, -548 + j * 18, 16, 13, 3, hexc("#c9cde0"), 2, gloss=False)
+    block(ctx, px - 12, -460, 34, 60, 6, hexc("#3a3f55"), 3, gloss=False)   # coin slot
+    block(ctx, px - 2, -450, 14, 40, 4, INK, 2, gloss=False)
+    block(ctx, -160, -165, 300, 100, 10, hexc("#1e2230"), 5, gloss=False)  # pick-up flap
+    block(ctx, -150, -160, 280, 34, 8, hexc("#3a3f55"), 3, gloss=False)
+    bold_text(ctx, "PUSH", -10, -100, 26, hexc("#9aa0b8"), shadow=False, stroke=0.0)
+    ctx.restore()
+    return (x + gx * s, y + gy * s, gw * s, gh * s)
+
+
+def price_tag(ctx, x, y, s, txt="1 R$", tilt=0.15, col="#ffd84a"):
+    """Hanging price tag (hole at x, y)."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    ctx.scale(s, s)
+    ctx.move_to(0, 0)
+    ctx.line_to(28, -18)
+    ctx.line_to(150, -18)
+    ctx.line_to(150, 38)
+    ctx.line_to(28, 38)
+    ctx.close_path()
+    shape_fill(ctx, c_(col), 5, -18, 38)
+    ctx.new_sub_path()
+    ctx.arc(26, 10, 7, 0, 2 * PI)
+    ctx.set_source_rgb(1, 1, 1)
+    ctx.fill()
+    bold_text(ctx, txt, 92, 10, 34, RED, outline=(1, 1, 1), shadow=False, stroke=0.1)
+    ctx.restore()
+
+
+def race_car(ctx, x, y, s, T, col="#e8323a", speed=1.0, driver=None, num="1"):
+    """Side-view blocky race car facing right; (x, y) = ground under its middle.
+    driver(ctx, hx, hy) draws the driver's head/body at the cockpit (before the body covers it)."""
+    if s <= 0.01:
+        return
+    c = c_(col)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -250, -230, 26, 110, 6, hexc("#3a3f55"), 4, gloss=False)   # spoiler
+    block(ctx, -300, -250, 140, 34, 10, c, 5)
+    ctx.restore()
+    if driver:                                                            # only the part above the body shows
+        ctx.save()
+        ctx.rectangle(-3000, -5000, 7000, y - 130 * s + 5000)
+        ctx.clip()
+        driver(ctx, x - 40 * s, y - 150 * s)
+        ctx.restore()
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    ctx.move_to(-280, -60)                                                # body
+    ctx.line_to(-280, -150)
+    ctx.line_to(-110, -165)
+    ctx.line_to(30, -165)
+    ctx.line_to(120, -120)
+    ctx.line_to(290, -100)
+    ctx.curve_to(320, -95, 320, -60, 290, -55)
+    ctx.close_path()
+    shape_fill(ctx, c, 6, -165, -55)
+    block(ctx, -180, -140, 110, 70, 30, (1, 1, 1), 4)                     # number circle
+    bold_text(ctx, num, -125, -105, 50, c, outline=(1, 1, 1), shadow=False, stroke=0.04)
+    block(ctx, 140, -112, 130, 18, 8, light(c, 0.35), 3, gloss=False)     # stripe
+    for wx in (-180, 200):                                                 # wheels
+        ctx.new_sub_path()
+        ctx.arc(wx, -50, 58, 0, 2 * PI)
+        shape_fill(ctx, hexc("#2a2a35"), 5, -108, 8)
+        ctx.new_sub_path()
+        ctx.arc(wx, -50, 26, 0, 2 * PI)
+        shape_fill(ctx, hexc("#c9cde0"), 4, -76, -24)
+        a = -T * 18 * speed
+        for k in range(3):
+            ctx.move_to(wx + math.cos(a + k * 2.09) * 8, -50 + math.sin(a + k * 2.09) * 8)
+            ctx.line_to(wx + math.cos(a + k * 2.09) * 24, -50 + math.sin(a + k * 2.09) * 24)
+        ctx.set_source_rgb(*hexc("#6a7088"))
+        ctx.set_line_width(5)
+        ctx.stroke()
+    ctx.restore()
+
+
+def crane(ctx, x, y, s, T, hook_x=None, hook_y=None, col="#ffcc33"):
+    """Yellow lattice crane; (x, y) = base of the mast; the jib points left. Returns the hook point."""
+    c = c_(col)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -70, -40, 140, 40, 8, hexc("#3a3f55"), 5, gloss=False)
+    mh, jl = 620, 560
+    block(ctx, -26, -40 - mh, 52, mh, 4, c, 5, gloss=False)                # mast
+    block(ctx, -jl, -40 - mh - 40, jl + 120, 40, 4, c, 5, gloss=False)     # jib
+    ctx.set_source_rgb(*line_of(c))
+    ctx.set_line_width(4)
+    for i in range(12):                                                    # lattice
+        yy = -40 - i * mh / 12
+        ctx.move_to(-26, yy)
+        ctx.line_to(26, yy - mh / 12)
+    for i in range(14):
+        xx = -jl + i * (jl + 120) / 14
+        ctx.move_to(xx, -40 - mh - 40)
+        ctx.line_to(xx + (jl + 120) / 14, -40 - mh)
+    ctx.stroke()
+    block(ctx, 60, -40 - mh - 20, 80, 70, 6, hexc("#8a90a8"), 4, gloss=False)  # counterweight
+    ctx.restore()
+    hx = x + (-jl + 60) * s if hook_x is None else hook_x
+    top_y = y + (-40 - mh) * s
+    hy = top_y + 300 * s if hook_y is None else hook_y
+    ctx.move_to(hx, top_y)
+    ctx.line_to(hx, hy)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(4 * s)
+    ctx.stroke()
+    ctx.arc(hx, hy + 20 * s, 18 * s, -0.3, PI)                              # hook
+    ctx.set_source_rgb(*hexc("#8a90a8"))
+    ctx.set_line_width(9 * s)
+    ctx.stroke()
+    return hx, hy + 30 * s
+
+
+def rocket(ctx, x, y, s, T, flame=0.0, col="#e8323a", tilt=0.0, label_txt=None):
+    """Big cartoon rocket; (x, y) = bottom centre of the body. flame 0..1 = exhaust size."""
+    if s <= 0.01:
+        return
+    c = c_(col)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    ctx.scale(s, s)
+    if flame > 0:
+        fl = flame * (190 + 30 * math.sin(T * 40))
+        for w, k, colr in ((70, 1.0, "#ff7a1a"), (46, 0.75, "#ffd84a"), (22, 0.45, "#ffffff")):
+            ctx.move_to(-w, 0)
+            ctx.curve_to(-w, fl * k * 0.5, -w * 0.3, fl * k * 0.8, 0, fl * k)
+            ctx.curve_to(w * 0.3, fl * k * 0.8, w, fl * k * 0.5, w, 0)
+            ctx.close_path()
+            ctx.set_source_rgb(*hexc(colr))
+            ctx.fill()
+    for side in (-1, 1):                                                    # fins
+        ctx.move_to(side * 70, -170)
+        ctx.line_to(side * 140, -10)
+        ctx.line_to(side * 140, 30)
+        ctx.line_to(side * 70, 0)
+        ctx.close_path()
+        shape_fill(ctx, c, 6, -170, 30)
+    block(ctx, -80, -460, 160, 470, 30, (1, 1, 1), 6, outline=INK)        # body
+    ctx.move_to(-80, -440)                                                  # nose cone
+    ctx.curve_to(-80, -560, -20, -640, 0, -660)
+    ctx.curve_to(20, -640, 80, -560, 80, -440)
+    ctx.close_path()
+    shape_fill(ctx, c, 6, -660, -440)
+    ctx.new_sub_path()
+    ctx.arc(0, -330, 44, 0, 2 * PI)                                          # window
+    shape_fill(ctx, hexc("#6fc3ff"), 7, -374, -286, outline=hexc("#8a90a8"))
+    block(ctx, -80, -150, 160, 40, 6, c, 5, gloss=False)                    # band
+    if label_txt:
+        bold_text(ctx, label_txt, 0, -215, 34, c, outline=(1, 1, 1), shadow=False, stroke=0.08)
+    ctx.restore()
+
+
+def map_slab(ctx, T, y_top=520, thick=220, x0=-200, x1=920, hole=None, trees=True):
+    """Side cross-section of the whole game map floating over a dark void: grass, dirt, stone, a clean
+    bottom edge. hole = (x, w): a gap broken through the slab. Draw void_bg (or anything) first."""
+    def slab(xa, xb):
+        block(ctx, xa, y_top, xb - xa, 34, 6, hexc("#51c844"), 5)
+        block(ctx, xa, y_top + 30, xb - xa, thick * 0.55, 0, hexc("#9a6a3c"), 5, gloss=False)
+        block(ctx, xa, y_top + 30 + thick * 0.55, xb - xa, thick * 0.45 - 30, 8, hexc("#7a7f95"), 5, gloss=False)
+        rnd = random.Random(int(xa) + 7)
+        for _ in range(int((xb - xa) / 60)):
+            sx = rnd.uniform(xa + 20, xb - 30)
+            sy = rnd.uniform(y_top + 50, y_top + thick - 30)
+            block(ctx, sx, sy, 26, 18, 6, hexc("#b88a5a") if sy < y_top + 30 + thick * 0.55 else hexc("#9aa0b8"),
+                  2, gloss=False)
+    if hole:
+        hx, hw = hole
+        slab(x0, hx)
+        slab(hx + hw, x1)
+    else:
+        slab(x0, x1)
+    if trees:
+        for tx in (40, 300, 620):
+            if hole and hole[0] - 40 < tx < hole[0] + hole[1] + 40:
+                continue
+            block(ctx, tx - 12, y_top - 80, 24, 82, 4, hexc("#8a5a3a"), 4, gloss=False)
+            block(ctx, tx - 50, y_top - 170, 100, 100, 24, hexc("#3fae4a"), 5)
+
+
+def reset_button(ctx, x, y, s, T, pressed=0.0, glow_a=0.0, col="#ff3b4a"):
+    """Big menu button 'RESET CHARACTER' with a circular-arrow icon (pressed 0..1 squashes it)."""
+    if s <= 0.01:
+        return
+    if glow_a > 0:
+        glow(ctx, x, y, 440 * s, (1, 0.35, 0.3), glow_a)
+    c = c_(col)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -270, -60, 540, 170, 50, dark(c, 0.45), 7, outline=INK, gloss=False)
+    dy = 30 * clamp(pressed)
+    block(ctx, -260, -120 + dy, 520, 190, 50, c, 7, outline=INK)
+    ix, iy = -170, -25 + dy                                                 # circular arrow
+    ctx.new_sub_path()
+    ctx.arc(ix, iy, 44, -PI * 0.15, PI * 1.45)
+    ctx.set_source_rgb(1, 1, 1)
+    ctx.set_line_width(14)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.stroke()
+    ax, ay = ix + 44 * math.cos(-PI * 0.15), iy + 44 * math.sin(-PI * 0.15)
+    ctx.move_to(ax - 26, ay - 6)
+    ctx.line_to(ax + 18, ay - 18)
+    ctx.line_to(ax + 8, ay + 26)
+    ctx.close_path()
+    ctx.fill()
+    bold_text(ctx, "RESET", 60, -60 + dy, 68, (1, 1, 1), stroke=0.14)
+    bold_text(ctx, "CHARACTER", 60, 10 + dy, 44, (1, 1, 1), stroke=0.16)
+    ctx.restore()
+
+
+def clipboard(ctx, x, y, s, rows, T, k_rows=None, title="TEST LIST"):
+    """Clipboard with a checklist; rows = [text, ...]; k_rows = per-row seconds since its tick (or None)."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    h = 130 + len(rows) * 74
+    block(ctx, -200, 0, 400, h, 20, hexc("#b8844e"), 6)
+    block(ctx, -175, 40, 350, h - 64, 8, (1, 1, 1), 4, outline=hexc("#c9cde0"), gloss=False)
+    block(ctx, -70, -20, 140, 56, 12, hexc("#8a90a8"), 5)
+    bold_text(ctx, title, 0, 82, 34, BLUE, outline=(1, 1, 1), shadow=False, stroke=0.02)
+    for i, txt in enumerate(rows):
+        ry = 140 + i * 74
+        block(ctx, -150, ry - 22, 44, 44, 8, (1, 1, 1), 4, outline=INK, gloss=False)
+        bold_text(ctx, txt, -90, ry, 34, INK, outline=(1, 1, 1), shadow=False, stroke=0.02, align="l")
+        k = None if k_rows is None else k_rows[i]
+        if k is not None and k >= 0:
+            check_mark(ctx, -128, ry - 4, 34, k / 0.2)
+    ctx.restore()
+
+
+def employee_frame(ctx, x, y, s, T, portrait=None, k=1.0):
+    """Gold 'EMPLOYEE OF THE MONTH' frame (centre x, y); portrait(ctx, px, py, pw, ph) draws inside."""
+    if s <= 0.01:
+        return
+    sc = s * (pop(k) if k < 1 else 1.0)
+    if sc <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    glow(ctx, 0, 0, 420, (1, 0.85, 0.4), 0.5)
+    block(ctx, -230, -280, 460, 560, 24, GOLD, 8, outline=hexc("#9a6a1c"))
+    block(ctx, -190, -240, 380, 400, 10, hexc("#9fd0f0"), 5, outline=hexc("#9a6a1c"), gloss=False)
+    if portrait:
+        ctx.save()
+        ctx.rectangle(-190, -240, 380, 400)
+        ctx.clip()
+        portrait(ctx, -190, -240, 380, 400)
+        ctx.restore()
+    block(ctx, -210, 175, 420, 84, 14, RED, 5)
+    bold_text(ctx, "EMPLOYEE", 0, 196, 40, (1, 1, 1), stroke=0.12, shadow=False)
+    bold_text(ctx, "OF THE MONTH", 0, 238, 30, YELLOW, stroke=0.14, shadow=False)
+    for sx in (-170, 170):
+        ctx.save()
+        ctx.translate(sx, -250)
+        star_path(ctx, 0, 0, 34)
+        shape_fill(ctx, YELLOW, 4, -34, 34)
+        ctx.restore()
+    ctx.restore()
+
+
+def wand(ctx, x, y, s=1.0, ang=-0.6, T=0.0):
+    """Admin teleport wand: a stick with a glowing star tip (x, y = hand)."""
+    tx, ty = x + math.sin(ang) * 120 * s, y - math.cos(ang) * 120 * s
+    ctx.move_to(x, y)
+    ctx.line_to(tx, ty)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(14 * s)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.stroke_preserve()
+    ctx.set_source_rgb(*hexc("#9d5cff"))
+    ctx.set_line_width(8 * s)
+    ctx.stroke()
+    glow(ctx, tx, ty, 80 * s, (0.7, 0.95, 1), 0.7)
+    star_path(ctx, tx, ty, 30 * s, rot=-PI / 2 + T)
+    shape_fill(ctx, YELLOW, 4 * s, ty - 30 * s, ty + 30 * s)

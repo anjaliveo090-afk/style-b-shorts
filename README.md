@@ -35,6 +35,7 @@ I am attaching a voiceover and its SRT. Run bash setup.sh, then read MASTER_PROM
 | `animator/robux10.py` | 44 s "Second 10 → 5" countdown story (timer pill, SECOND cards, mystery box, refund twist); captions in `animator/captions/robux10.json` |
 | `animator/grandma_pro.py` | 47 s story written with `script_guide.md` (Day ladder, lip-sync on Grandma/Kid, REWIND ending); captions in `animator/captions/grandma_pro.json` |
 | `animator/sneeze.py` | 47 s sneeze story (pepper, dusty cat, attic, launch, mom's clean-up twist); captions in `animator/captions/sneeze.json` |
+| `animator/reset_noob.py` | 76 s story "This noob is the reason Roblox has a reset button" (Oliver stuck in a vending machine, an obby gap, under the map; RESET CHARACTER button; lip-sync on his two lines; REWIND ending) |
 | `assembler/make_voice.py` | Test voiceover + SRT from a script in the `Narrator: [emotion] …` format (Kokoro TTS, one voice per character) |
 | `analysis/silences.py`, `assembler/tighten_voice.py` | Measure the pauses in a voice; shorten pauses that are too long |
 | `analysis/` | Reference analysis tools (frame logs, SFX/music measure, pace, camera flow, word alignment) and `ref_data/` |
