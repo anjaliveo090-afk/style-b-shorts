@@ -37,6 +37,7 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
 | File | What it holds |
 |---|---|
 | `lessons.md` | **Read first.** Rules learned from the user's YouTube retention data (they override the other guides), the drop-diagnosis checklist and the log |
+| `thumbnail_dna.md` | LOCKED REFERENCE THUMBNAIL DNA: thumbnail formats, layout families, typography, colours, title-to-text rules |
 | `videos.md` | Every delivered video: story name, title, YouTube title, whether analytics came back |
 | `style_bible.md` | Look: format and safe zone, characters in head-widths, faces and the 19 expressions, palette, sets, STYLE LOCK |
 | `visual_grammar.md` | Measured pace and camera; **section 2 = phrase type → what is shown → camera → reaction** (rows 1-20) |
@@ -128,7 +129,7 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
 - This is 2D code animation. The references are hand-made vector animation with more drawing detail, bespoke props and smoother squash-and-stretch. We match the look (proportions, line, palette, shading, faces), and the pace, cuts, camera, phrase → visual logic and sound levels closely. Every new prop has to be drawn in code.
 - Sounds are synthesised (`audio.py`). They match the measured kinds and levels, not the exact timbres of the reference channel's sound files, which must never be copied.
 - The music matches the measured key, tempo, density and level. Its percussive share (0.07) is below the references' (0.14-0.22).
-- `animator/thumbnail.py` is still the old kit's version (it imports `home`, `office`, `mom_owner`). Adapt it to `style.py` / `sets.py` when the user asks for a thumbnail (MASTER_PROMPT.md, "Thumbnail").
+- `animator/thumbnail.py` is still the old kit's version (it imports `home`, `office`, `mom_owner`). Thumbnails now follow **`thumbnail_dna.md`** (the LOCKED REFERENCE THUMBNAIL DNA learned from the user's 7 reference thumbnails). When the user sends a title for a thumbnail, follow its section 7: 9:16 design (1080x1920) plus the 16:9 centred-panel version, drawn with `style.py` / `sets.py`.
 
 ## New reference videos of this style
 Run, for each video:
