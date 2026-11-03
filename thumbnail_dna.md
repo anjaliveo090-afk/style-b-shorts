@@ -22,7 +22,7 @@ The ZIP filenames are cut at 40 characters, plus `-<YouTube video id>`.
 ## 1. Format (measured)
 - Every file is 1280×720. The **designed thumbnail is a 9:16 panel**: x 438-841, 404×720 = 0.561 (9:16).
 - The sides hold the same image enlarged and blurred. This is the Shorts thumbnail as YouTube shows it at 16:9.
-- **Design at 1080×1920 (9:16).** For a 16:9 version, put that panel in the centre over a blurred, enlarged copy of itself (`thumb_16x9()` in section 8).
+- **Deliver ONLY 9:16, 1080×1920** (the user's rule: the thumbnails are for Shorts). Do not make a 16:9 version unless the user asks for one.
 - **Safe area:** the title text and the key subject sit in the middle ~80% of the panel width. Nothing important touches the panel's edges.
 
 ## 2. Individual analysis
@@ -142,7 +142,7 @@ V = visible on the image, I = interpretation.
    - the proof object to circle;
    - the burst colour;
    - the text (rewrite the title into a 2-5 word "?!" line) and its colours.
-3. **Generate:** draw it in code with the video cast, at 1080×1920 plus a 1280×720 centred version, as in section 1. Also give an image-generation prompt if the user wants to use an AI image tool.
+3. **Generate:** draw it in code with the video cast, **only at 9:16, 1080×1920**. Also give an image-generation prompt if the user wants to use an AI image tool.
 4. **QC against this list:**
    - it matches the title;
    - the style follows this DNA;
@@ -153,5 +153,5 @@ V = visible on the image, I = interpretation.
    - it is curious but not misleading;
    - it is original.
 
-## 8. 16:9 wrap used by the references
-For the 16:9 version, take the 9:16 panel and scale it to 720 px high (404 px wide), placed at x 438. Fill the background with the same panel scaled to 1280 px wide, centred, Gaussian-blurred (radius ~20) and darkened by ~15%.
+## 8. 16:9 wrap (only if the user explicitly asks)
+The references show it this way because YouTube displays Shorts like this. Take the 9:16 panel and scale it to 720 px high (404 px wide), placed at x 438. Fill the background with the same panel scaled to 1280 px wide, centred, Gaussian-blurred (radius ~20) and darkened by ~15%.

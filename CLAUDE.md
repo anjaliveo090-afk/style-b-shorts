@@ -129,7 +129,7 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
 - This is 2D code animation. The references are hand-made vector animation with more drawing detail, bespoke props and smoother squash-and-stretch. We match the look (proportions, line, palette, shading, faces), and the pace, cuts, camera, phrase → visual logic and sound levels closely. Every new prop has to be drawn in code.
 - Sounds are synthesised (`audio.py`). They match the measured kinds and levels, not the exact timbres of the reference channel's sound files, which must never be copied.
 - The music matches the measured key, tempo, density and level. Its percussive share (0.07) is below the references' (0.14-0.22).
-- `animator/thumbnail.py` is still the old kit's version (it imports `home`, `office`, `mom_owner`). Thumbnails now follow **`thumbnail_dna.md`** (the LOCKED REFERENCE THUMBNAIL DNA learned from the user's 7 reference thumbnails). When the user sends a title for a thumbnail, follow its section 7: 9:16 design (1080x1920) plus the 16:9 centred-panel version, drawn with `style.py` / `sets.py`.
+- `animator/thumbnail.py` is still the old kit's version (it imports `home`, `office`, `mom_owner`). Thumbnails now follow **`thumbnail_dna.md`** (the LOCKED REFERENCE THUMBNAIL DNA learned from the user's 7 reference thumbnails). When the user sends a title for a thumbnail, follow its section 7: **only 9:16, 1080x1920** (the user's rule, for Shorts; no 16:9 copy unless asked), drawn with `style.py` / `sets.py`.
 
 ## New reference videos of this style
 Run, for each video:
