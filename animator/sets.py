@@ -3117,9 +3117,10 @@ def chips_bag(ctx, x, y, s=1.0, col="#ff8a3d", tilt=0.0):
 CHIP_COLS = ("#ff8a3d", "#4fd16a", "#2f6bd8", "#ff4f5a", "#9d5cff", "#ffd84a")
 
 
-def vending_machine(ctx, x, y, s, T, inside=None, n_rows=4, gone=(), col="#e8323a", glass_a=0.32):
+def vending_machine(ctx, x, y, s, T, inside=None, n_rows=4, gone=(), col="#e8323a", glass_a=0.32, texts=True):
     """Snack vending machine; (x, y) = bottom centre. inside(ctx, gx, gy, gw, gh) draws behind the glass
-    (after the chips); gone = (row, col) chips already taken. Returns the glass rect (gx, gy, gw, gh)."""
+    (after the chips); gone = (row, col) chips already taken. texts=False leaves out the sign and flap words
+    (close-ups that crop them at the frame edge). Returns the glass rect (gx, gy, gw, gh)."""
     if s <= 0.01:
         return (x, y, 0, 0)
     c = c_(col)
@@ -3128,7 +3129,8 @@ def vending_machine(ctx, x, y, s, T, inside=None, n_rows=4, gone=(), col="#e8323
     ctx.scale(s, s)
     block(ctx, -190, -660, 380, 660, 18, c, 6)                          # body
     block(ctx, -170, -720, 340, 80, 20, hexc("#ffd84a"), 5)            # top sign
-    bold_text(ctx, "SNACKS", 0, -680, 46, c, outline=(1, 1, 1), shadow=False, stroke=0.12)
+    if texts:
+        bold_text(ctx, "SNACKS", 0, -680, 46, c, outline=(1, 1, 1), shadow=False, stroke=0.12)
     gx, gy, gw, gh = -160, -610, 230, 420                              # glass window
     block(ctx, gx - 8, gy - 8, gw + 16, gh + 16, 10, hexc("#3a3f55"), 4, gloss=False)
     ctx.rectangle(gx, gy, gw, gh)
@@ -3171,7 +3173,8 @@ def vending_machine(ctx, x, y, s, T, inside=None, n_rows=4, gone=(), col="#e8323
     block(ctx, px - 2, -450, 14, 40, 4, INK, 2, gloss=False)
     block(ctx, -160, -165, 300, 100, 10, hexc("#1e2230"), 5, gloss=False)  # pick-up flap
     block(ctx, -150, -160, 280, 34, 8, hexc("#3a3f55"), 3, gloss=False)
-    bold_text(ctx, "PUSH", -10, -100, 26, hexc("#9aa0b8"), shadow=False, stroke=0.0)
+    if texts:
+        bold_text(ctx, "PUSH", -10, -100, 26, hexc("#9aa0b8"), shadow=False, stroke=0.0)
     ctx.restore()
     return (x + gx * s, y + gy * s, gw * s, gh * s)
 

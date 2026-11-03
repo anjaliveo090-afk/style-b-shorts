@@ -28,6 +28,7 @@ I am attaching a voiceover and its SRT. Run bash setup.sh, then read MASTER_PROM
 | `animator/sample.py` | Template story (22 s sample) |
 | `animator/report_noob.py` | Full 60 s story on a real voiceover ("This noob is the reason Roblox invented the report button") |
 | `animator/contact.py` | Contact sheet of a story with the safe zone drawn, before rendering |
+| `animator/safe_audit.py` | Frame-by-frame safe-zone check of a story (heads, all text, keep boxes); must print 0 before delivery |
 | `animator/test_sheet.py`, `animator/set_sheet.py` | Style test sheets (characters × expressions × poses, all sets) |
 | `animator/engine.py`, `audio.py`, `safezone.py`, `thumbnail.py` | Render engine, synthesised sound + music, safe-zone fitter, thumbnail template |
 | `assembler/` | Joins animation + voice + music + SFX into the final mp4; `captions.py` burns reference-style captions onto it |

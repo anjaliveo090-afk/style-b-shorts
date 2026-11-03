@@ -223,8 +223,8 @@ def s_hook(ctx, t, d, T0=0.0, frozen=False):
     style.block(ctx, -100, 960, 920, 500, 0, hexc("#9a6a3c"), 6, gloss=False)
     for i, (cx, cy) in enumerate(((210, 935), (300, 925), (440, 930), (520, 940))):   # cracks
         st.dust(ctx, cx, cy, ((T + i * 0.2) % 0.8) / 0.8, n=3, spread=40, r=14)
-    for x, i, look in ((95, 2, 0.6), (630, 4, -0.6)):
-        P[i].draw(ctx, x, 1250, 1.2, "laugh", T, arms=("point", "cover") if x < 360 else ("cover", "point"),
+    for x, i, look in ((100, 2, 0.6), (540, 4, -0.6)):
+        P[i].draw(ctx, x, 1000, 0.8, "laugh", T, arms=("point", "cover") if x < 360 else ("cover", "point"),
                   look=look)
     st.arrow(ctx, 620, 260, 520, 380, k=0.6 + ease(T / 0.15) * 0.4)
     label(ctx, "THIS NOOB", 330, 230, 76, fg=st.RED, scale=pop(T - 0.36) if T >= 0.36 else 0.0)
@@ -423,7 +423,7 @@ def _chips_inside(T, who="oliver", expr="grin", talk=False, tag_k=None):
 def s_chips(ctx, t, d):
     T = 11.45 + t
     st.street(ctx, T, y_ground=1000)
-    st.vending_machine(ctx, 470, 1500, 2.0, T, inside=_chips_inside(T, expr=keyed(T, [(0, "happy"), (11.61, "stars")])),
+    st.vending_machine(ctx, 470, 1530, 2.2, T, texts=False, inside=_chips_inside(T, expr=keyed(T, [(0, "happy"), (11.61, "stars")])),
                        gone=((2, 1), (3, 1)))
     for i in range(5):                                       # chips raining down inside
         k = (T - 11.6 - i * 0.12)
@@ -452,7 +452,7 @@ def s_onsale(ctx, t, d):
     ctx.close_path()
     ctx.set_source_rgba(1, 1, 1, 0.3)
     ctx.fill()
-    st.speech_bubble(ctx, 520, 250, "HELP!", 60, T - 12.42, tail=(-1, 1))
+    st.speech_bubble(ctx, 500, 330, "HELP!", 60, T - 12.42, tail=(-1, 1))
     if 12.5 < T < 13.0:                                      # banging on the glass
         st.impact_star(ctx, 170, 520, 70, (T - 12.5) % 0.25)
 
@@ -466,7 +466,7 @@ def s_bought(ctx, t, d):
     k = T - 13.9
     if 0 <= k < 0.3:                                          # a coin flies into the slot
         st.coin(ctx, lerp(520, 420, k / 0.3), lerp(700, 640, k / 0.3), 0.6, spin=T * 8)
-    st.toast(ctx, 360, 230, "Chips: 1 R$ paid", T - 14.19, col=st.GREEN)
+    st.toast(ctx, 360, 330, "Chips: 1 R$ paid", T - 14.19, col=st.GREEN)
 
 
 def s_gotoliver(ctx, t, d):
@@ -497,14 +497,14 @@ def s_pull(ctx, t, d):
         ctx.clip()
         lying(ctx, OLIVER, fx + 120 + tug, fy, 0.85, "scared", T, head_right=False, arms=("up", "up"))
         ctx.restore()
-        for i, x in enumerate((150, 60)):
+        for i, x in enumerate((205, 125)):
             P[3 + i].draw(ctx, x + tug, 1170, 1.0, "angry", T, arms=("point", "point"), look=0.7, lean=-0.15)
     else:
         k = T - 16.92
         st.impact_star(ctx, fx, fy, 110, k, "POP!")
         oliver(ctx, lerp(fx - 60, 300, ease(k / 0.3)), 1170, 1.0, "laugh", T, arms=("up", "up"), pose="jump")
-        for i, x in enumerate((150, 60)):
-            P[3 + i].draw(ctx, x - 40 * ease(k / 0.3), 1170, 1.0, "shock", T, arms=("up", "up"), pose="sit")
+        for i, x in enumerate((205, 125)):
+            P[3 + i].draw(ctx, x - 15 * ease(k / 0.3), 1170, 1.0, "shock", T, arms=("up", "up"), pose="sit")
 
 
 def s_swap(ctx, t, d):
@@ -583,7 +583,7 @@ def s_guys(ctx, t, d):
     ctx.translate(-360, 0)
     closeup(ctx, OLIVER, "stars", T, arms=("wave", "wave"), talk=talking("oliver", T))
     ctx.restore()
-    st.speech_bubble(ctx, 360, 240, "GUYS!", 70, T - 23.16, tail=(0, 1))
+    st.speech_bubble(ctx, 360, 290, "GUYS!", 70, T - 23.16, tail=(0, 1))
 
 
 def s_secret(ctx, t, d):
@@ -598,7 +598,7 @@ def s_secret(ctx, t, d):
 def s_notroom(ctx, t, d):
     T = 24.86 + t
     _dark_gap(ctx, T)
-    sign(ctx, 360, 900, 1.6, "SECRET ROOM", tilt=-0.03)
+    sign(ctx, 360, 900, 1.3, "SECRET ROOM", tilt=-0.03)
     st.red_x(ctx, 360, 690, 200, (T - 25.12) / 0.25)
     label(ctx, "NOPE", 360, 280, 90, fg=st.RED, scale=pop(T - 25.37) if T >= 25.37 else 0.0)
 
@@ -671,7 +671,7 @@ def s_wave(ctx, t, d):
 def s_nobody(ctx, t, d):
     T = 27.78 + t
     _gap_top(ctx, T)
-    for i, (x0, sp, tq) in enumerate(((-80, 520, 27.93), (760, -480, 28.2))):
+    for i, (x0, sp, tq) in enumerate(((100, 380, 27.93), (590, -380, 28.2))):
         x = x0 + sp * (T - 27.78)
         P[5 + i].draw(ctx, x, 800, 1.0, "neutral" if T < tq else "worried", T, pose="run", walk_phase=T * 2.5,
                       look=0.6 if sp > 0 else -0.6)
@@ -761,7 +761,7 @@ def s_wall(ctx, t, d):
             ctx.rotate(k * (6 + i))
             style.block(ctx, -32, -15, 64, 30, 4, hexc("#aaafbc"), 3)
             ctx.restore()
-        st.impact_star(ctx, wx + 60, 820, 160, k, "CRASH!")
+        st.impact_star(ctx, wx - 60, 750, 150, k, "CRASH!")
         st.flash(ctx, 0.6 * math.exp(-14 * k))
 
 
@@ -770,10 +770,12 @@ def s_fall(ctx, t, d):
     st.void_bg(ctx, top="#84d4fb", bottom=VOID, y0=500, y1=1300)
     st.map_slab(ctx, T, y_top=380, thick=230, hole=(330, 130))
     p = clamp((T - 34.98) / 1.4)
-    cx, cy = 400 + 60 * p, 560 + 640 * p * p
+    q = ease(p)
+    cx, cy = lerp(400, 370, q), lerp(560, 880, q)      # it falls away into the void, shrinking
     ctx.save()
     ctx.translate(cx, cy)
     ctx.rotate(p * 5)
+    ctx.scale(lerp(1.0, 0.3, q), lerp(1.0, 0.3, q))
     ctx.translate(-cx, -cy)
 
     def drv(c, hx, hy):
@@ -836,11 +838,12 @@ def s_explode(ctx, t, d):
     else:
         k = T - boom
         st.shockwave(ctx, 500, 600, k / 0.6, r_max=700)
-        st.impact_star(ctx, 500, 560, 300, k, "BOOM!", c1="#fff3a8", c2="#ff5a1a")
-        for i in range(8):                                    # players blown into the hole
+        e = ease(clamp(k / 0.5))
+        for i in range(8):                                    # players blown up and out
             a = i * 0.8
-            P[i].draw(ctx, 370 + math.cos(a) * 300 * k, 780 + math.sin(a) * 200 * k + 900 * k * k, 0.55, "scared",
+            P[i].draw(ctx, 390 + math.cos(a) * 160 * e, 720 + math.sin(a) * 150 * e - 120 * e, 0.55, "scared",
                       T, arms=("up", "up"), pose="jump")
+        st.impact_star(ctx, 420, 560, 200, k, "BOOM!", c1="#fff3a8", c2="#ff5a1a")
         st.flash(ctx, 0.8 * math.exp(-10 * k))
 
 
@@ -854,18 +857,20 @@ def s_twenty(ctx, t, d):
         k = T - t0
         if k < 0:
             continue
-        x = 370 + ((i * 53) % 260 - 130) + math.sin(i) * 40 * k
-        y = 420 + 700 * k * k + 140 * k
-        if y > 1500:
-            n += 1
-            continue
         n += 1
+        q = ease(clamp(k / 1.1))
+        if q >= 1:
+            continue
+        off = (i * 53) % 260 - 130
+        x = 370 + off * lerp(1.0, 0.35, q)
+        y = lerp(420, 800, q)
         ctx.save()
         ctx.translate(x, y)
         ctx.rotate(k * (2 + i % 3) * (1 if i % 2 else -1))
-        P[i % 14].draw(ctx, 0, 60, 0.42, "scared", T, arms=("up", "up"), pose="jump", shadow=False)
+        ctx.scale(1 - 0.85 * q, 1 - 0.85 * q)
+        P[i % 14].draw(ctx, 0, 60, 0.45, "scared", T, arms=("up", "up"), pose="jump", shadow=False)
         ctx.restore()
-    st.number_counter(ctx, 360, 1000, 0.75, n, T, prefix="+", col=st.RED)
+    st.number_counter(ctx, 360, 935, 0.6, n, T, prefix="+", col=st.RED)
     label(ctx, "20 MORE!", 360, 140 + 90, 70, bg=st.RED, scale=pop(T - 41.23) if T >= 41.23 else 0.0)
 
 
@@ -994,7 +999,7 @@ def s_night(ctx, t, d):
     dev_at_desk(ctx, T, keyed(T, [(0, "tired"), (52.12, "sleepy")]), 1.0, n_cups=1 + int(clamp((T - 51.6) / 1.0) * 6),
                 lean=0.06)
     st.zzz(ctx, 330, 520, T)
-    label(ctx, "THAT NIGHT", 360, 250, 64, bg=st.UI_DARK, fg=st.YELLOW, scale=pop(T - 51.63) if T >= 51.63 else 0.0)
+    label(ctx, "THAT NIGHT", 360, 330, 64, bg=st.UI_DARK, fg=st.YELLOW, scale=pop(T - 51.63) if T >= 51.63 else 0.0)
 
 
 def s_code(ctx, t, d):
@@ -1044,7 +1049,7 @@ def s_boom(ctx, t, d):
         oliver(ctx, 340, 1000, 1.2, "grin", T, tag=False)
     else:
         break_apart(ctx, 340, 1000, 1.2, k)
-        st.impact_star(ctx, 360, 700, 260, k, "BOOM!", c1="#fff3a8", c2="#ff5a1a")
+        st.impact_star(ctx, 350, 600, 240, k, "BOOM!", c1="#fff3a8", c2="#ff5a1a")
         st.flash(ctx, 0.7 * math.exp(-12 * k))
 
 
@@ -1108,7 +1113,7 @@ def s_resets(ctx, t, d):
     T = 61.6 + t
     st.night_wall(ctx, 2000)
     st.monitor(ctx, 360, 950, 1.12, T, _reset_stats(T))
-    DEV.draw(ctx, 600, 1420, 2.0, keyed(T, [(0, "neutral"), (62.09, "shock")]), T, arms=("down", "down"), look=-0.6,
+    DEV.draw(ctx, 190, 1330, 2.0, keyed(T, [(0, "neutral"), (62.09, "shock")]), T, arms=("down", "down"), look=0.6,
              bob=0.4)
     label(ctx, "THOUSANDS?!", 360, 250, 62, fg=st.YELLOW, scale=pop(T - 62.09) if T >= 62.09 else 0.0)
 
@@ -1180,7 +1185,7 @@ def s_hired(ctx, t, d):
     st.office(ctx, T)
     DEV.draw(ctx, 520, 1150, 1.2, "happy", T, arms=("point", "down"), look=-0.6)
     oliver(ctx, 210, 1150, 1.2, keyed(T, [(0, "shock"), (69.76, "stars")]), T, arms=("down", "point"), look=0.6)
-    st.stamp(ctx, 360, 430, "HIRED!", T - 69.76, col=st.GREEN)
+    st.stamp(ctx, 360, 520, "HIRED!", T - 69.76, col=st.GREEN, size=100)
     if T >= 69.76:
         st.confetti(ctx, T, 69.76, n=30, seed=7)
 
@@ -1256,7 +1261,7 @@ CU = dict(closeup=True, keep=FACE_KEEP)
 LBL = (60, 170, 660, 340)                       # the label band at the top
 
 shot(0.00, s_hook, [(0.0, 1.3, (360, 600)), (0.12, 1.0, (360, 680), 0.12), (0.36, 1.12, (360, 620), 0.1)],
-     shake=(0.36, 12), closeup=True, keep=[(110, 180, 610, 760)])
+     shake=(0.36, 12), closeup=True, keep=[(110, 180, 610, 760), (50, 740, 590, 860)])
 shot(0.86, s_teaser(s_onsale, 1.1), punch(0.86, 1.08, C, 0.9, 1.12, (360, 660), 0.1), shake=(0.0, 8), **CU)
 shot(1.21, s_teaser(s_stuck, 1.0), punch(1.21, 1.06, (360, 760), 1.25, 1.1, (360, 760), 0.1), shake=(0.0, 8))
 shot(1.56, s_button, punch(1.56, 1.0, (360, 720), 1.91, 1.08, (360, 720), 0.14), shake=(0.1, 10),

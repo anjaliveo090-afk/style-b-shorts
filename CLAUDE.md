@@ -78,6 +78,11 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
    - Shots under a HUD use `top=250`.
    - Key props get `keep=[...]`.
    - `safezone.fit` runs inside `__main__` right before `render()`.
+   - **Then run `cd animator && python3 safe_audit.py <story>`** and fix until it prints `0 elements outside the safe zone`. This is the user's rule: everything goes in the safe zone.
+     - It replays every frame with the fitted camera and checks every head (side characters in close-ups too), every text (labels, name tags, bubbles, toasts, UI rows, stamps, cards) and the `keep` boxes.
+     - Only things crossing the frame edge (entering or leaving) are allowed.
+     - The fitter does not see bubbles, toasts, stamps or side characters in close-ups, so this check catches what it misses.
+     - Things that fall away should shrink into the void inside the zone, not drop through the bottom band.
 5. **Render and assemble**:
    ```bash
    O=output/<story>

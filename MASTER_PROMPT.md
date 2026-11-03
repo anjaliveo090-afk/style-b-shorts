@@ -54,6 +54,9 @@ STEP 3 - BUILD AND CHECK FRAMES
 - Write animator/<story_name>.py (copy sample.py). Add new places or props to animator/sets.py.
 - Before the full render, run `cd animator && python3 contact.py <story_name> ../output/<story_name>/contact.png 1`
   and look at it. Fix anything small, cut off, hidden, empty or outside the red safe-zone outline.
+- Then run `cd animator && python3 safe_audit.py <story_name>` and fix until it prints
+  "0 elements outside the safe zone": every head (also side characters in close-ups), every text
+  (labels, name tags, bubbles, toasts, UI rows, stamps, cards) and every keep box, on every frame.
 
 STEP 4 - MY DEFAULTS
 - Always add reference-style captions with assembler/captions.py (see CLAUDE.md Defaults), never repeating
