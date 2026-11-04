@@ -19,6 +19,7 @@ Groups:
             experience_tile, dominus, valk, bloxy_cola, avatar_break, ROBLOX_NAMES
   friends   friend_card (Accept / Decline, sent, DECLINED), invite_card (JOIN), friends_count, roblox_dialog,
             bracelet, party_hat, server_grid (FULL servers)
+  chat      house_block (roleplay house, door_k), security_booth, spectate_pill (eye + SPECTATING)
   UI        hud_timer, second_card, stage_pill, health_bar, damage_text, ko_sticker, toast, login_screen,
             leaderboard, shop_grid, gamepass_card, comments_sheet, subscribe_button, joystick_ui, cursor
   FX        burst, glow, tint, flash, vignette, speed_lines, shockwave, impact_star, sparkles, confetti,
@@ -4203,3 +4204,68 @@ def server_grid(ctx, x0, y0, n, T, cols=4, k_rows=None, w=150, h=96):
         bold_text(ctx, "FULL", 0, -h * 0.17, h * 0.32, RED, shadow=False, stroke=0.0)
         bold_text(ctx, "50/50", 0, h * 0.22, h * 0.22, hexc("#d8dbe6"), shadow=False, stroke=0.0)
         ctx.restore()
+
+
+# ================================================================ chat filter (added for chat_filter.py)
+def house_block(ctx, x, y, s=1.0, door_k=0.0, sign="HOUSE", col="#ffd27a"):
+    """A blocky roleplay house (bottom centre x, y). door_k 0..1 = door open amount. Sign on the roof."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -220, -420, 440, 420, 14, c_(col), 6)                    # walls
+    ctx.move_to(-250, -410)                                              # roof
+    ctx.line_to(0, -560)
+    ctx.line_to(250, -410)
+    ctx.close_path()
+    shape_fill(ctx, hexc("#e8574a"), 6, -560, -410)
+    block(ctx, -70, -250, 140, 250, 8, hexc("#8a5a3a"), 5, gloss=False)  # door frame
+    dw = 120 * (1 - 0.8 * clamp(door_k))
+    block(ctx, -60, -240, dw, 230, 6, hexc("#b0743c"), 4, gloss=False)  # door leaf
+    block(ctx, -170, -340, 110, 90, 8, hexc("#9fd0f0"), 5, gloss=False) # window
+    bold_text(ctx, sign, 0, -460, 34, (1, 1, 1), shadow=False, stroke=0.08)
+    ctx.restore()
+
+
+def security_booth(ctx, x, y, s=1.0, T=0.0):
+    """A glass security booth with a SECURITY sign (bottom centre x, y)."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -170, -330, 340, 330, 16, hexc("#2b2f45"), 6)             # booth body
+    block(ctx, -140, -300, 280, 180, 12, hexc("#9fd0f0"), 5, gloss=False)  # glass
+    ctx.rectangle(-140, -300, 280, 180)
+    ctx.set_source_rgba(1, 1, 1, 0.18)
+    ctx.fill()
+    block(ctx, -200, -390, 400, 62, 14, hexc("#ff4f5a"), 5)              # sign
+    bold_text(ctx, "SECURITY", 0, -358, 40, (1, 1, 1), shadow=False, stroke=0.1)
+    block(ctx, -40, -100, 80, 100, 8, hexc("#3a3f55"), 4, gloss=False)  # counter
+    ctx.restore()
+
+
+def spectate_pill(ctx, x, y, s=1.0, txt="SPECTATING"):
+    """A dark pill with an eye icon and a label (the 'you are spectating' badge)."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    w = text_width(ctx, txt, 30) + 100
+    rrect(ctx, -w / 2, -30, w, 60, 30)
+    ctx.set_source_rgba(0.08, 0.09, 0.14, 0.85)
+    ctx.fill()
+    ctx.move_to(-w / 2 + 28, 0)                                          # eye
+    ctx.curve_to(-w / 2 + 40, -16, -w / 2 + 62, -16, -w / 2 + 74, 0)
+    ctx.curve_to(-w / 2 + 62, 16, -w / 2 + 40, 16, -w / 2 + 28, 0)
+    ctx.set_source_rgb(1, 1, 1)
+    ctx.set_line_width(4)
+    ctx.stroke()
+    ctx.new_sub_path()
+    ctx.arc(-w / 2 + 51, 0, 7, 0, 2 * PI)
+    ctx.set_source_rgb(*hexc("#4f8bff"))
+    ctx.fill()
+    bold_text(ctx, txt, 18, 0, 30, (1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
