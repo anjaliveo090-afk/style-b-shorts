@@ -9,4 +9,5 @@ When the user sends analytics for a YouTube title, find the story here. When a n
 | robux10 | What if you got 1,000,000 Robux in just 10 seconds? | 44 s | 2026-10-30 | | |
 | grandma_pro | What If Your GRANDMA Became a Roblox Pro? | 47 s | 2026-10-31 | | |
 | sneeze | What If You Got 1 ROBUX Every Time You Sneezed? | 47 s | 2026-10-31 | | |
+| tensec (not made in this repo; the user's upload, analysed as a reference) | What If MOM Gave You 10 Seconds of Roblox | 50 s | – | What If MOM Gave You 10 Seconds of Roblox | **yes, 2026-11-04** (`analysis/ref_data/analytics/tensec`, lessons 1-6) |
 | reset_noob | This noob is the reason Roblox has a reset button (no captions: the user asked; thumbnail: `animator/thumb_reset_noob.py`) | 76 s | 2026-11-03 | This Noob Is the REASON Roblox Has a Reset Button... 😭 | |

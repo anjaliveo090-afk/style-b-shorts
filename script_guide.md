@@ -65,20 +65,20 @@ The style is copied, never the text: do not reuse the reference channel's lines,
 
 | # | Time | Beat | Who | Emotion | What it does | Reference shapes (paraphrased) |
 |---|---|---|---|---|---|---|
-| 1 | 0-2.5 s | **Hook**: the title as a question | Narrator | curious | States the absurd idea | "What if your dad became the Noob King?" |
-| 2 | 2.5-7 s | **Setup**: a quick exchange or a cool line | a character (or the narrator) | pleading / smug / confident / whispering | Shows the characters and the conflict | kid begs dad to change his avatar, dad: "Nope."; "Watch this."; "I'm in!" |
+| 1 | 0-1.8 s | **Hook**: the title as a question, ≤ 1.8 s, the number/power in it (`lessons.md` 1) | Narrator | curious | States the absurd idea | "What if your dad became the Noob King?" |
+| 2 | 1.8-5 s | **Setup**: a quick exchange or a cool line, at most 3 short lines; chapter 1 starts by ~5 s (`lessons.md` 2) | a character (or the narrator) | pleading / smug / confident / whispering | Shows the characters and the conflict | kid begs dad to change his avatar, dad: "Nope."; "Watch this."; "I'm in!" |
 | 3 | 7-12 s | **Chapter 1**: the first small, funny result | Narrator + a 1-line character reaction | excited / chuckling | The power works, clumsily | can't even jump; blink → DING, it's real |
 | 4 | 12-17 s | **Chapter 2**: a surprising escalation | Narrator | excited / gasping | Bigger and stranger | a golden crown drops; /GIANT |
 | 5 | 17-23 s | **Chapter 3**: a huge number | Narrator | excited, emphasis on the number | 1,000,000 / trillion / everything free | "One million noobs join his army" |
 | 6 | 23-26 s | **Chapter 4**: it goes public | Narrator | excited | The whole server or class sees it | take over every obby; everyone's staring |
-| 7 | 26-29 s | **CTA**: "Everyone who subscribes gets ___" (always tied to the power) | Narrator | cheerful | A subscribe button gets pressed on screen | gets ADMIN / joins the noob army / one free blink |
+| 7 | 26-29 s | **CTA**: "Everyone who subscribes gets ___" (always tied to the power). **Analytics rule (`lessons.md` 3): one line ≤ 2 s, a curiosity hook right before it ("But on Day 5, something impossible happens…"), the biggest surprise right after** | Narrator | whispering → cheerful | A subscribe button gets pressed on screen | gets ADMIN / joins the noob army / one free blink |
 | 8 | 29-35 s | **Chapter 5 = the conflict**: mom or dad steps in | Narrator ("Mom says…") + a character | soft → suspicious / angry | The authority figure arrives | "Tablet. Off. NOW."; "Staring contest, sweetie." |
 | 9 | 35-42 s | **Showdown**: the power vs the parent | the characters | pleading / confident / shocked | One clever move each | freeze mom; "Kneel before the King!" |
 | 10 | 42-47 s | **Punishment**: everything goes to zero | Narrator | deadpan → sad | The loss, item by item | "Your Robux… Zero."; "Pet, gone."; turns into a noob |
 | 11 | 47-49 s | **The parent's sweet ending line** | Mom / Dad | sweet / smug | Irony | "Bedtime, sweetie."; "No more Roblox, sweetie." |
 | 12 | 49-52 s | **Twist**: "But then…" one more turn | Narrator | whispering → excited | Opens a new problem | the game updated…; mom forgot one thing… |
-| 13 | 50-53 s | **Comment CTA** with ONE keyword | Narrator | cheerful | "Comment HACK if you'd…" | the keyword is the title's power word |
-| 14 | 53-56 s | **Loop line**: leads back into the hook | a character | confused / sneaky | Ends mid-action, so the video restarts | "Slash… REWIND!"; "Wait, which button goes back?" |
+| 13 | 47-51 s | **Comment CTA** with ONE keyword, **before** the final punchline, ≤ 1.5 s (`lessons.md` 4) | Narrator | cheerful | "Comment HACK if you'd…" | the keyword is the title's power word |
+| 14 | 51-54 s | **Final punchline = loop line**: the last spoken words, leading back into the hook; nothing after it except the REWIND | a character | confused / sneaky | Ends mid-action, so the video restarts | "Slash… REWIND!"; "Wait, which button goes back?" |
 
 ### How the two set-3 scripts fit the beat sheet
 | Beat | Never stopped | Best friend quit |

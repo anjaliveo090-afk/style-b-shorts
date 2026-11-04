@@ -32,7 +32,7 @@ The energy comes from the cuts, the pops and the faces, not from camera travel.
 ## 2. Phrase type → what is shown → camera → character reaction
 | # | When the phrase... | Show | Camera | Character | Example in the references |
 |---|---|---|---|---|---|
-| 1 | Hook question "What if your mom..." | The main place with **both characters**: kid in front, mom in the doorway or at a desk. Timer/HUD already visible | Slight push; the expression snaps on "mom" | Kid shocked (pale, shake lines), mom smirk | tensec 0:00: night bedroom, kid in bed with a laptop, mom in the door; momplays 0:00: mom close-up in a gamer headset |
+| 1 | Hook question "What if your mom..." (**analytics rule: the first frame is a giant close-up of the stake, a new picture every ≤ 0.8 s for 3 s**, `lessons.md` 1) | The main place with **both characters**: kid in front, mom in the doorway or at a desk. Timer/HUD already visible | Slight push; the expression snaps on "mom" | Kid shocked (pale, shake lines), mom smirk | tensec 0:00: night bedroom, kid in bed with a laptop, mom in the door; momplays 0:00: mom close-up in a gamer headset |
 | 2 | A rule / an order ("10 seconds, then you go to bed") | **Close-up of the speaker holding the object** (alarm clock 0:10) | Medium close-up, punch-in on the number word | Smirk → cold on "bed", arm points | mom in the door holding the clock |
 | 3 | Disbelief ("10 seconds?") | **Face close-up**, head 60-80% of the width | Punch-in x1.2 + shake | shock: white circle eyes, pale blue face, sweat, shake lines | kid "TEN SECONDS?" |
 | 4 | A cool turn ("unless you're a speedrunner") | **Extreme close-up**, face fills the frame, dutch tilt | Quick push to the eyes | smug (half-lid + tongue), sparkle on the eye | kid "SPEEDRUNNER." |

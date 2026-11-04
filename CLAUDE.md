@@ -10,8 +10,8 @@ When the user gives a voiceover + SRT (or a script), follow this workflow withou
 
 ## YouTube analytics (retention / swipe-away points)
 When the user sends a video's name with its retention, the times where viewers swiped and the lines there (with or without the reason), follow "How to handle an analytics message" in `lessons.md`:
-1. Find the story in `videos.md`.
-2. Run `python3 analysis/drop_point.py <story> <time>` for every drop and look at the frames.
+1. Find the story in `videos.md`. If the user sends the Studio export zip, run `python3 analysis/retention.py <zip> <video or seconds> <subs.srt>` to get the drop zones in seconds with their lines.
+2. Run `python3 analysis/drop_point.py <story> <time>` for every drop and look at the frames (for a video not made here, grab the frames with ffmpeg at the drop times).
 3. Name the reason. Use the checklist if the user did not give one, and say how sure you are.
 4. Add a lesson plus a **rule** to `lessons.md`, and update the guide or tool that caused it.
 5. Commit, push, and explain in Hinglish.
@@ -19,7 +19,7 @@ When the user sends a video's name with its retention, the times where viewers s
 Every delivered video gets a row in `videos.md`.
 
 ## Titles and scripts (before any voice exists)
-Read `script_guide.md` first. It was learned from 6 reference videos: who speaks when, the emotions, the beat sheet and the silent parts.
+Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8 reference videos: who speaks when, the emotions, the beat sheet and the silent parts.
 - **"Title do" / "titles":**
   - Give 10 titles from the formulas in section 1, and mark the 3 strongest.
   - Our own ideas only; never the reference channel's titles.
