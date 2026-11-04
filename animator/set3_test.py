@@ -31,10 +31,10 @@ def closeup(ctx, ch, expr, T, x=360, s=4.2, arms=("down", "down"), snap=None, bo
 def s_day(ctx, t, d):
     T = t
     st.kitchen(ctx, T, night=False)
-    MOM.draw(ctx, 200, 1150, 1.3, "smirk", T, arms=("down", "hold"))
-    KID.draw(ctx, 520, 1150, 1.3, "grin", T, arms=("hold", "hold"))
-    st.tablet(ctx, 520, 960, 0.5, T)
-    st.day_write(ctx, "DAY", 1, 330, 330, T - 0.12, size=120)
+    MOM.draw(ctx, 170, 1500, 2.4, "smirk", T, arms=("down", "hold"))
+    KID.draw(ctx, 560, 1500, 2.4, "grin", T, arms=("hold", "hold"))
+    st.tablet(ctx, 580, 1010, 0.8, T)
+    st.day_write(ctx, "DAY", 1, 330, 470, T - 0.12, size=170)
 
 
 def s_what(ctx, t, d):
@@ -44,7 +44,7 @@ def s_what(ctx, t, d):
         st.street(ctx, T)
     else:
         st.burst(ctx, T, "#ffd27a", "#ff7a1a", cy=560, spin=0.3)
-    closeup(ctx, KID, "happy" if T < hit else "scream", T, arms=("show", "show"),
+    closeup(ctx, KID, "happy" if T < hit else "scream", T, arms=("show", "show"), s=5.4, dy=40,
             snap=(T - hit) if T >= hit else None)
     if T >= hit:
         style.sweat(ctx, 560, 420, 1.0, T)
@@ -82,7 +82,7 @@ def ov_splat(ctx, t, d):
 def s_system(ctx, t, d):
     T = 4.8 + t
     st.night_bedroom(ctx, T)
-    st.system_message(ctx, 360, 600, 1.0, ["Please...", "take a break."], T - 4.9, T=T,
+    st.system_message(ctx, 360, 560, 1.3, ["Please...", "take a break."], T - 4.9, T=T,
                       typed=clamp((T - 5.1) / 0.9))
 
 

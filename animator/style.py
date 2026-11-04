@@ -917,7 +917,7 @@ def _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, ch):
     elif mouth == "forced":
         dmouth(0.17 * u, 0.08 * u, teeth=True, tongue=False, bottom_teeth=True)
     elif mouth == "scream":   # the references' "WHAT?!" scream: a huge tall mouth, top teeth, tongue at the bottom
-        w, d = 0.17 * u, 0.36 * u
+        w, d = 0.21 * u, 0.46 * u
         ctx.move_to(cx - w, my - 0.04 * u)
         ctx.curve_to(cx - w, my - 0.1 * u, cx + w, my - 0.1 * u, cx + w, my - 0.04 * u)
         ctx.curve_to(cx + w * 1.05, my + d * 0.7, cx + w * 0.6, my + d, cx, my + d)

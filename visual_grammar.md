@@ -87,6 +87,12 @@ Every frame of both videos was read (3207 + 3304 frames at 60 fps). Use `engine.
 | Reaction snap | the head grows and the mouth opens over ~6 frames; the background switches to a burst on the same frame | same | `Block.draw(..., snap=seconds since)` + the new `"scream"` expression for "WHAT?!" |
 | Lip-sync (character lines) | the mouth changes every 2-4 frames between closed smile, half-open teeth, open with tongue | same | `engine.LIPSYNC` + `talk=` (3 mouth sizes from the voice) |
 
+**Framing in set 3 (side-by-side check, `output/set3_test/side_by_side.png`):**
+- Characters are framed **tight**: two people in a scene are medium shots cut at the chest (Block scale ~2.4), not full bodies.
+- A reaction close-up ("WHAT?!") fills ~75 % of the width (closeup `s≈5.4`), with the `"scream"` mouth taller than the eyes.
+- The DAY card spans ~80 % of the width (`day_write(..., size=170)`), across the middle of the frame, over the characters' heads.
+- Phone screens and dialogs fill the frame (`system_message(..., s=1.3)`, phone close-ups with hands at the bottom).
+
 ## 3. Composition
 - Safe zone: the whole character and key props inside x 38-680, y 149-1013 (below y 678 only to x 599). Run `safezone.fit(SHOTS, module)` before render. Use `keep=[...]` for key props and `top=250` under the HUD.
 - **Face close-ups** (rows 3, 4, 13, 17) are the exception: the body runs off the bottom of the frame. Mark the shot `closeup=True` and add the face box to `keep=[...]`. safezone then keeps the face and labels in the zone and ignores the body (see `sample.py` `FACE_KEEP`).
