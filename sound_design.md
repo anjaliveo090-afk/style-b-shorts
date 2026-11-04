@@ -54,7 +54,36 @@ Our generator: `animator/audio.py music_game(total, start=..., dips=[(t0, t1), .
 | Comment line | ding |
 | Loop rewind | whoosh |
 
+## 2b. All 7 references side by side (set 3 added 2026-11-04)
+Measured with `audio_ref.py` on the downloaded references. dB are relative to the narration.
+
+| Reference | Music vs voice | SFX per 10 s | SFX median vs voice | SFX on cuts | Music key / bpm | Percussive share |
+|---|---|---|---|---|---|---|
+| tensec | -10.5 | 11.0 | -2.7 | 65 % | G minor / 120 | 0.14 |
+| momplays | -10.0 | 11.8 | -3.5 | 78 % | G major / 136 | 0.22 |
+| blink | -12.3 | 12.5 | -5.1 | 87 % | F# minor / 123 | 0.13 |
+| dad noob king | -15.2 | 10.4 | -8.2 | 91 % | G major / 140 | 0.20 |
+| hacked | -13.5 | 11.3 | -6.7 | 81 % | D major / 94 | 0.26 |
+| **never_stop** (set 3) | **-20.2** | 12.5 | **-11.4** | 85 % | D major / 133 | 0.20 |
+| **bff_quit** (set 3) | **-14.9** | 10.2 | **-8.4** | 79 % | G minor / 126 | 0.22 |
+| **median of 7** | **-13.5** | 11.3 | **-6.7** | 81 % | G / D, ~126 | 0.20 |
+
+What set 3 changes:
+- **The newer videos are mixed quieter under the voice.** Music sits around -15 dB (never_stop -20) and SFX around -8 to -11 dB. The new targets below use the median of all 7.
+- **Fewer booms.** Set 3 SFX kinds: pops 45-55 %, ticks/clicks 15-33 %, dings/chimes 16-21 %, thuds/booms only 5-7 % (3-5 per video), whoosh 1-2. Booms are kept for the 3-5 biggest moments (the DAY 5 power cut, a slam); the comic sound-word stickers (`sfx_word`) get a pop or a tick.
+- 79-85 % of SFX land on a cut.
+- Keys: G or D (D is G's dominant), 126-133 bpm. The bed stays "G-centred".
+
 ## 3. Defaults for every new video (animator)
+**With `engine.profile("set3")` (the default for new stories since 2026-11-04):**
+- Music: `MUSIC = dict(bpm=128, perc=0.6, dips=[...])`, mixed with **`--music-volume 0.45`** (about -14 dB under a voiceflow voice).
+  - `perc` adds a soft kick and a woodblock. `audio_ref.py` counts part of them as SFX (perc=1 alone read 3.7 per 10 s at -6.6 dB) and still reports a low percussive share; the references' numbers include the same effect. Keep perc at 0.6 and count it in the SFX budget.
+- SFX: **`SFX_GAIN = 0.2`** for the user's voiceflow voice (0.28 measured -3.6 dB; set 3 wants about -7). About 1.0-1.1 SFX per second in the `SFX` list (the music adds a few counted ones).
+- Kind mix: ~50 % pop (every `sfx_word` sticker, card and label pop), ~25 % tick/click/type, ~15 % ding/sparkle/success, **3-5 booms in the whole video**, `whip.wav` only on the rewind and `swish` on a whip pan.
+- Targets (section 4 table): music **-13.5 ± 3 dB**, SFX **10-12.5 per 10 s**, SFX median **-4 to -9 dB**, key G (or D).
+
+**Older stories (30 fps, no profile)** keep the numbers below, so their fix renders still match.
+
 These were calibrated by measuring assembled mp4s with `audio_ref.py` (section 4):
 - `animator/report_noob.py`: a real recorded voiceover, 60 s. **Use these numbers.**
 - `animator/sample.py`: a TTS test voice.

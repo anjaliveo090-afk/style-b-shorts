@@ -15,6 +15,21 @@ PI = math.pi
 LIPSYNC = True  # False: mouths keep the scene expression instead of following the voice
 ENERGY = 2.0  # character motion multiplier (idle sway, head and hand movement)
 DRIFT = (0.07, 14, -10)  # key_camera creep while holding: zoom per s, x px/s, y px/s (Style B uses a calmer value)
+SHAKE = "rattle"  # "bump": the reference impact (analysis/frame60.py): one vertical damped bounce ~5.5 Hz + zoom kick
+PUNCH = "inout"   # "settle": short camera moves (<= 0.3 s) start fast and settle, peak speed at 25 % of the move
+WHIP_IN, WHIP_OUT = 0.07, 0.05   # whip-pan transition: seconds of the fast pan into / out of a shot
+
+
+def profile(name):
+    """Motion profile. 'set3' = measured frame by frame at 60 fps on reference set 3 (style_bible.md, 60 fps):
+    renders at 60 fps like the references, impact bumps instead of rattles, punch-ins that settle,
+    and the measured hold creep (2.7 % zoom/s, ~0.5 % width/s pan). Call it at the top of the story,
+    before set_voice(). Stories without it keep the old 30 fps look (so their patch renders still match)."""
+    global FPS, SHAKE, PUNCH, DRIFT
+    if name == "set3":
+        FPS, SHAKE, PUNCH, DRIFT = 60, "bump", "settle", (0.027, 4, -2)
+    else:
+        FPS, SHAKE, PUNCH, DRIFT = 30, "rattle", "inout", DRIFT
 
 
 # ---------- helpers ----------
@@ -294,7 +309,7 @@ _NOW = {"t": 0.0, "speaker": None}
 
 
 def set_voice(path):
-    """Load the voiceover loudness (30 values per second) to drive mouths."""
+    """Load the voiceover loudness (FPS values per second) to drive mouths."""
     raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-ac", "1", "-ar", "16000",
                           "-f", "s16le", "-"], capture_output=True, check=True).stdout
     x = np.frombuffer(raw, np.int16).astype(np.float32)
@@ -876,7 +891,10 @@ def key_camera(keys, T):
             za, ca = drift(keys[i - 1], t1 - m - t0)
             zb, cb = keys[i][1], keys[i][2]
             x = (T - (t1 - m)) / m
-            p = 4 * x ** 3 if x < 0.5 else 1 - (-2 * x + 2) ** 3 / 2   # cubic ease in-out
+            if PUNCH == "settle" and m <= 0.3:
+                p = 1 - (1 - x) ** 4 * (1 + 4 * x)                      # fast start, long settle (refs)
+            else:
+                p = 4 * x ** 3 if x < 0.5 else 1 - (-2 * x + 2) ** 3 / 2   # cubic ease in-out
             dist = math.hypot(cb[0] - ca[0], cb[1] - ca[1])
             bump = 0.22 if dist > 350 else 0.0
             z = math.exp(lerp(math.log(za), math.log(zb), p)) * (1 - bump * math.sin(PI * p))
@@ -900,6 +918,19 @@ def _motion_blur(surf, dx, dy):
     surf.mark_dirty()
 
 
+def _whip_dx(shot, t, d):
+    """Camera x offset of a whip-pan transition (world px before zoom). shot['whip'] = +1 / -1: this shot is
+    entered with a fast pan to the right / left; '_whip_out' is set by render() when the next shot whips in."""
+    dx = 0.0
+    w = shot.get("whip")
+    if w and t < WHIP_IN:
+        dx -= w * W * 0.5 * (1 - t / WHIP_IN) ** 2
+    wo = shot.get("_whip_out")
+    if wo and t > d - WHIP_OUT:
+        dx += wo * W * 0.5 * ((t - (d - WHIP_OUT)) / WHIP_OUT) ** 2
+    return dx
+
+
 def _draw_shot(shot, t, surf, rng_noise):
     ctx = cairo.Context(surf)
     ctx.set_source_rgb(0, 0, 0)
@@ -912,6 +943,8 @@ def _draw_shot(shot, t, surf, rng_noise):
         T = shot["start"] + t
         z, (cx, cy) = key_camera(keys, T)
         zp, (px, py) = key_camera(keys, T - 1 / FPS)
+        cx += _whip_dx(shot, t, d) / z
+        px += _whip_dx(shot, t - 1 / FPS, d) / zp
         z0, c0 = keys[0][1], keys[0][2]
         shot["_vel"] = ((cx - px) * z, (cy - py) * z + (z - zp) * H * 0.5)
     else:
@@ -927,7 +960,13 @@ def _draw_shot(shot, t, surf, rng_noise):
     shake = shot.get("shake")
     if shake:
         st, amp = shake
-        if t >= st:
+        if t >= st and SHAKE == "bump":       # one vertical jolt that bounces out in ~0.25 s, plus a zoom kick
+            k = t - st
+            e = math.exp(-12 * k)
+            cy += 2.0 * amp * e * math.cos(2 * PI * 5.5 * k)
+            cx += 0.6 * amp * e * math.sin(2 * PI * 7 * k)
+            z *= 1 + 0.035 * math.exp(-10 * k)
+        elif t >= st:
             k = math.exp(-(t - st) * 6) * amp
             cx += math.sin(t * 70) * k
             cy += math.cos(t * 53) * k
@@ -987,6 +1026,7 @@ def render(shots, total, out_path, xfade=0.22, grain=9, fade_out=0.6, frames=Non
     for f in range(*(frames or (0, nframes))):
         T = f / FPS
         i = max(k for k, s in enumerate(shots) if s["start"] <= T or k == 0)
+        shots[i]["_whip_out"] = shots[i + 1].get("whip") if i + 1 < len(shots) else None
         _draw_shot(shots[i], T - shots[i]["start"], surf_a, noise)
         if i + 1 < len(shots):
             nxt = shots[i + 1]

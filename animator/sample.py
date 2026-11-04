@@ -28,10 +28,10 @@ from sets import label
 from style import Block
 
 TOTAL = 22.3
-engine.LIPSYNC = False            # the references do not lip-sync
-engine.DRIFT = (0.02, 5, -3)      # calm creep while holding (measured camera median 2-5 % width/s)
+engine.profile("set3")           # 60 fps + the motion measured frame by frame on reference set 3 (bumps, settle, whip)
+engine.LIPSYNC = False            # narrator only here; lip-sync only on character dialogue (CLAUDE.md)
 engine.ENERGY = 3.0               # livelier idle bounce/sway (non-camera motion target 5-8)
-MUSIC = {}                        # music_game() kwargs, e.g. dict(start=3.0, dips=[(t0, t1)])
+MUSIC = dict(bpm=128, perc=0.6)   # music_game() kwargs (set 3); add start=3.0 or dips=[(t0, t1)] as needed
 SFX_GAIN = 0.17                   # all cue volumes x this: SFX median ~-3 dB vs the voice (sound_design.md)
 
 KID, KID_GAME, MOM = style.KID, style.KID_GAME, style.MOM

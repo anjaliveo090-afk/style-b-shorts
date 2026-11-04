@@ -187,7 +187,9 @@ class Block:
     # ------------------------------------------------------------------
     def draw(self, ctx, x, y, s=1.0, expr="neutral", t=0.0, talk=False,
              arms=("down", "down"), pose="stand", look=0.0, bob=1.0,
-             item=None, item_hand=1, walk_phase=0.0, lean=0.0, head_nod=0.0, shadow=True):
+             item=None, item_hand=1, walk_phase=0.0, lean=0.0, head_nod=0.0, shadow=True, snap=None):
+        """snap = seconds since the expression changed: the head pops (x1.06 at ~60 ms, settled by ~0.3 s),
+        like the references' reaction snaps (analysis/frame60.py strips)."""
         r = 64 * s
         u = self.HW * r                      # head width
         e = engine.ENERGY * bob
@@ -236,7 +238,16 @@ class Block:
         for i, side, a, ang, length in front:
             if a not in ("cover",):
                 self._arm(ctx, u, lw, top, side, ang, length, item if i == item_hand else None, t)
-        self._head(ctx, hcx, hcy, u, lw, expr, t, talk, look)
+        if snap is not None and 0 <= snap < 0.4:
+            sc = 1 + 0.12 * math.sin(25 * snap) * math.exp(-10 * snap)
+            ctx.save()
+            ctx.translate(hcx, hcy + 0.45 * u)
+            ctx.scale(sc, sc)
+            ctx.translate(-hcx, -(hcy + 0.45 * u))
+            self._head(ctx, hcx, hcy, u, lw, expr, t, talk, look)
+            ctx.restore()
+        else:
+            self._head(ctx, hcx, hcy, u, lw, expr, t, talk, look)
         for i, side, a, ang, length in front:
             if a == "cover":
                 self._arm(ctx, u, lw, top, side, ang, length, None, t)
@@ -443,7 +454,7 @@ class Block:
         x0, y0 = cx - hw / 2, cy - hh / 2
         self._hair_back(ctx, cx, y0, u, lw)
         skin = self.skin
-        if expr in ("shock", "scared"):
+        if expr in ("shock", "scared", "scream"):
             skin = mix(skin, PALE, 0.5)
         elif expr == "disgust":
             skin = mix(skin, hexc("#9fd86a"), 0.35)
@@ -487,7 +498,7 @@ class Block:
         _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, self)
         self._accessories(ctx, cx, y0, u, lw, hh, t)
         # reaction FX around the head
-        if expr in ("shock", "scared"):
+        if expr in ("shock", "scared", "scream"):
             shake_lines(ctx, cx, y0 + hh * 0.45, hw * 0.72, hh * 0.75, t, lw=max(2, lw * 1.1))
             sweat(ctx, cx + hw * 0.47, y0 + hh * 0.2, 0.13 * u, t)
         elif expr == "angry":
@@ -743,7 +754,7 @@ def _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, ch):
     elif expr in ("sad", "worried", "cry", "scared", "forced"):
         for s_ in (-1, 1):
             brow(s_, 0.02, -0.05)
-    elif expr in ("shock", "crazy"):
+    elif expr in ("shock", "crazy", "scream"):
         for s_ in (-1, 1):
             brow(s_, 0.07, 0.0, arch=True)
     elif expr in ("smirk", "smug"):
@@ -790,8 +801,8 @@ def _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, ch):
             ctx.move_to(ex - 0.07 * u, ey + 0.02 * u)
             ctx.curve_to(ex - 0.04 * u, ey - 0.06 * u, ex + 0.04 * u, ey - 0.06 * u, ex + 0.07 * u, ey + 0.02 * u)
             stroke(EYE, 0.035 * u)
-        elif expr in ("shock", "scared", "crazy"):
-            rr = 0.15 * u if expr == "crazy" else 0.14 * u
+        elif expr in ("shock", "scared", "crazy", "scream"):
+            rr = 0.15 * u if expr == "crazy" else (0.155 * u if expr == "scream" else 0.14 * u)
             ctx.new_sub_path()
             ctx.arc(ex - lx, ey, rr, 0, 2 * PI)
             ctx.set_source_rgb(1, 1, 1)
@@ -905,6 +916,30 @@ def _face(ctx, cx, y0, u, hh, lw, expr, t, talk, look, ch):
         dmouth(0.25 * u, 0.19 * u, teeth=True, tongue=True)
     elif mouth == "forced":
         dmouth(0.17 * u, 0.08 * u, teeth=True, tongue=False, bottom_teeth=True)
+    elif mouth == "scream":   # the references' "WHAT?!" scream: a huge tall mouth, top teeth, tongue at the bottom
+        w, d = 0.17 * u, 0.36 * u
+        ctx.move_to(cx - w, my - 0.04 * u)
+        ctx.curve_to(cx - w, my - 0.1 * u, cx + w, my - 0.1 * u, cx + w, my - 0.04 * u)
+        ctx.curve_to(cx + w * 1.05, my + d * 0.7, cx + w * 0.6, my + d, cx, my + d)
+        ctx.curve_to(cx - w * 0.6, my + d, cx - w * 1.05, my + d * 0.7, cx - w, my - 0.04 * u)
+        ctx.close_path()
+        path = ctx.copy_path()
+        ctx.set_source_rgb(*MOUTH)
+        ctx.fill_preserve()
+        ctx.save()
+        ctx.clip()
+        ctx.rectangle(cx - w * 1.2, my - 0.12 * u, 2.4 * w, 0.09 * u)
+        ctx.set_source_rgb(*TEETH)
+        ctx.fill()
+        ellipse(ctx, cx, my + d * 0.95, w * 0.75, d * 0.3)
+        ctx.set_source_rgb(*TONGUE)
+        ctx.fill()
+        ellipse(ctx, cx, my + d * 0.35, w * 0.45, d * 0.28)
+        ctx.set_source_rgba(0, 0, 0, 0.35)
+        ctx.fill()
+        ctx.restore()
+        ctx.append_path(path)
+        stroke(EYE, 0.024 * u)
     elif mouth in ("shock",):
         ellipse(ctx, cx, my + 0.03 * u, 0.07 * u, 0.095 * u)
         ctx.set_source_rgb(*MOUTH)
@@ -1027,7 +1062,7 @@ def back_figure(ctx, x, y, s, hair_col="#8d5e3b", shirt="#e8573a", hair="bowl"):
 
 # ---------------------------------------------------------------- our own cast (style only, not the reference's people)
 EXPRESSIONS = ["neutral", "happy", "grin", "laugh", "smirk", "smug", "cold", "shock", "scared", "angry", "cry",
-               "sad", "worried", "crazy", "wink", "stars", "sleepy", "determined", "forced", "disgust"]
+               "sad", "worried", "crazy", "wink", "stars", "sleepy", "determined", "forced", "disgust", "scream"]
 ARMS = ["down", "up", "point", "show", "hip", "hold", "cross", "wave", "shrug", "punch", "cover", "phone"]
 POSES = ["stand", "walk", "run", "jump", "sit", "feetup"]
 

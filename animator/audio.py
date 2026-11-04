@@ -262,6 +262,11 @@ def music_ref(total, swell_at=None):
                 continue
             m = pluck(note(tones[i]), 0.9, 3, 5) * 0.33
             put(m * np.minimum(1, (len(m) - np.arange(len(m))) / (SR * 0.1)), t + k * beat / 2)
+        if perc > 0:
+            for k in (0, 2):
+                put(kick() * 0.32 * perc, t + k * beat)
+            for k in range(4):
+                put(wood(1250 if k % 2 else 1500) * 0.07 * perc, t + k * beat + beat / 2)
         t += beat * 4
         bar += 1
     if swell_at is not None:
@@ -306,6 +311,11 @@ def music(total, sad_from, sad_to):
             for k in range(4):
                 n = rng.standard_normal(int(SR * 0.05))
                 put((n - onepole(n, 5000)) * np.exp(-np.arange(len(n)) / SR * 80) * 0.15, t + k * beat + beat / 2)
+        if perc > 0:
+            for k in (0, 2):
+                put(kick() * 0.32 * perc, t + k * beat)
+            for k in range(4):
+                put(wood(1250 if k % 2 else 1500) * 0.07 * perc, t + k * beat + beat / 2)
         t += beat * 4
         bar += 1
     put(sum(pluck(note(m), 3.0, 4, 1.2) for m in (48, 55, 60, 64)) * 0.5, total - 2.8)
@@ -316,13 +326,15 @@ def music(total, sad_from, sad_to):
     return out * fade
 
 
-def music_game(total, start=0.0, dips=(), bpm=120, end_hit=True):
+def music_game(total, start=0.0, dips=(), bpm=120, end_hit=True, perc=0.0):
     """Style B bed (sound_design.md section 1): cheeky game tune centred on G that swings
     between major and minor (G | Gm | Eb | D7), a soft root-fifth bass, a marimba + square
     lead; ~2 notes/s. All attacks are >= 8 ms and there are no noise hats, so
     analysis/audio_ref.py does not count the music as SFX. `start` fades the bed in (the references often start it after the
     hook); `dips` = [(t0, t1), ...] drop it ~9 dB (slow-motion / dramatic beats).
-    Mix with assemble.py --music-volume MUSIC_VOL (about -10 dB under the voice, measured)."""
+    Mix with assemble.py --music-volume MUSIC_VOL (about -10 dB under the voice, measured).
+    perc 0..1 adds a soft kick (beats 1 and 3) and a woodblock on the off-beats: reference set 3 measures a
+    percussive share of 0.20-0.22 at 126-133 bpm (use perc=1, bpm=128 with engine.profile("set3"))."""
     out = np.zeros(int(SR * (total + 3)))
     beat = 60 / bpm
 
@@ -347,6 +359,16 @@ def music_game(total, start=0.0, dips=(), bpm=120, end_hit=True):
         x = np.sin(2 * np.pi * f * t) + 0.35 * np.sin(2 * np.pi * 2 * f * t) + 0.12 * np.sin(2 * np.pi * 3 * f * t)
         return x * np.minimum(1, t / 0.07) * np.exp(-t * 1.5) * np.minimum(1, (d - t) / 0.05)
 
+    def kick(d=0.3):
+        t = tt(d)
+        f = 52 + 75 * np.exp(-t * 32)
+        return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 13) * np.minimum(1, t / 0.008)
+
+    def wood(f=1250, d=0.09):
+        t = tt(d)
+        return (np.sin(2 * np.pi * f * t) + 0.4 * np.sin(2 * np.pi * 2.7 * f * t)) * np.exp(-t * 55) \
+            * np.minimum(1, t / 0.008)
+
     # (bass root, chord tones for the lead) per bar: G | Gm | Eb | D7, a cheeky major/minor swing on G
     prog = [(43, [67, 71, 74, 79]), (43, [67, 70, 74, 79]), (39, [67, 70, 75, 79]), (38, [66, 69, 72, 74])]
     riffs = [[0, None, 2, None, None, None, None, None], [None, None, None, 2, 1, None, None, None],
@@ -361,6 +383,11 @@ def music_game(total, start=0.0, dips=(), bpm=120, end_hit=True):
             if i is not None:
                 put(marimba(note(tones[i])) * 0.3, t + k * beat / 2)
                 put(square(note(tones[i] + 12), 0.3, 9) * 0.07, t + k * beat / 2)
+        if perc > 0:
+            for k in (0, 2):
+                put(kick() * 0.32 * perc, t + k * beat)
+            for k in range(4):
+                put(wood(1250 if k % 2 else 1500) * 0.07 * perc, t + k * beat + beat / 2)
         t += beat * 4
         bar += 1
     if end_hit:

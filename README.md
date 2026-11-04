@@ -41,6 +41,8 @@ I am attaching a voiceover and its SRT. Run bash setup.sh, then read MASTER_PROM
 | `assembler/make_voice.py` | Test voiceover + SRT from a script in the `Narrator: [emotion] …` format (Kokoro TTS, one voice per character) |
 | `analysis/silences.py`, `assembler/tighten_voice.py` | Measure the pauses in a voice; shorten pauses that are too long |
 | `analysis/` | Reference analysis tools (frame logs, SFX/music measure, pace, camera flow, word alignment) and `ref_data/` |
+| `analysis/frame60.py` | Frame-exact analysis (every frame at 60 fps): cuts, held drawings, punch-ins, impact bumps, whip pans, caption pops |
+| `animator/set3_test.py` | 6 s side-by-side test of the reference set 3 motion (`engine.profile("set3")`: 60 fps, bumps, whip, DAY write-on, sound-word stickers, system message) |
 | `reference_examples/` | The older toolkit (another style) this repo was bootstrapped from, kept as worked examples |
 
 ## Quick test

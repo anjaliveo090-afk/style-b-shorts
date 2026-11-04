@@ -43,8 +43,11 @@ STEP 2 - VISUAL PLAN
   - a big red X for "no / wrong";
   - a face close-up (closeup=True) for reactions;
   - game UI (stage pill, health bar, leaderboard, shop, comments) for game things.
-- A hard cut on each phrase, a new visual every 1.1-1.6 s. The camera punches in (0.1-0.2 s key)
-  and expressions snap ON the key word.
+- A hard cut on each phrase, a new visual every 1.1-1.3 s. The camera punches in (0.12-0.15 s key, +8 %)
+  and expressions snap ON the key word. A sound-word sticker (sets.sfx_word: SPLAT!, BUMP!) on every physical
+  action; the game UI tells quits, invites, gifts and counts (visual_grammar.md rows 21-30).
+- Start every new story with engine.profile("set3"): 60 fps, impact bumps, settling punch-ins, whip pans
+  (shot(..., whip=1)), head snaps (snap=), the "scream" face, sets.day_write chapter cards.
 - Show me the plan as a table (time | words | row | visual | camera | expression | SFX) before building.
 - Safe zone: the WHOLE character and key props inside x 38-680, y 149-1013
   (below y 678 only up to x 599). Face close-ups keep the face and labels inside.
@@ -62,22 +65,23 @@ STEP 4 - MY DEFAULTS
 - Always add reference-style captions with assembler/captions.py (see CLAUDE.md Defaults), never repeating
   text that is already on screen at that moment. Send me ONLY the captioned mp4, one file, no caption-free copy. Lip-sync only when a character speaks dialogue (not the narrator). No camera whoosh.
 - Hard cuts: render(xfade=0, grain=2, fade_in=0, fade_out=0), loop back to the first frame.
-- Music: audio.music_game() (the story's MUSIC dict, written as music.wav) at --music-volume 0.5.
-- SFX: about 1.1 per second on visual events, SFX_GAIN = 0.4 (real voice), hits 1.3, booms 1.6.
-  Measure, then adjust SFX_GAIN only (no re-render needed) until the SFX median is about -3 dB.
+- Music: audio.music_game() (MUSIC = dict(bpm=128, perc=0.6, dips=[...]), written as music.wav) at --music-volume 0.45.
+- SFX: about 1.0-1.1 per second on visual events, SFX_GAIN = 0.2 (the voiceflow voice); mostly pops, ticks and
+  dings, only 3-5 booms per video. Measure, then adjust SFX_GAIN only (no re-render needed) until the SFX median
+  is about -7 dB.
 - Synthesised SFX and music only (animator/audio.py).
 
 STEP 5 - MEASURE, THEN SEND
-- analysis/new_visuals.py: a new visual every 1.1-1.6 s.
+- analysis/new_visuals.py: a new visual every 1.1-1.3 s (1.6 at most).
 - analysis/flow.py on the animation: camera median 2-5, mean 6-11; non-camera motion 5-8.
 - analysis/audio_ref.py on the final mp4:
 
   | Measure | Target |
   |---|---|
-  | Music vs voice | -10 ± 2.5 dB |
+  | Music vs voice | -13.5 ± 3 dB |
   | Music key | G (major or minor) |
-  | SFX per 10 s | 9-13 |
-  | SFX median vs voice | -1 to -7 dB |
+  | SFX per 10 s | 10-12.5 |
+  | SFX median vs voice | -4 to -9 dB |
   | SFX on a visual change | above the random share |
 
 - analysis/frame_log.py on the final mp4: look at every sheet.

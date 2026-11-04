@@ -7,7 +7,7 @@ Look measured from the reference videos (style_bible.md section 1):
   thick black outline, soft drop shadow underneath;
 - normal words white in normal case; the key word in CAPITALS and the whole group in a colour
   (yellow, green, red, pink, purple, orange, blue);
-- every new caption pops in (0.85 -> 1.0 with a small overshoot) on its first word.
+- every new caption pops in on its first word: 2 frames (60 fps) at 0.82, then 1.0, no overshoot (measured).
 
 Usage:
   captions.py video.mp4 aligned.json spec.json out.mp4
@@ -98,7 +98,7 @@ def auto_spec(words):
 
 def draw_caption(ctx, text, col, k):
     """One caption; k = seconds since it appeared (drives the pop)."""
-    sc = 1 - 0.15 * math.exp(-14 * k) * math.cos(20 * k)
+    sc = 0.82 if k < 0.034 else 1.0     # measured at 60 fps on the references: 2 frames at ~0.82, then 1.0, no overshoot
     ctx.save()
     ctx.select_font_face(FONT, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
     ctx.set_font_size(SIZE)

@@ -7,6 +7,7 @@ This guide was learned from 6 reference videos (~50-56 s each):
 - What If You Got 1 ROBUX Every Time You Blinked
 - What If You HACKED Roblox
 - the robux10 voice the user made
+- **Set 3 (2026-11-04):** What If You NEVER Stopped Playing Roblox, What If Your BEST FRIEND Quit Roblox (read at 4 fps and every frame at 60 fps; data in `analysis/ref_data/set3_*`)
 
 **How they were analysed:**
 - Every video was read at 4 fps (`analysis/frame_log.py`).
@@ -79,6 +80,29 @@ The style is copied, never the text: do not reuse the reference channel's lines,
 | 13 | 50-53 s | **Comment CTA** with ONE keyword | Narrator | cheerful | "Comment HACK if you'd…" | the keyword is the title's power word |
 | 14 | 53-56 s | **Loop line**: leads back into the hook | a character | confused / sneaky | Ends mid-action, so the video restarts | "Slash… REWIND!"; "Wait, which button goes back?" |
 
+### How the two set-3 scripts fit the beat sheet
+| Beat | Never stopped | Best friend quit |
+|---|---|---|
+| 1 Hook (0-2.3 s) | "What if you never stopped playing Roblox?" | "What if your best friend didn't want to play Roblox anymore?" |
+| 2 Setup (2.6-9 s) | a **3-step list** "Not for dinner, not for bed, never." → Mom: "Sweetie, time to stop playing." → Kid: "Can't. I'm on a win streak." | Friend: "Roblox is for babies. I quit." → Kid: "You what?" |
+| 3-6 Day 1-4 (9-24 s) | dinner (spaghetti + tablet) → mom hides the tablet → microwave → shower in a plastic bag → playing asleep | game invite → DECLINED → legendary dragon gift → RETURN TO SENDER → a giant sign → the whole server spams COME BACK |
+| Each Day | **action → the parent/friend's counter → the kid's absurd workaround** in two lines | **the kid's attempt → the friend's one-word rejection** ("Declined.", "Return to sender.") |
+| Big number | "96 hours straight. New world record." | "A thousand players spamming come back." |
+| 7 CTA (24.9-31.6 s) | "Everyone who subscribes gets unlimited screen time." | "Everyone who subscribes gets a best friend who never quits." |
+| 8 Day 5 = conflict (32-38 s) | mom shuts off the power for the whole house | you peek through their window |
+| 9-10 Showdown / loss | phone at 1 % battery; the game begs; the servers are tired | the secret account "Totally not me 1, 2, 3" → the confession |
+| 11 Turn | Kid: "Fine, I'll stop." | Narrator: "It's the first jump. The tutorial one." |
+| 13 Comment CTA (47-52 s) | "Comment one more if you'd never stop either." | "Comment carry if you'd help your friend too." |
+| 14 Loop line | Kid: "Okay, one more game." | Friend: "I fell again." |
+
+**What set 3 teaches for new scripts:**
+- **Day lines are two-beat jokes**: an action, then the counter-move ("Day two, mom hides the tablet. So you play on the microwave."). The second half starts with "So, you…" or is a single result word ("Declined.").
+- **The antagonist can be anyone close** (mom, a best friend, the game itself). A friend who "quits" is a secret fan: the twist reveals the real reason (stuck on the easiest jump).
+- **Absurd places beat bigger numbers**: microwave, shower in a plastic bag, asleep. Each is one literal picture.
+- **The comment keyword is the story's verb** ("one more", "carry"), not only the title word.
+- **The last line undoes the ending** ("Okay, one more game.", "I fell again.") and loops into the hook.
+- Length: 126 and 135 words in 53-55 s (set 1-2: 122-143).
+
 ### Escalation rules
 - **Numbers climb by orders of magnitude**: 1 → 100 → 1,000,000 → 900 trillion, then crash to **zero**.
 - **Every chapter is something the camera can show literally**: an object, a UI panel, a crowd, a counter. No abstract lines.
@@ -141,8 +165,13 @@ Measured voices: the kid's lines sit high (320-520 Hz), dad's low (~100 Hz), mom
 | Mom plays | hook, Day lines, CTA | Mom: "What's so special about this blocky game? Give me that." · Mom: "Which button is jump?" · Kid: "It's 3 a.m. Mom." · Mom: "Just one more round." · Kid: "Did you spend my Robux?" · Mom: "It was for a pet. For you, sweetie." |
 | Hacked (SRT + pitch) | hook, "Just one line of code.", Day lines, CTA, "Mom froze, mid-sentence.", "Then the screen turned red.", "Your avatar turns into a noob. Your Robux, zero.", "Comment…" | Kid: "I'm in!" (429 Hz) · Mom: "Tablet. Off. NOW." (~207 Hz) · Kid: "Slash… freeze… Mom." (376 Hz) · Kid: "Hacker detected!" (408 Hz, shocked close-up) · Mom: "Unfrozen!" (437 Hz shout; the SRT misheard it as "I'm frozen") · Mom: "Bedtime, sweetie." (302 Hz) · Kid: "Slash, rewind!" (432 Hz, the loop line) |
 
+| Never stopped (set 3) | hook, "Not for dinner, not for bed, never.", Day 1-5 lines, "96 hours straight. New world record.", CTA, "So you switch to your phone. 1 % battery.", "Even the servers are tired.", "Comment one more…" | Mom: "Sweetie, time to stop playing." (254 Hz, sweet → firm) · Kid: "Can't. I'm on a win streak." (293 Hz, cocky) · **the game itself**: "Please, take a break." (578 Hz, a robotic/pleading voice in a SYSTEM MESSAGE) · Kid: "Fine, I'll stop." (160 Hz, exhausted, slow 1.6 w/s) · Kid: "Okay, one more game." (363 Hz, sneaky grin; the loop line) |
+| Best friend quit (set 3) | hook, Day 1-5 lines, "Declined.", "Return to sender.", CTA, "You peek through their window. They're playing Roblox on a secret account.", "It's the first jump. The tutorial one.", "Comment carry…" | Friend: "Roblox is for babies. I quit." (192 Hz, cool, dismissive) · Kid: "You what?" (274 Hz, shocked) · Kid (sign): "Please come back." (321 Hz, pleading) · Kid: "Totally not me 1, 2, 3." (355 Hz, reading the fake name in disbelief) · Friend: "Okay, okay. I didn't quit. I've been stuck on the same obby jump for a whole month." (376-517 Hz, caught → confessing fast) · Kid: "Bro, I'll carry you." (238 Hz, warm, slow 1.7 w/s) · Friend: "I fell again." (339 Hz, deadpan; the loop line) |
+
 **The pattern:**
 - **The kid reacts in the first person** to his own wins ("It's real!", "100 Robux!").
+- **Set 3 adds two speaker kinds:** **the game / a device talks** (a SYSTEM MESSAGE begging "Please, take a break", servers that are "tired"), and **the antagonist is a friend**, not a parent: the friend's cool quit line, then a caught confession.
+- **Set 3 ends on the antagonist's or kid's 3-5 word confession / relapse**: "Okay, one more game.", "I fell again." It undoes the whole story in one line, so the loop back to the hook feels earned.
 - **The parent gets the orders and the "sweetie" lines.**
 - **The narrator owns** the hook, the chapter words, the facts, both calls to action and the punishment list.
 - **Two speakers can share one breath**: "Tablet, off, now, slash, freeze, mom" is mom's order cut off by the kid's command, with a 0.2 s gap. Write it as two blocks; the video cuts between their close-ups in that gap.
@@ -184,6 +213,8 @@ When the user gives another topic, or a script from another niche, keep its **co
 | 10 Seconds (SRT given) | 89% | 1.6 | 0.29 s | 0.54 s | 4/8 | 0.54 s |
 | Hacked (SRT given) | 89% | 1.5 (gaps ≥0.2 s) | 0.28 s | 0.71 s (the gap before "Day three", filled by the DAY card + SFX) | 3/8 | 0.70 s |
 | robux10 (user's voice) | 91% | 0.2 | 0.55 s | 0.55 s | (no SFX in a voice file) | 0 s |
+| Never stopped (set 3) | 86% | 1.7 | 0.30 s | 0.52 s | 6/9 | 1.34 s (rewind) |
+| Best friend quit (set 3) | 90% | 0.4 | 0.33 s | 0.40 s | 1/2 | 0.99 s (rewind) |
 
 **The rules that follow:**
 - **There is almost no silence.** The voice starts on the first frame (0-0.4 s) and runs 89-93% of the time.
@@ -248,6 +279,20 @@ Each gap was looked at in 3 frames (start, middle, end); the SFX column comes fr
 | Hacked | 41.26 | 0.20 | "…into a noob." → "Your Robux…" | "DETECTED?!" close-up, then a **cut to the avatar at spawn** | – |
 | Hacked | 49.04 | 0.23 | "Bedtime, sweetie." → "Comment hack…" | Mom leaves with hearts; the **kid peeks from under the blanket** | – |
 | Hacked | 54.31 | 0.70 | last word → end | **◀◀ REWIND** ("Roblox?" hook shot flashes), landing on the first frame | rewind |
+
+### Set 3 gaps (read frame by frame at 60 fps)
+| Video | Gap at | Length | Between | What is on screen | SFX |
+|---|---|---|---|---|---|
+| Never stopped | 17.25 | 0.28 | "…microwave." → "Day three…" | **Cut to the pink shower curtain** before the DAY 3 card writes on | swish |
+| Never stopped | 32.05 | 0.45 | "…screen time." → "Day five…" | **Cut to the empty hallway with the MAIN POWER panel**; the DAY 5 card writes on as mom walks in | pop |
+| Never stopped | 37.06 | 0.52 | "…whole house." → "So you switch…" | The house's **lit windows go dark one by one** (a reaction hold), then a cut to the kid's face lit by the phone | clunk |
+| Never stopped | 40.26 | 0.40 | "1 % battery." → "Please, take a break." | The kid's panicked face with sweat, then **the SYSTEM MESSAGE pops** on the phone | ding |
+| Never stopped | 44.3-45.1 | ~0.7 (music) | "…are tired." → "Fine, I'll stop." | Back in the bedroom: the kid yawns, **steam puffs from his ears**; a slow beat before the tired line | – |
+| Best friend | 28.52 | 0.25 | "…never quits." → "Day 5." | **Cut to the house at night** before the DAY 5 card | – |
+| Best friend | 46.92 | 0.40 | "…tutorial one." → "Bro, I'll carry you." | The friend falls off the tutorial jump into the water (**splash**), then the kid **joins the game** (toast at the top) | splash |
+| both | end | 1.0-1.3 | last line → loop | **◀◀ REWIND**: 4-5 earlier shots backwards (~0.25 s each) to the first frame | rewind |
+
+Set 3 confirms the rules below: no gap over 0.52 s in the middle, a cut or a pop inside every gap, and a reaction hold (lights going out, a yawn) is the only "still" moment.
 
 ### What the 41 gaps show (patterns)
 1. **The voice never really stops.** 39 of 41 gaps are 0.20-0.54 s. Only two run longer: Hacked "Day three" (0.71 s) and the Dad ending (1.03 s). There is no gap before the first word (voice from 0.35-0.4 s) and no music-only intro.

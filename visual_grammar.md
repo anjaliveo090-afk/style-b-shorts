@@ -53,6 +53,40 @@ The energy comes from the cuts, the pops and the faces, not from camera travel.
 | 19 | Call to comment ("Comment loop if...") | A **phone comments sheet** with a keyboard; the word is typed, likes fly up | Static | none | both endings |
 | 20 | Loop ending | A **REWIND** scrub (whip-blur or a rewind icon) back to the first frame | Whip pan | Same as shot 1 | tensec 49.5 s |
 
+### Rows added from reference set 3 (never_stop, bff_quit; read frame by frame at 60 fps)
+| # | When the phrase... | Show | Camera | Character | Example in the references |
+|---|---|---|---|---|---|
+| 21 | Any **physical action or noise** (grab, splat, slam, bump, clunk, ding, poof, click) | A **comic sound-word sticker** on the action: white jagged burst, ink outline, coloured text (`sets.sfx_word`) | Impact **bump** (`shake=` with `engine.profile("set3")`) | Reaction snap on the same frame | SPLAT!, YOINK!, BUMP!, SLAM!, CLUNK!, DING!, SPLASH!, POOF!, SQUEEZE!, THWACK!, HA!, CLICK CLACK |
+| 22 | A **list of 3 escalating places / times** ("Not for dinner, not for bed, never") | One cut per item, **same character, same pose**, a different set each time (sunset bedroom → night bedroom → glow burst) | Small push per item, the last item gets a **glow burst + speed lines** | Same smug face, bigger on the last | never_stop 2.5-4.9 |
+| 23 | Someone **leaves / quits / declines** | The **game UI says it**: "MaxPro99 left the game" toast, a friends list with "Invite sent" → red **DECLINED** stamp, a parcel stamped RETURN TO SENDER flying back | Bump on the stamp | The victim cries in the next shot (tears, broken heart) | bff_quit 1.5, 9.2, 13.3 |
+| 24 | **Time passing / a big number of attempts** ("96 hours", "a whole month", "9,999 fails") | A **rolling counter** UI (digital PLAYTIME clock, FAILS: N pill, a calendar page flipping to 30) over the same action repeating | Static or slow push; the final number lands with a gold glow | Gets more tired / more desperate each beat | never_stop 25-27.3, bff_quit 42.7-44 |
+| 25 | **The game / a device talks** ("Please, take a break") | A **SYSTEM MESSAGE** dialog with a robot-screen face, the text typing on, an OK button (`sets.system_message`); then the device itself as a sleepy character (server rack with eyes) | Push-in on the dialog | — | never_stop 40.7-44.3 |
+| 26 | **A disguise / secret identity** ("on a secret account") | The person in a fake hat + glasses + moustache, a **name tag** that reads the joke (`TotallyNotMe123`), question marks round the head, spotlight | Push-in on the name tag | The kid behind the window: shock → squint ("?!") | bff_quit 33.8-38 |
+| 27 | **Peeking / spying** | The kid's head rising from behind a bush or a window frame, a few leaves on the head; then **over-the-shoulder** onto what he sees | Cut from outside to the over-the-shoulder | sly → shock | bff_quit 30-33.8 |
+| 28 | **A crowd joins in** ("The whole server joins in") | Players spawn in beams one by one, then a packed crowd with signs; a **Players: N** pill counts 1 → 1,000 and join toasts stack at the top | Pull-out as the crowd grows | Crowd chants; the hero stands in the middle, moved | bff_quit 20.3-24.5 |
+| 29 | **Real-life place + the game** ("you play on the microwave / in the shower") | The device inside the absurd place (the game on the microwave screen, the tablet in a plastic bag under the shower) with the game's WIN! UI on it | Punch-in on the device | Proud grin, star eyes on the WIN | never_stop 15.5-20 |
+| 30 | The **final line before the loop** (the character's last word) | Back to the opening place; the character says it to camera; then **REWIND** (◀◀ REWIND top-left, scanlines, 4-5 earlier shots backwards, ~0.25 s each) to the first frame | Hold, then rewind | The joke face (tired grin, falling again) | never_stop 49.9-53.4, bff_quit 52.7-55 |
+
+## 2b. Motion measured at 60 fps (reference set 3, `analysis/frame60.py`)
+Every frame of both videos was read (3207 + 3304 frames at 60 fps). Use `engine.profile("set3")` to get this motion.
+
+| What | never_stop | bff_quit | **In code (`engine.profile("set3")`)** |
+|---|---|---|---|
+| Frame rate | 60 fps | 60 fps | **renders at 60 fps** |
+| New visual every (`new_visuals.py`) | 1.19 s | 1.15 s | target **1.1-1.3 s** |
+| Camera median / mean, non-camera motion (`flow.py`) | 2.98 / 6.42, 5.93 | 4.48 / 10.43, 8.14 | same targets as before |
+| Cuts | 69 (median shot 35 frames = 0.58 s) | 48 (48 frames = 0.8 s) | one cut per phrase, plus 4-frame flashes |
+| Held drawings (frames with no change after removing the camera) | 3.3 % | 0.2 % | **animate on every frame**: idle sway, blink, breathing never stop |
+| Punch-ins | 40 (0.75 per s) | 47 (0.85 per s) | `punch()` keys: **+8.5 % zoom in 7-9 frames (0.12-0.15 s)**, fastest at 23 % of the move, then a long settle (`PUNCH="settle"`). Lands 0.4-1.0 s after the cut, on the key word |
+| Hold creep | +2.7 % zoom/s, ~0.5 % width/s pan | similar | `DRIFT = (0.027, 4, -2)` |
+| Impacts | no rattling shake was found | no rattling shake | **one vertical bump**: ~1.5-4.7 % of the height, bounces at ~5.5 Hz and dies in ~0.25 s, with a +2-3 % zoom kick (`SHAKE="bump"`). `shake=(t, amp)`: amp 8-12 for a stamp, 20-26 for a scream |
+| Whip pans | 8 | 5 | `shot(..., whip=+1/-1)`: 2-5 frames at 10-32 % of the width per frame with motion blur; used between two characters in one room (mom → kid) and on a fast change of place |
+| Caption pop | 2 frames at 0.88, then 1.0 | 2 frames at 0.82, then 1.0 | `captions.py`: 2 frames at 0.82, no overshoot |
+| Chapter card | DAY + number | DAY + number | `sets.day_write`: letters write on ~3 frames each → the number slams in at ~3x and lands in ~5 frames → gold ring + white spikes → underline swoosh (~0.25 s) |
+| Sound-word sticker | 0.45 → 1.08 in 3 frames, settled by frame 6 | same | `sets.sfx_word` |
+| Reaction snap | the head grows and the mouth opens over ~6 frames; the background switches to a burst on the same frame | same | `Block.draw(..., snap=seconds since)` + the new `"scream"` expression for "WHAT?!" |
+| Lip-sync (character lines) | the mouth changes every 2-4 frames between closed smile, half-open teeth, open with tongue | same | `engine.LIPSYNC` + `talk=` (3 mouth sizes from the voice) |
+
 ## 3. Composition
 - Safe zone: the whole character and key props inside x 38-680, y 149-1013 (below y 678 only to x 599). Run `safezone.fit(SHOTS, module)` before render. Use `keep=[...]` for key props and `top=250` under the HUD.
 - **Face close-ups** (rows 3, 4, 13, 17) are the exception: the body runs off the bottom of the frame. Mark the shot `closeup=True` and add the face box to `keep=[...]`. safezone then keeps the face and labels in the zone and ignores the body (see `sample.py` `FACE_KEEP`).
@@ -66,12 +100,13 @@ The energy comes from the cuts, the pops and the faces, not from camera travel.
 - **Face close-ups use a calm idle sway (`bob≈0.35`).** At close-up scale the full sway moves the whole frame, and on sneeze.py it pushed the measured camera mean to 14.4.
 - Bodies: blocky limbs swing in big, readable poses (arms up, arm thrust forward, crossed arms, a leaning point). There is a constant small bounce/idle sway; nothing is ever fully still.
 - Squash on landing; jump arcs; impacts get a 2-frame white flash and a shake.
-- **No lip-sync** in the references: mouths change shape by expression, not phoneme by phoneme. Our default is `engine.LIPSYNC = False`.
+- **No lip-sync** in the first references: mouths change shape by expression, not phoneme by phoneme. Reference set 3 **does** move the mouth on character lines (mom's "Sweetie, time to stop playing": a new mouth shape every 2-4 frames at 60 fps). Our rule (the user's): lip-sync only on character dialogue (`engine.LIPSYNC = True` + `talk=`), never on the narrator.
+- Set 3: **nothing is ever held**: 99.8 % of frames change after the camera is removed. Characters keep breathing, swaying and blinking even in a 2 s shot.
 
 ## 5. Transitions
 - **Hard cuts** for almost every change. These fall on the word (on the first syllable of the phrase the new picture illustrates).
 - Card pops (scale overshoot 0.2 s) inside a shot count as new visuals.
-- A **whip pan** with motion blur when changing world (real life ↔ game), about once per video.
+- A **whip pan** with motion blur when changing world (real life ↔ game), about once per video. Set 3 uses **5-8 per video**: also between two characters in one room (mom in the door → kid on the bed). In code: `shot(..., whip=1)` with `engine.profile("set3")`.
 - A **zoom through a screen** (monitor or phone) to enter the game.
 - No cross-dissolves: `render(..., xfade=0)`.
 
@@ -87,7 +122,8 @@ The energy comes from the cuts, the pops and the faces, not from camera travel.
 2. Split the narration into phrases of 2-4 words. Give each phrase a row from section 2.
 3. One visual per phrase. Cut on the phrase's first word, then punch-in or pop on the key word.
 4. Put expression snaps and card pops on key words, and one SFX on every pop, hit or snap (see `sound_design.md`).
-5. Check: `new_visuals.py` (1.1-1.6 s), `flow.py` (camera median 2-5, mean 6-11).
+5. Check: `new_visuals.py` (1.1-1.6 s; with set 3: 1.1-1.3 s), `flow.py` (camera median 2-5, mean 6-11).
+6. Put a **sound-word sticker** (`sfx_word`) on every physical action (row 21), and let the **game UI tell** quits, invites, gifts and counts (rows 23-25, 28).
 
 ## 8. Measured on our sample (`animator/sample.py`, 22 s)
 | Measure | Sample | Target |

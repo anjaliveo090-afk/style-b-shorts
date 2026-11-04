@@ -12,6 +12,8 @@ Groups:
             arena, throne_room, coin, coin_pile, egg, pet, chest, map_slab (map cross-section over the void)
   reset     vending_machine, chips_bag, price_tag, race_car, crane, rocket, reset_button, clipboard,
             employee_frame, wand (added for reset_noob.py)
+  set 3     day_write (letter-by-letter DAY card), sfx_word (SPLAT!/BUMP! stickers), name_pill, game_toast,
+            game_hud (streak / coins / players), system_message, playtime_clock (measured at 60 fps)
   UI        hud_timer, second_card, stage_pill, health_bar, damage_text, ko_sticker, toast, login_screen,
             leaderboard, shop_grid, gamepass_card, comments_sheet, subscribe_button, joystick_ui, cursor
   FX        burst, glow, tint, flash, vignette, speed_lines, shockwave, impact_star, sparkles, confetti,
@@ -3456,3 +3458,219 @@ def wand(ctx, x, y, s=1.0, ang=-0.6, T=0.0):
     glow(ctx, tx, ty, 80 * s, (0.7, 0.95, 1), 0.7)
     star_path(ctx, tx, ty, 30 * s, rot=-PI / 2 + T)
     shape_fill(ctx, YELLOW, 4 * s, ty - 30 * s, ty + 30 * s)
+
+
+# ================================================================ set 3 (measured at 60 fps, analysis/frame60.py)
+def day_write(ctx, word, num, x, y, k, size=110, fill=YELLOW, T=0.0):
+    """The references' chapter card ('DAY 4'), frame by frame at 60 fps:
+    the word writes on letter by letter (~3 frames each), then the number SLAMS in at ~3x and shrinks to size
+    in ~5 frames, a gold ring + white spikes burst round it, and the underline swoosh draws left to right
+    (~0.25 s). k = seconds since it starts. Total ~0.55 s."""
+    if k < 0:
+        return
+    word, num = str(word), str(num)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(-0.06 + 0.01 * math.sin(T * 3))
+    gap = size * 0.28
+    w_word = text_width(ctx, word, size) + gap
+    w_full = w_word + text_width(ctx, num, size * 1.1)
+    x0 = -w_full / 2
+    per = 0.05
+    n_on = min(len(word), int(k / per) + 1)
+    ctx.save()
+    ctx.transform(cairo.Matrix(1, 0, -0.12, 1, 0, 0))
+    bold_text(ctx, word[:n_on], x0, 0, size, c_(fill), stroke=0.26, align="l")
+    ctx.restore()
+    t_num = len(word) * per + 0.02
+    kn = k - t_num
+    nx = x0 + w_word + text_width(ctx, num, size) / 2
+    if kn >= 0:
+        sc = 1 + 2.0 * math.exp(-28 * kn)
+        ctx.save()
+        ctx.transform(cairo.Matrix(1, 0, -0.12, 1, 0, 0))
+        bold_text(ctx, num, nx, 0, size * 1.1, c_(fill), stroke=0.26, scale=sc)
+        ctx.restore()
+        kr = kn - 0.1
+        if 0 <= kr < 0.45:                                   # gold ring + white spikes round the number
+            r = size * (0.5 + 1.3 * ease(kr / 0.45))
+            ctx.new_sub_path()
+            ctx.arc(nx, 0, r, 0, 2 * PI)
+            ctx.set_source_rgba(*c_(GOLD), 0.85 * (1 - kr / 0.45))
+            ctx.set_line_width(size * 0.07)
+            ctx.stroke()
+            for i in range(6):
+                a = i * PI / 3 + 0.3
+                ctx.move_to(nx + math.cos(a) * r * 0.75, math.sin(a) * r * 0.75)
+                ctx.line_to(nx + math.cos(a) * r * 1.0, math.sin(a) * r * 1.0)
+            ctx.set_source_rgba(1, 1, 1, 0.9 * (1 - kr / 0.45))
+            ctx.set_line_width(size * 0.04)
+            ctx.stroke()
+        ku = kn - 0.12
+        if ku >= 0:                                          # underline swoosh, left to right
+            p = ease(ku / 0.25)
+            ux0 = x0 + size * 0.1
+            ctx.move_to(ux0, size * 0.72)
+            ctx.curve_to(ux0 + w_full * 0.3, size * 0.62, ux0 + w_full * 0.6, size * 0.66,
+                         lerp(ux0, ux0 + w_full * 0.95, p), size * 0.58)
+            ctx.set_source_rgb(*INK)
+            ctx.set_line_width(size * 0.12)
+            ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+            ctx.stroke_preserve()
+            ctx.set_source_rgb(*c_(fill))
+            ctx.set_line_width(size * 0.06)
+            ctx.stroke()
+    ctx.restore()
+
+
+def _jag_path(ctx, w, h, n=11, seed=3):
+    rnd = random.Random(seed)
+    for i in range(n * 2):
+        a = i * PI / n
+        rr = 1.0 if i % 2 == 0 else rnd.uniform(0.66, 0.78)
+        px, py = math.cos(a) * w / 2 * rr, math.sin(a) * h / 2 * rr
+        (ctx.move_to if i == 0 else ctx.line_to)(px, py)
+    ctx.close_path()
+
+
+def sfx_word(ctx, x, y, txt, k, col="#ff4f5a", size=46, tilt=-0.18, seed=3, bg=(1, 1, 1), life=None):
+    """Comic sound-word sticker (SPLAT! YOINK! BUMP! CLUNK! DING!) on every physical action in the references:
+    a white jagged burst with a thick ink outline and coloured outlined text. Measured pop at 60 fps: 0.45 -> 1.08
+    in 3 frames, settle to 1.0 by ~6 frames, then hold (k = seconds since the action). life: fade out after it."""
+    if k < 0 or (life is not None and k > life + 0.12):
+        return
+    if k < 0.05:
+        sc = lerp(0.45, 1.08, k / 0.05)
+    else:
+        sc = 1 + 0.08 * math.exp(-25 * (k - 0.05))
+    a = 1.0 if life is None else clamp(1 - (k - life) / 0.12)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(tilt)
+    ctx.scale(sc, sc)
+    ctx.push_group()
+    tw = text_width(ctx, txt, size)
+    w, h = tw + size * 1.5, size * 1.9
+    _jag_path(ctx, w, h, seed=seed)
+    ctx.set_source_rgb(*c_(bg))
+    ctx.fill_preserve()
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(size * 0.1)
+    ctx.set_line_join(cairo.LINE_JOIN_MITER)
+    ctx.stroke()
+    bold_text(ctx, txt, 0, 0, size, c_(col), outline=INK, shadow=False, stroke=0.2)
+    ctx.pop_group_to_source()
+    ctx.paint_with_alpha(a)
+    ctx.restore()
+
+
+def name_pill(ctx, x, y, name, size=26, col=(1, 1, 1), a=0.55):
+    """The references' player name tag: a translucent dark rounded pill with white text, above the head."""
+    w = text_width(ctx, name, size) + size * 1.1
+    h = size * 1.45
+    rrect(ctx, x - w / 2, y - h / 2, w, h, h / 2)
+    ctx.set_source_rgba(0.12, 0.13, 0.2, a)
+    ctx.fill()
+    bold_text(ctx, name, x, y, size, c_(col), shadow=False, stroke=0.0)
+
+
+def game_toast(ctx, x, y, name, msg, k, icon_col="#ffd84a", name_col="#ffd84a", w=None, size=22):
+    """Top-of-screen game notice ('MaxPro99 left the game', 'X joined the game'): dark pill, a small square
+    icon, the name in colour, the message in white. Slides down 12 px and fades in over ~6 frames."""
+    if k < 0:
+        return
+    a = clamp(k / 0.1)
+    msg_w = text_width(ctx, " " + msg, size)
+    nm_w = text_width(ctx, name, size)
+    w = w or nm_w + msg_w + size * 2.8
+    h = size * 1.7
+    ctx.save()
+    ctx.translate(x, y - 12 * (1 - ease(k / 0.12)))
+    rrect(ctx, -w / 2, -h / 2, w, h, size * 0.4)
+    ctx.set_source_rgba(0.08, 0.09, 0.14, 0.82 * a)
+    ctx.fill()
+    block(ctx, -w / 2 + size * 0.5, -size * 0.45, size * 0.9, size * 0.9, size * 0.15, c_(icon_col), 2, gloss=False)
+    tx = -w / 2 + size * 1.75
+    bold_text(ctx, name, tx, 0, size, c_(name_col), align="l", shadow=False, stroke=0.0)
+    bold_text(ctx, " " + msg, tx + nm_w, 0, size, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def game_hud(ctx, T, streak=None, coins=None, players=None, y=60):
+    """Top game HUD of the references: menu button, a WIN STREAK pill with a flame, a coin counter, or a
+    'Players: N' pill. Screen-space (draw it in an overlay, inside the safe zone: y >= 160)."""
+    if streak is not None:
+        block(ctx, 70, y - 26, 52, 52, 12, hexc("#2b3150"), 3, gloss=False)
+        for i in range(3):
+            block(ctx, 84, y - 12 + i * 10, 24, 5, 2, (1, 1, 1), 1, gloss=False)
+        block(ctx, 250, y - 32, 210, 64, 20, hexc("#2b2f45"), 4, outline=GOLD)
+        ctx.move_to(285, y + 18)
+        ctx.curve_to(262, y + 4, 276, y - 18, 290, y - 26)
+        ctx.curve_to(292, y - 10, 310, y - 4, 302, y + 18)
+        ctx.close_path()
+        shape_fill(ctx, hexc("#ff7a1a"), 3, y - 26, y + 18)
+        bold_text(ctx, "WIN STREAK", 380, y - 12, 16, YELLOW, shadow=False, stroke=0.1)
+        bold_text(ctx, f"{int(streak):,}", 340, y + 10, 30, (1, 1, 1), shadow=False, stroke=0.12, align="l")
+    if coins is not None:
+        block(ctx, 490, y - 24, 170, 48, 24, hexc("#2b2f45"), 3, gloss=False)
+        coin(ctx, 515, y, 0.42)
+        bold_text(ctx, f"{int(coins):,}", 545, y, 26, (1, 1, 1), shadow=False, stroke=0.0, align="l")
+    if players is not None:
+        txt = f"Players: {int(players):,}"
+        w = text_width(ctx, txt, 26) + 70
+        block(ctx, 360 - w / 2, y - 24, w, 48, 24, hexc("#2b2f45"), 3, gloss=False)
+        bold_text(ctx, txt, 360 + 14, y, 26, (1, 1, 1), shadow=False, stroke=0.0)
+        ctx.new_sub_path()
+        ctx.arc(360 - w / 2 + 26, y - 4, 7, 0, 2 * PI)
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.fill()
+
+
+def system_message(ctx, x, y, s, lines, k, T=0.0, typed=1.0):
+    """'SYSTEM MESSAGE' dialog (the game talking to the player): dark panel, a robot-screen face icon,
+    the text typing on (typed 0..1), an OK button. k = seconds since it popped."""
+    if k < 0:
+        return
+    sc = s * (pop(k) if k < 0.6 else 1.0)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    block(ctx, -250, -190, 500, 380, 26, hexc("#1f2440"), 6, outline=hexc("#4f8bff"))
+    bold_text(ctx, "SYSTEM MESSAGE", -150, -155, 22, hexc("#9fb8ff"), align="l", shadow=False, stroke=0.0)
+    block(ctx, -200, -170, 30, 30, 15, hexc("#4f8bff"), 2, gloss=False)
+    block(ctx, -55, -120, 110, 80, 16, hexc("#9aa0b8"), 4)             # robot screen face
+    block(ctx, -45, -110, 90, 60, 10, hexc("#141a2e"), 3, gloss=False)
+    for ex in (-20, 20):
+        ctx.move_to(ex - 10, -82 + math.sin(T * 3) * 2)
+        ctx.line_to(ex + 10, -82 + math.sin(T * 3) * 2)
+    ctx.set_source_rgb(*hexc("#6fd3ff"))
+    ctx.set_line_width(6)
+    ctx.stroke()
+    total = sum(len(l) for l in lines)
+    left = int(total * clamp(typed))
+    for i, l in enumerate(lines):
+        part = l[:max(0, left)]
+        left -= len(l)
+        if part:
+            bold_text(ctx, part, 0, 10 + i * 46, 38, (1, 1, 1), shadow=False, stroke=0.0)
+    block(ctx, -120, 115, 240, 54, 14, (1, 1, 1), 3, gloss=False)
+    bold_text(ctx, "OK", 0, 142, 30, INK, outline=(1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def playtime_clock(ctx, x, y, s, seconds, T=0.0, glow_a=0.0, label_txt="PLAYTIME", col="#6fe6ff"):
+    """Digital 'PLAYTIME' clock (HH:MM:SS with HRS MIN SEC) from the references; seconds can roll fast."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    if glow_a > 0:
+        glow(ctx, 0, 0, 380, c_(YELLOW), glow_a)
+    block(ctx, -300, -95, 600, 190, 30, hexc("#141a2e"), 7, outline=hexc("#4f8bff"))
+    block(ctx, -290, -150, 230, 50, 25, hexc("#2b6bd8"), 4, gloss=False)
+    bold_text(ctx, label_txt, -175, -125, 26, (1, 1, 1), shadow=False, stroke=0.0)
+    hh, mm, ss = int(seconds // 3600), int(seconds % 3600 // 60), int(seconds % 60)
+    bold_text(ctx, f"{hh:02d}:{mm:02d}:{ss:02d}", 0, -5, 112, c_(col), outline=hexc("#0b2a4a"), shadow=False,
+              stroke=0.08)
+    for i, t in enumerate(("HRS", "MIN", "SEC")):
+        bold_text(ctx, t, -190 + i * 190, 70, 20, hexc("#9aa0b8"), shadow=False, stroke=0.0)
+    ctx.restore()

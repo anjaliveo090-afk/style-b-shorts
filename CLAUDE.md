@@ -64,7 +64,8 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
    - Split the narration into phrases of 2-4 words.
    - Give each phrase a row from section 2 (hook, rule, disbelief close-up, DAY/SECOND card, game thing, number counter, action, list, twist, comment call, loop...).
    - One literal visual per phrase, a **hard cut on the phrase's first word**, and a punch-in, pop or expression snap **on the key word**.
-   - Aim for a new visual every 1.1-1.6 s, never more than ~2.7 s.
+   - Aim for a new visual every 1.1-1.3 s (reference set 3 measures 1.15-1.19 s), never more than ~2.7 s.
+   - Put a **sound-word sticker** (`sets.sfx_word`: SPLAT!, BUMP!, YOINK!) on every physical action, and let the **game UI tell** quits, invites, gifts and counts (`visual_grammar.md` rows 21-30).
    - Write the plan as a table (time | words | row | what is shown | camera | expression | SFX) before coding.
 3. **Build** `animator/<story>.py` by copying `animator/sample.py`:
    - Keep its helpers: `shot`, `punch`, `kid_face` / `FACE_*` close-ups, `SFX_GAIN`, `MUSIC`, `TOTAL`, the loop ending (`s_end` = first frame), and the `__main__` block (it writes `cues.json` and `music.wav`).
@@ -89,20 +90,21 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
    python3 animator/audio.py $O/sfx <TOTAL>
    (cd animator && python3 <story>.py ../$O/clips/animation.mp4 ../$O/cues.json)
    python3 assembler/assemble.py --clips $O/clips --voice <voice> --sfx $O/cues.json --sfx-dir $O/sfx \
-     --music $O/music.wav --music-volume 0.5 --crf 20 --out $O/<story>_final.mp4
+     --music $O/music.wav --music-volume 0.45 --crf 20 --out $O/<story>_final.mp4
    ```
    - No `--srt` here: the captions are burned afterwards with `assembler/captions.py` (step 7).
    - The story writes `music.wav` from its `MUSIC` settings (a late start, dips under dramatic beats).
    - A 60 s render takes about 1.5 min.
 6. **Measure** against the targets, and fix anything outside them before sending:
-   - `python3 analysis/new_visuals.py $O/clips/animation.mp4`: a new visual every 1.1-1.6 s.
+   - `python3 analysis/new_visuals.py $O/clips/animation.mp4`: a new visual every 1.1-1.3 s (1.6 at most).
+   - Optional, frame-exact: `python3 analysis/frame60.py $O/clips/animation.mp4 $O/f60` (punch-ins, bumps, whips, caption pops at 60 fps; compare with `analysis/ref_data/set3_*_f60.json`).
    - `python3 analysis/flow.py $O/clips/animation.mp4`: camera median 2-5, mean 6-11 (up to ~12 is fine), non-camera motion 5-8.
    - `python3 analysis/audio_ref.py $O/<story>_final.mp4 <subs.srt> $O/check`, against `sound_design.md` section 3. If the SFX median is off, change only `SFX_GAIN`, rewrite `cues.json` and re-assemble; no re-render is needed:
      `(cd animator && python3 -c "import json, <story> as r; json.dump([{'time': round(t, 3), 'file': f, 'volume': round(v * <GAIN>, 3)} for t, f, v in sorted(r.SFX)], open('../$O/cues.json', 'w'))")`.
      Results:
-     - music -10 ± 2.5 dB;
-     - SFX 9-13 per 10 s;
-     - SFX median -1 to -7 dB;
+     - music -13.5 ± 3 dB (median of all 7 references; set 3 alone is -15 to -20);
+     - SFX 10-12.5 per 10 s;
+     - SFX median -4 to -9 dB;
      - the music key reads G.
    - `python3 analysis/frame_log.py $O/<story>_final.mp4 <subs.srt> $O/fl 4`: look at every sheet.
 7. **Burn the captions** (see Defaults), then **send only `<story>_final_captions.mp4`** to the user (SendUserFile), one file. Add the video to `videos.md`. Commit and push the story code; `output/` is git-ignored. Say honestly what could not match.
@@ -122,13 +124,20 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
   - Mouths snap between closed, half open and wide open.
 - **No camera whoosh.** Only `whip.wav` on the loop rewind, and `swish` on a physical throw or a panel sliding in.
 - **Hard cuts** (`render(xfade=0)`), grain 2, `vignette` 0.15 (flat vector look).
-- `engine.DRIFT = (0.02, 5, -3)` and `engine.ENERGY = 3.0` (set at the top of the story).
+- **`engine.profile("set3")` at the top of every new story** (then `engine.ENERGY = 3.0`). It is the motion measured frame by frame at 60 fps on reference set 3 (`visual_grammar.md` section 2b):
+  - renders at **60 fps** like the references (a 60 s video takes ~3 min);
+  - `shake=(t, amp)` becomes one vertical **bump** with a zoom kick (amp 8-12 for a stamp, 20-26 for a scream);
+  - `punch()` moves start fast and settle; the hold creep is `DRIFT = (0.027, 4, -2)`;
+  - `shot(..., whip=1 / -1)` gives a 2-5 frame whip pan into the shot (mom → kid, a change of place); 5-8 per video;
+  - reaction snaps: `Block.draw(..., snap=T - t_snap)` pops the head; `"scream"` is the huge "WHAT?!" mouth;
+  - chapter cards: `sets.day_write("DAY", n, ...)` (letters write on, the number slams in, ring, underline).
+  - Stories made before 2026-11-04 have no profile: they stay 30 fps with the old shake, so their fix renders still match.
 - **Loop:** `render(..., fade_in=0, fade_out=0)`. The last 0.5-1.0 s after the final word is a REWIND montage, as in the references:
   - `draw, ov = sets.rewind_shot(SHOTS, [t1, t2, …, 0.0])` plays 4-6 earlier shot times backwards and lands exactly on the first frame.
   - Use it as the last shot with keys `[(start, 1.0, (360, 640))]`, `overlay=ov`, `blur=False`, `closeup=True`, `keep=[]`.
   - Add `whip.wav` at its start.
-- **Music:** `music_game` (`MUSIC` dict in the story) at `--music-volume 0.5`.
-- **SFX:** about 1.1 per second, `SFX_GAIN = 0.4` for a real recorded voice (the TTS sample needed 0.17), hits 1.3, booms 1.6. Always measure and adjust (see `sound_design.md`).
+- **Music:** `music_game` with `MUSIC = dict(bpm=128, perc=0.6, dips=[...])` at `--music-volume 0.45` (set 3; older stories: 0.5-0.55, no perc).
+- **SFX:** about 1.0-1.1 per second, `SFX_GAIN = 0.2` for the user's voiceflow voice (0.28 measured -3.6 dB; the new target is about -7). Mostly pops (every sticker, card, label), ticks and dings; **only 3-5 booms per video**. Always measure and adjust (see `sound_design.md` section 3).
 
 ## Limits to state honestly
 - This is 2D code animation. The references are hand-made vector animation with more drawing detail, bespoke props and smoother squash-and-stretch. We match the look (proportions, line, palette, shading, faces), and the pace, cuts, camera, phrase → visual logic and sound levels closely. Every new prop has to be drawn in code.

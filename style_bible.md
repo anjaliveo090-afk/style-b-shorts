@@ -12,7 +12,7 @@ Only the **style** is copied. The reference channel's characters, names, logos, 
 ## 1. Format and safe zones
 | What | Value |
 |---|---|
-| Frame | 720x1280 (9:16). The references are 60 fps; we render 30 fps (motion reads the same) |
+| Frame | 720x1280 (9:16). The references are 60 fps. New stories render at **60 fps** with `engine.profile("set3")`; older stories stay at 30 fps |
 | Safe zone (user's Shorts template) | The whole character and key props inside **x 38-680, y 149-1013**; below y 678 only up to x 599 (like/comment buttons). Enforced by `animator/safezone.py` |
 | HUD | Timer pill at the top centre, y 150-210 (inside the zone). Shots with a HUD use `top=250`, so characters sit below it |
 | Captions | The references burn in big captions at y ≈ 825. **Our default is no captions**; on request, use `assembler/captions.py` (measured look below) |
@@ -36,6 +36,8 @@ Only the **style** is copied. The reference channel's characters, names, logos, 
   | blue | `#54ccfc` | calm, tech, water |
 
 - **All other words** are white in normal case ("What if", "seconds.", "Then you").
+- Set 3 adds: **purple for a trailing "…" word** (hesitation, tiredness, suspense: "asleep…", "…Fine.", "window…", "Bro…", "…Okay."), **blue for devices and messages** ("tablet", "your phone", "invite…", "Please…"), **pink for cute / pleading** ("Sweetie,", "BABIES.", "quits."), **orange for food and strong words** ("dinner.", "STUCK", "MONTH!").
+- Set 3 pop, measured at 60 fps: **2 frames at 0.82-0.88, then 1.0**, no bounce (`captions.py` does this).
 - **No duplicates** (the user's rule): if the same text is already on screen at that moment (a scene label, chapter card, speech bubble, HUD or UI text), it is left out of the caption. `assembler/captions.py ... animator/<story>.py` does this automatically.
 
 ## 2. Look in one line
@@ -149,6 +151,17 @@ Measured shot brightness median **0.43-0.51**, saturation **0.46-0.53**. Night s
 | Leaderboard / shop / comments | Full-screen game UI panels: rows, gold #1 badge, OWNED stamps, BUY buttons, phone keyboard | Explanations, lists |
 | Burst backgrounds | Radial rays: gold (reward), red (alarm), purple (legendary), blue (calm), dark with a gold glow (secret item) | Reveals |
 | Throne room | Gold throne, purple banners, red carpet, crowd in front | Victory |
+| **Set 3:** sunset bedroom | The same bedroom in **warm sunset orange-pink** (window glow, peach wall) for "dinner" time; the night version for "bed" | Time of day without a card |
+| **Set 3:** dining kitchen | Sunset window with a scalloped yellow awning, a big red wall clock, checker tablecloth, spaghetti plates | Family meal |
+| **Set 3:** day kitchen | Mint wall, blue cabinets, a red wall clock, a microwave with a screen, cookie jar | Mom hides things |
+| **Set 3:** bathroom | Pink shower curtain with a bow, mint tiles, a hanging caddy with bottles and a **rubber duck that reacts** ("?!") | Absurd place to play |
+| **Set 3:** hallway | Striped wallpaper, a **MAIN POWER** panel with a lever and buttons, a "GAME ZONE" door, a red runner rug, a family photo | Mom's power move |
+| **Set 3:** house at night | A red-roof house, lit windows that go dark, picket fence, bushes; for "the whole house" | Scale of the consequence |
+| **Set 3:** server room | Blue server racks with **sleepy faces**, cables, steam puffs | The game/servers as characters |
+| **Set 3:** game lobby | A rainbow arch, a round stone **spawn pad with coloured dots**, block trees, green studded baseplate | Friends meeting in game |
+| **Set 3:** suburb street | Brick and yellow houses, white picket fence, the kid's front yard | Real-life friend scenes |
+| **Set 3:** tutorial obby | A grey studded platform over blue water, **yellow-black hazard stripes**, a TUTORIAL sign, a "1 STUD" gap label, a "Press SPACE" key | The easiest jump in the game |
+| **Set 3:** CTA living room | Sky-blue wall with rays, a purple couch, a red alarm clock on a side table, a pink rug, a small plant shelf | "Everyone who subscribes gets…" |
 
 **Depth of field:** almost none. The style is flat vector. Only foreground props (a blurred shoulder, a tablet edge) are softened, and only in close-ups (`dof=1-2`).
 
@@ -175,6 +188,21 @@ These are drawn in `animator/sets.py`:
 - Notification toast.
 
 **Reaction FX** (`animator/sets.py`): sweat drop, anger mark, tears, shake lines, speed lines, impact star "BONK!", sparkles, confetti, hearts, poof cloud, shockwave ring.
+
+**Added from reference set 3** (`sets.py`, section "set 3"):
+- **Sound-word stickers** on every physical action (`sfx_word`): SPLAT!, YOINK!, BUMP!, SLAM!, CLUNK!, DING!, SPLASH!, POOF!, SQUEEZE!, THWACK!, HA!. White jagged burst, ink outline, coloured outlined text, tilted ±0.2 rad.
+- **Name tags are pills** (`name_pill`): a translucent dark rounded pill with white text above the head ("BaconHair", "MaxPro99"). Joke names carry the gag ("TotallyNotMe123").
+- **Game toasts at the top** (`game_toast`): "MaxPro99 left the game", "X joined the game" (they stack), "GIFT SENT to …".
+- **HUD** (`game_hud`): a menu button, a WIN STREAK pill with a flame, a coin counter; a "Players: N" pill for crowds.
+- **DAY card** (`day_write`): written letter by letter, the number slams in, a gold ring, an underline.
+- **Counters for time and tries**: a digital PLAYTIME clock (`playtime_clock`), a red "FAILS: N" pill, a calendar page flipping.
+- **Dialogs**: SYSTEM MESSAGE with a robot-screen face (`system_message`), PLAY AGAIN? ▶ PLAY, a phone friends list with BEST FRIEND badge and "Invite sent", red **DECLINED** / RETURN TO SENDER stamps (`stamp`), a SUBSCRIBE → SUBSCRIBED (bell) button, a SCREEN TIME bar that turns into "∞ UNLIMITED", a 1 % battery screen, LOADING… spinner.
+- Phone and tablet screens fill the frame for every "you send / you switch to your phone" line, with big cartoon hands holding them.
+
+**Characters seen in set 3** (style only; we use our own cast in `style.py`):
+- The kid, mom in a robe with curlers and bunny slippers, a best friend in a cap and hoodie, a disguise (fedora + glasses + moustache), a cheering subscriber, crowds of varied avatars with signs.
+- **Objects become characters** with the same face style: a server rack with sleepy eyes, a rubber duck that looks at the camera with "?!", a calendar.
+- Same construction as sets 1-2: rounded-square head, thick self-coloured outline, black oval eyes with a highlight (or white circles in shock), thick brows, D-mouth with pink tongue, pink blush ovals. New in set 3: a **huge scream mouth** (top teeth, tongue at the bottom) for "WHAT?!" → our `"scream"` expression.
 
 ## 8. STYLE LOCK (one paragraph to paste into any prompt)
 > Flat 2D vector cartoon of blocky game avatars: rounded-rectangle head (1.0 x 0.9), torso (1.1 x 1.05), block arms and legs (0.55 wide), no neck, no hands or feet beyond the blocks. Thick outlines in a dark shade of each colour. Soft top-left light with glossy white highlight streaks. Big expressive cartoon faces (black oval eyes with a white highlight, thick rounded brows, D-shaped open mouths with pink tongues). Very saturated colours: navy night bedroom with a warm door light, bright sky-blue game worlds with studded green baseplates, orange lava obbies, purple boss castles, gold reward bursts. Game UI overlays: timer pill, stage pills, health bars, leaderboards. Hard cuts, a punch-in zoom on every key word, screen shake on impacts.

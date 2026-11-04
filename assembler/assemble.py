@@ -86,6 +86,12 @@ def main():
     if not clips:
         sys.exit(f"no video clips found in {a.clips}")
     durs = [probe_duration(c) for c in clips]
+    global FPS
+    fr = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=r_frame_rate",
+                         "-of", "csv=p=0", str(clips[0])], capture_output=True, text=True).stdout.strip()
+    if fr:
+        num, den = fr.split("/")
+        FPS = round(float(num) / float(den))      # keep the animation's frame rate (60 for engine.profile("set3"))
     n, d = len(clips), a.xfade
     if any(x <= d * 2 for x in durs):
         sys.exit("a clip is shorter than twice the crossfade, lower --xfade")
