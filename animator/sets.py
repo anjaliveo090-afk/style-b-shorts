@@ -14,6 +14,9 @@ Groups:
             employee_frame, wand (added for reset_noob.py)
   set 3     day_write (letter-by-letter DAY card), sfx_word (SPLAT!/BUMP! stickers), name_pill, game_toast,
             game_hud (streak / coins / players), system_message, playtime_clock (measured at 60 fps)
+  roblox    robux (the Robux icon; use it for ALL money), robux_pile, robux_counter, purchase_prompt, robux_pack,
+            esc_menu (Reset Character / Leave / Resume), player_list, hotbar, disconnect_dialog, teleport_screen,
+            experience_tile, dominus, valk, bloxy_cola, avatar_break, ROBLOX_NAMES
   UI        hud_timer, second_card, stage_pill, health_bar, damage_text, ko_sticker, toast, login_screen,
             leaderboard, shop_grid, gamepass_card, comments_sheet, subscribe_button, joystick_ui, cursor
   FX        burst, glow, tint, flash, vignette, speed_lines, shockwave, impact_star, sparkles, confetti,
@@ -2586,12 +2589,17 @@ def golden_ticket(ctx, x, y, s, rot=0.0, flip=1.0):
     ctx.restore()
 
 
-def number_counter(ctx, x, y, s, value, T, spinning=False, col="#ffd84a", prefix="R$ "):
-    """Big slot-style counter panel (centre x, y). spinning blurs the digits."""
+def number_counter(ctx, x, y, s, value, T, spinning=False, col="#ffd84a", prefix="R$ ", icon=False):
+    """Big slot-style counter panel (centre x, y). spinning blurs the digits.
+    icon=True draws the Robux icon instead of the text prefix (use it for every Robux amount)."""
     ctx.save()
     ctx.translate(x, y)
     ctx.scale(s, s)
     block(ctx, -300, -95, 600, 190, 40, hexc("#1f2236"), 7, outline=GOLD)
+    if icon:
+        robux(ctx, -225, 0, 1.15)
+        ctx.translate(45, 0)
+        prefix = ""
     txt = prefix + (f"{int(value):,}" if not spinning else f"{int(value):,}")
     if spinning:
         for k in (-1, 1):   # motion smear of rolling digits
@@ -3674,3 +3682,360 @@ def playtime_clock(ctx, x, y, s, seconds, T=0.0, glow_a=0.0, label_txt="PLAYTIME
     for i, t in enumerate(("HRS", "MIN", "SEC")):
         bold_text(ctx, t, -190 + i * 190, 70, 20, hexc("#9aa0b8"), shadow=False, stroke=0.0)
     ctx.restore()
+
+
+# ================================================================ Roblox world (the user's videos are all about Roblox)
+# Everything here is redrawn in our flat cartoon style so it reads as Roblox at a glance. The official ROBLOX
+# wordmark/logo and real game screenshots are never used (trademark/copyright claims; the references do not use them).
+ROBUX_GOLD = ("#ffe680", "#ffc928", "#e8930f")
+ROBLOX_NAMES = ["BaconHair", "xX_Noob_Xx", "BloxKid", "PizzaGamer99", "ObbyQueen", "Builder_Bob", "SpeedyTom",
+                "LavaJumper", "RobuxRich", "CoolDude2012", "PixelPanda_7", "NoobMaster3000", "Turbo_Toast",
+                "BlockyBella"]
+
+
+def _hex_path(ctx, x, y, r, rot=0.0):
+    for i in range(6):
+        a = rot + PI / 6 + i * PI / 3
+        (ctx.move_to if i == 0 else ctx.line_to)(x + math.cos(a) * r, y + math.sin(a) * r)
+    ctx.close_path()
+
+
+def robux(ctx, x, y, s=1.0, spin=0.0, mono=None, outline=True):
+    """The Robux currency icon (a rounded hexagon with a rounded-square hole), centre x, y, ~80 px wide at s=1.
+    spin (radians) flips it like a coin; mono='#ffffff' draws the flat one-colour UI version (counters, prices)."""
+    sx = abs(math.cos(spin))
+    if s <= 0.01 or sx < 0.04:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s * sx, s)
+    r = 40
+    ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+    ctx.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
+    _hex_path(ctx, 0, 0, r)
+    ctx.new_sub_path()
+    rrect(ctx, -r * 0.34, -r * 0.34, r * 0.68, r * 0.68, r * 0.12)
+    if mono:
+        ctx.set_source_rgb(*c_(mono))
+        ctx.fill()
+    else:
+        g = cairo.LinearGradient(0, -r, 0, r)
+        for k, c in zip((0, 0.5, 1), ROBUX_GOLD):
+            g.add_color_stop_rgb(k, *hexc(c))
+        ctx.set_source(g)
+        ctx.fill_preserve()
+        if outline:
+            ctx.set_source_rgb(*hexc("#8a4a08"))
+            ctx.set_line_width(5)
+            ctx.stroke()
+        ctx.move_to(-r * 0.62, -r * 0.42)                # glossy highlight on the upper-left edge
+        ctx.line_to(-r * 0.12, -r * 0.72)
+        ctx.set_source_rgba(1, 1, 1, 0.7)
+        ctx.set_line_width(6)
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.stroke()
+    ctx.set_fill_rule(cairo.FILL_RULE_WINDING)
+    ctx.restore()
+
+
+def robux_pile(ctx, x, y, w, h, T=0.0, seed=4):
+    """A heap of Robux icons (bottom centre x, y), w x h."""
+    rnd = random.Random(seed)
+    rows = max(1, int(h / 34))
+    for j in range(rows):
+        k = 1 - j / rows
+        for i in range(int(w * k / 40) + 1):
+            px = x - w * k / 2 + i * 40 + rnd.uniform(-8, 8)
+            robux(ctx, px, y - 20 - j * 30 + rnd.uniform(-5, 5), 0.55, spin=rnd.uniform(-0.6, 0.6))
+
+
+def robux_counter(ctx, x, y, value, s=1.0, k=None):
+    """Roblox-style balance chip: dark translucent pill, white Robux icon, the amount (centre x, y).
+    k = seconds since the value changed: the chip bumps."""
+    txt = f"{int(value):,}"
+    sc = s * (1 + 0.15 * math.exp(-14 * k) if k is not None and k >= 0 else s)
+    if k is None or k < 0:
+        sc = s
+    w = text_width(ctx, txt, 34) + 96
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    rrect(ctx, -w / 2, -30, w, 60, 30)
+    ctx.set_source_rgba(0.1, 0.11, 0.16, 0.8)
+    ctx.fill()
+    robux(ctx, -w / 2 + 34, 0, 0.5, mono="#ffffff")
+    bold_text(ctx, txt, -w / 2 + 64, 0, 34, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def purchase_prompt(ctx, x, y, s, item, price, k, pressed=0.0, item_fn=None, done=False):
+    """The 'Buy Item' prompt: item picture, "Would you like to buy <item> for R$ <price>?", Buy Now / Cancel.
+    done=True swaps it to 'Purchase completed'. item_fn(ctx, cx, cy, size) draws the item. k = seconds since pop."""
+    if k < 0:
+        return
+    sc = s * (pop(k) if k < 0.6 else 1.0)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    block(ctx, -270, -230, 540, 460, 22, hexc("#2b2d36"), 5, outline=hexc("#15161c"))
+    bold_text(ctx, "Purchase completed" if done else "Buy Item", 0, -190, 30, (1, 1, 1), shadow=False, stroke=0.0)
+    ctx.move_to(-250, -160)
+    ctx.line_to(250, -160)
+    ctx.set_source_rgba(1, 1, 1, 0.15)
+    ctx.set_line_width(2)
+    ctx.stroke()
+    block(ctx, -230, -135, 170, 170, 14, hexc("#3c3f4c"), 3, gloss=False)
+    if item_fn:
+        item_fn(ctx, -145, -50, 150)
+    bold_text(ctx, "Would you like", 90, -110, 26, hexc("#d8dbe6"), shadow=False, stroke=0.0)
+    bold_text(ctx, "to buy", 90, -78, 26, hexc("#d8dbe6"), shadow=False, stroke=0.0)
+    bold_text(ctx, item, 90, -40, 30, (1, 1, 1), shadow=False, stroke=0.0)
+    robux(ctx, 30, 5, 0.42, mono="#ffffff")
+    bold_text(ctx, f"{int(price):,}", 58, 5, 30, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+    if done:
+        block(ctx, -230, 80, 460, 70, 14, GREEN, 4)
+        bold_text(ctx, "OK", 0, 115, 32, (1, 1, 1), shadow=False, stroke=0.1)
+    else:
+        dy = 5 * clamp(pressed)
+        block(ctx, -230, 80 + dy, 220, 70, 14, hexc("#00b06f"), 4)
+        bold_text(ctx, "Buy Now", -120, 115 + dy, 30, (1, 1, 1), shadow=False, stroke=0.1)
+        block(ctx, 10, 80, 220, 70, 14, hexc("#4a4d5a"), 4, gloss=False)
+        bold_text(ctx, "Cancel", 120, 115, 30, (1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def robux_pack(ctx, x, y, s, amount, price="$9.99", hi=False):
+    """A Robux store tile: a stack of icons, the amount, a price button (centre x, y)."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -110, -150, 220, 300, 18, hexc("#2b2d36"), 5, outline=GOLD if hi else hexc("#15161c"))
+    n = 1 + min(4, len(str(amount)) - 1)
+    for i in range(n):
+        robux(ctx, -((n - 1) * 18) + i * 36, -60 - (i % 2) * 14, 0.8)
+    robux(ctx, -60, 40, 0.35, mono="#ffffff")
+    bold_text(ctx, f"{int(amount):,}", -38, 40, 34, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+    block(ctx, -90, 82, 180, 50, 12, hexc("#00b06f"), 3)
+    bold_text(ctx, price, 0, 107, 26, (1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def esc_menu(ctx, T, k=1.0, hi=None, pressed=0.0, names=None):
+    """The in-game ESC menu, full screen: tab icons at the top, the player list, and Reset Character (R) /
+    Leave (L) / Resume (ESC) at the bottom. hi = 'reset' / 'leave' / 'resume' highlights a button.
+    Drawn inside the safe zone (y 170-1000)."""
+    a = clamp(k / 0.15)
+    ctx.save()
+    ctx.rectangle(-3000, -5000, 7000, 10000)
+    ctx.set_source_rgba(0.05, 0.06, 0.1, 0.55 * a)
+    ctx.fill()
+    block(ctx, 50, 180, 620, 800, 24, hexc("#24262f"), 4, outline=hexc("#15161c"))
+    for i, t in enumerate(("Players", "Settings", "Report", "Help")):
+        cx = 125 + i * 157
+        block(ctx, cx - 62, 200, 124, 70, 12, hexc("#3a3d4a") if i else hexc("#4f5366"), 2, gloss=False)
+        bold_text(ctx, t, cx, 235, 22, (1, 1, 1), shadow=False, stroke=0.0)
+    for i, nm in enumerate((names or ROBLOX_NAMES[:5])[:6]):
+        yy = 320 + i * 80
+        block(ctx, 80, yy - 32, 560, 64, 10, hexc("#30333f"), 2, gloss=False)
+        face_icon(ctx, 120, yy, 24, "#e9c22c", "#4a2f22")
+        bold_text(ctx, nm, 160, yy, 26, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+    btns = (("reset", "Reset Character", "R"), ("leave", "Leave", "L"), ("resume", "Resume", "ESC"))
+    for i, (key, t, kk) in enumerate(btns):
+        bx = 80 + i * 190
+        dy = 5 * clamp(pressed) if hi == key else 0
+        col = hexc("#e8323a") if (hi == key and key == "reset") else (hexc("#4f8bff") if hi == key else hexc("#3a3d4a"))
+        block(ctx, bx, 870 + dy, 180, 90, 14, col, 3)
+        block(ctx, bx + 12, 882 + dy, 40, 40, 8, (1, 1, 1), 2, gloss=False)
+        bold_text(ctx, kk, bx + 32, 902 + dy, 20 if len(kk) < 3 else 14, INK, outline=(1, 1, 1), shadow=False,
+                  stroke=0.0)
+        bold_text(ctx, t, bx + 90, 940 + dy, 20 if len(t) > 8 else 26, (1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def player_list(ctx, x, y, names, T, s=1.0, stat=None, me=None):
+    """The top-right player list (leaderstats): translucent rows with a name and an optional stat column.
+    (x, y) = top-left; keep x + 300*s <= 680 for the safe zone.
+    stat = (title, [values]); me = the highlighted name."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    w = 300 if stat else 230
+    if stat:
+        bold_text(ctx, stat[0], w - 50, -22, 20, (1, 1, 1), shadow=False, stroke=0.0)
+    for i, nm in enumerate(names):
+        yy = i * 44
+        rrect(ctx, 0, yy, w, 40, 6)
+        ctx.set_source_rgba(*(hexc("#4f8bff") if nm == me else (0.1, 0.11, 0.16)), 0.75)
+        ctx.fill()
+        bold_text(ctx, nm, 14, yy + 20, 20, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+        if stat:
+            bold_text(ctx, str(stat[1][i]), w - 50, yy + 20, 20, YELLOW, shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def hotbar(ctx, y, items, sel=None, T=0.0):
+    """The inventory hotbar: numbered square slots in a row (centre x 360); items = [draw_fn or None, ...],
+    draw_fn(ctx, cx, cy, size). Keep y <= 960 so it stays in the safe zone."""
+    n = len(items)
+    x0 = 360 - n * 98 / 2
+    for i, fn in enumerate(items):
+        bx = x0 + i * 98
+        rrect(ctx, bx, y - 44, 88, 88, 10)
+        ctx.set_source_rgba(0.1, 0.11, 0.16, 0.7)
+        ctx.fill_preserve()
+        ctx.set_source_rgb(*(YELLOW if sel == i else (0.7, 0.72, 0.8)))
+        ctx.set_line_width(5 if sel == i else 2)
+        ctx.stroke()
+        bold_text(ctx, str(i + 1), bx + 14, y - 30, 18, (1, 1, 1), shadow=False, stroke=0.0)
+        if fn:
+            fn(ctx, bx + 44, y + 4, 60)
+
+
+def disconnect_dialog(ctx, x, y, s, k, title="Disconnected", msg="You were kicked from this experience",
+                      code="Error Code: 267"):
+    """The 'Disconnected' error dialog with a Leave button (k = seconds since it popped)."""
+    if k < 0:
+        return
+    sc = s * (pop(k) if k < 0.6 else 1.0)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    block(ctx, -280, -170, 560, 340, 18, hexc("#2b2d36"), 5, outline=hexc("#15161c"))
+    bold_text(ctx, title, 0, -128, 34, (1, 1, 1), shadow=False, stroke=0.0)
+    ctx.move_to(-260, -95)
+    ctx.line_to(260, -95)
+    ctx.set_source_rgba(1, 1, 1, 0.15)
+    ctx.set_line_width(2)
+    ctx.stroke()
+    words, line, lines = msg.split(), "", []
+    for wd in words:
+        if text_width(ctx, line + " " + wd, 26) > 480 and line:
+            lines.append(line)
+            line = wd
+        else:
+            line = (line + " " + wd).strip()
+    lines.append(line)
+    for i, l in enumerate(lines[:3]):
+        bold_text(ctx, l, 0, -50 + i * 36, 26, hexc("#d8dbe6"), shadow=False, stroke=0.0)
+    bold_text(ctx, code, 0, 40, 22, hexc("#9aa0b8"), shadow=False, stroke=0.0)
+    block(ctx, -110, 85, 220, 60, 12, (1, 1, 1), 3, gloss=False)
+    bold_text(ctx, "Leave", 0, 115, 28, INK, outline=(1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def teleport_screen(ctx, T, title="Teleporting...", game=None):
+    """The loading / teleporting screen: dark gradient, a tilted square spinner, the game name."""
+    g = cairo.LinearGradient(0, 0, 0, H)
+    g.add_color_stop_rgb(0, *hexc("#1b2140"))
+    g.add_color_stop_rgb(1, *hexc("#0b0d1a"))
+    ctx.rectangle(-3000, -5000, 7000, 10000)
+    ctx.set_source(g)
+    ctx.fill()
+    if game:
+        bold_text(ctx, game, 360, 470, 50, (1, 1, 1), stroke=0.12)
+    ctx.save()
+    ctx.translate(360, 640)
+    ctx.rotate(T * 4)
+    rrect(ctx, -40, -40, 80, 80, 14)
+    ctx.set_source_rgb(1, 1, 1)
+    ctx.set_line_width(12)
+    ctx.stroke()
+    ctx.restore()
+    bold_text(ctx, title, 360, 780, 34, hexc("#d8dbe6"), shadow=False, stroke=0.0)
+
+
+def experience_tile(ctx, x, y, s, title, like=94, playing="12.3K", art=None, T=0.0):
+    """A game tile from the Home / Discover page (top-left x, y): square art, title, thumbs-up % and players."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, 0, 0, 200, 200, 14, hexc("#3c3f4c"), 3, gloss=False)
+    if art:
+        ctx.save()
+        rrect(ctx, 0, 0, 200, 200, 14)
+        ctx.clip()
+        art(ctx, 0, 0, 200, 200, T)
+        ctx.restore()
+    bold_text(ctx, title, 0, 228, 22, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+    bold_text(ctx, f"{like}%", 0, 258, 18, hexc("#9aa0b8"), align="l", shadow=False, stroke=0.0)
+    bold_text(ctx, f"{playing} playing", 70, 258, 18, hexc("#9aa0b8"), align="l", shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def dominus(ctx, x, y, s=1.0, col="#2b2f45"):
+    """A dark hooded helm with a glowing face slit (the famous expensive hat), centred on a head at (x, y)."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    ctx.move_to(-70, 40)
+    ctx.curve_to(-80, -40, -40, -95, 0, -100)
+    ctx.curve_to(40, -95, 80, -40, 70, 40)
+    ctx.line_to(40, 70)
+    ctx.line_to(-40, 70)
+    ctx.close_path()
+    shape_fill(ctx, c_(col), 5, -100, 70)
+    for sx in (-1, 1):
+        ctx.move_to(sx * 70, -10)
+        ctx.line_to(sx * 115, -60)
+        ctx.line_to(sx * 75, 20)
+        ctx.close_path()
+        shape_fill(ctx, GOLD, 4, -60, 20)
+    block(ctx, -36, -10, 72, 26, 10, hexc("#6fe6ff"), 3, gloss=False)
+    ctx.restore()
+
+
+def valk(ctx, x, y, s=1.0, col="#e9e4f5"):
+    """A winged silver valkyrie helmet (centred on the top of a head at x, y)."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    for sx in (-1, 1):
+        ctx.move_to(sx * 55, -10)
+        ctx.curve_to(sx * 120, -60, sx * 140, -120, sx * 110, -150)
+        ctx.curve_to(sx * 95, -100, sx * 70, -70, sx * 45, -50)
+        ctx.close_path()
+        shape_fill(ctx, (1, 1, 1), 4, -150, -10)
+    ctx.move_to(-60, 10)
+    ctx.curve_to(-60, -70, 60, -70, 60, 10)
+    ctx.close_path()
+    shape_fill(ctx, c_(col), 5, -70, 10)
+    block(ctx, -8, -62, 16, 70, 6, GOLD, 3, gloss=False)
+    ctx.restore()
+
+
+def bloxy_cola(ctx, x, y, s=1.0):
+    """A classic red cola bottle collectible (bottom centre x, y)."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    ctx.move_to(-28, 0)
+    ctx.line_to(-28, -90)
+    ctx.curve_to(-28, -120, -12, -125, -12, -150)
+    ctx.line_to(12, -150)
+    ctx.curve_to(12, -125, 28, -120, 28, -90)
+    ctx.line_to(28, 0)
+    ctx.close_path()
+    shape_fill(ctx, hexc("#c62828"), 4, -150, 0)
+    block(ctx, -14, -166, 28, 18, 4, (0.85, 0.85, 0.9), 3, gloss=False)
+    block(ctx, -28, -80, 56, 34, 4, (1, 1, 1), 3, gloss=False)
+    bold_text(ctx, "COLA", 0, -63, 16, hexc("#c62828"), outline=(1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def avatar_break(ctx, x, y, s, k, cols=("#e9c22c", "#1a68cf", "#9bbc36"), style_mod=None):
+    """An avatar falling apart into its blocks (the Roblox death), k = seconds since; cols = (skin, shirt, pants).
+    (x, y) = where the avatar stood, s = its Block scale."""
+    import style as _st
+    skin, shirt, pants = cols
+    u = 1.45 * 64 * s
+    parts = [(skin, 0.0, -2.05, 0.95, 0.9, -0.6, -3.2, 5), (shirt, 0.0, -1.5, 1.1, 1.05, 0.1, -1.6, 2),
+             (skin, -0.75, -1.5, 0.42, 1.0, -2.6, -2.2, 7), (skin, 0.75, -1.5, 0.42, 1.0, 2.6, -2.4, -7),
+             (pants, -0.28, -0.5, 0.52, 1.0, -1.4, -1.0, 4), (pants, 0.28, -0.5, 0.52, 1.0, 1.5, -1.1, -4)]
+    for col, px, py, w, h, vx, vy, spin in parts:
+        cx = x + px * u + vx * 300 * k
+        cy = y + py * u + vy * 300 * k + 900 * k * k
+        ctx.save()
+        ctx.translate(cx, cy)
+        ctx.rotate(spin * k)
+        _st.block(ctx, -w * u / 2, -h * u / 2, w * u, h * u, 0.1 * u, hexc(col), 4)
+        ctx.restore()

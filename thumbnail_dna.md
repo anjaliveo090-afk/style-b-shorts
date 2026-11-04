@@ -126,6 +126,8 @@ V = visible on the image, I = interpretation.
 - One radial burst colour; one red circle on the proof detail.
 - Every element readable at phone size: text at least about 9% of the panel width in letter height.
 
+- Every thumbnail is Roblox: money = the **Robux icon** (`sets.robux`), proof objects from the Roblox UI (Buy Now prompt, Reset Character, a "Disconnected" dialog, a player list). Never the official ROBLOX logo.
+
 **Don't**
 - No full title as text, and no "What if" in the text.
 - No more than 2 characters plus 1 prop focus.

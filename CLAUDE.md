@@ -72,6 +72,11 @@ Read `script_guide.md` first. It was learned from 6 reference videos: who speaks
    - `animator/report_noob.py` is a second, full 60 s example (48 shots). Its helpers include `closeup()`, a named game character with a name tag, a developer at a desk, and the report/ban props.
    - Add new places or props to `animator/sets.py` in the same style: `style.block` / `shape_fill`, self-coloured outlines, palette from `style_bible.md` section 5. Never copy the reference channel's characters, logos or text.
    - Use our cast from `style.py`, or new `Block(...)` looks.
+   - **Every video is a Roblox video (the user's rule): show the Roblox world.** `sets.py` section "roblox":
+     - **money is always Robux**: `robux()` icon (never a plain gold coin), `robux_pile`, `robux_counter`, `number_counter(..., icon=True)`;
+     - Roblox UI for game moments: `purchase_prompt` (Buy Item / Buy Now), `robux_pack` (store), `esc_menu` (Reset Character / Leave / Resume), `player_list`, `hotbar`, `disconnect_dialog` (kicked, Error Code 267), `teleport_screen`, `experience_tile`, plus `game_toast` ("X joined the game"), `name_pill`, `game_hud`;
+     - Roblox items and moments: `dominus`, `valk`, `bloxy_cola`, `avatar_break` (falling apart when you die), the classic `style.NOOB`, studded `baseplate`, `spawn_pad`, `obby`; usernames from `ROBLOX_NAMES`;
+     - everything is redrawn in our cartoon style. **Never paste the official ROBLOX wordmark/logo or real game screenshots** (trademark/copyright claims; the reference channel does not use them either). The word "Roblox" in titles and on-screen text is fine.
 4. **Contact sheet with the safe zone** before the full render:
    `cd animator && python3 contact.py <story> ../output/<story>/contact.png 1`.
    Look at it and fix anything small, cut off, hidden, empty or off-zone.

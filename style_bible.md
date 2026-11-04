@@ -204,5 +204,12 @@ These are drawn in `animator/sets.py`:
 - **Objects become characters** with the same face style: a server rack with sleepy eyes, a rubber duck that looks at the camera with "?!", a calendar.
 - Same construction as sets 1-2: rounded-square head, thick self-coloured outline, black oval eyes with a highlight (or white circles in shock), thick brows, D-mouth with pink tongue, pink blush ovals. New in set 3: a **huge scream mouth** (top teeth, tongue at the bottom) for "WHAT?!" → our `"scream"` expression.
 
+## 7b. The Roblox world (the user's rule: every video is about Roblox)
+- **Money is always Robux**: the Robux icon (a gold rounded hexagon with a rounded-square hole, `sets.robux`), never a plain coin. In UI it is the flat white version next to the number (`robux_counter`, prices).
+- Game moments use the Roblox UI, redrawn: Buy Item prompt, Robux store packs, ESC menu with Reset Character / Leave / Resume, the player list, the hotbar, the Disconnected dialog, Teleporting screen, game tiles, "joined / left the game" toasts, name pills.
+- Iconic items: the noob avatar, a Dominus-style hood, a winged Valk helm, a cola bottle, the studded baseplate, the spawn pad, obbies over lava, avatars falling apart into blocks when they die.
+- **Not used:** the official ROBLOX wordmark/logo and real screenshots (trademark and copyright). The name "Roblox" is fine in text.
+- Test sheet: `output/roblox_sheet/roblox_sheet.png` (redraw it with the code in the commit that added `sets.robux`).
+
 ## 8. STYLE LOCK (one paragraph to paste into any prompt)
 > Flat 2D vector cartoon of blocky game avatars: rounded-rectangle head (1.0 x 0.9), torso (1.1 x 1.05), block arms and legs (0.55 wide), no neck, no hands or feet beyond the blocks. Thick outlines in a dark shade of each colour. Soft top-left light with glossy white highlight streaks. Big expressive cartoon faces (black oval eyes with a white highlight, thick rounded brows, D-shaped open mouths with pink tongues). Very saturated colours: navy night bedroom with a warm door light, bright sky-blue game worlds with studded green baseplates, orange lava obbies, purple boss castles, gold reward bursts. Game UI overlays: timer pill, stage pills, health bars, leaderboards. Hard cuts, a punch-in zoom on every key word, screen shake on impacts.
