@@ -10,5 +10,5 @@ When the user sends analytics for a YouTube title, find the story here. When a n
 | grandma_pro | What If Your GRANDMA Became a Roblox Pro? | 47 s | 2026-10-31 | | |
 | sneeze | What If You Got 1 ROBUX Every Time You Sneezed? | 47 s | 2026-10-31 | | |
 | tensec (not made in this repo; the user's upload, analysed as a reference) | What If MOM Gave You 10 Seconds of Roblox | 50 s | – | What If MOM Gave You 10 Seconds of Roblox | **yes, 2026-11-04** (`analysis/ref_data/analytics/tensec`, lessons 1-6) |
-| ten_seconds_v2 (script only so far: `output/ten_seconds_v2/script.txt`, a NEW countdown story so it is not a repeat of the old upload; thumbnail `animator/thumb_ten_seconds.py`) | Fresh 10-seconds script written with lessons 1-6 (PAUSE MOM button twist) | ~48 s | – | What If Your Roblox Time Was Only 10 SECONDS? | |
+| ten_seconds_v2 (script only so far: `output/ten_seconds_v2/script.txt`, a NEW countdown story so it is not a repeat of the old upload; thumbnail `animator/thumb_ten_seconds.py`) | Fresh 10-seconds script written with lessons 1-6 (PAUSE MOM button twist), 149 words | ~60 s | – | What If Your Roblox Time Was Only 10 SECONDS? | |
 | reset_noob | This noob is the reason Roblox has a reset button (no captions: the user asked; thumbnail: `animator/thumb_reset_noob.py`) | 76 s | 2026-11-03 | This Noob Is the REASON Roblox Has a Reset Button... 😭 | |
