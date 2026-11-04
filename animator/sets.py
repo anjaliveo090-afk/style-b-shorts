@@ -17,6 +17,8 @@ Groups:
   roblox    robux (the Robux icon; use it for ALL money), robux_pile, robux_counter, purchase_prompt, robux_pack,
             esc_menu (Reset Character / Leave / Resume), player_list, hotbar, disconnect_dialog, teleport_screen,
             experience_tile, dominus, valk, bloxy_cola, avatar_break, ROBLOX_NAMES
+  friends   friend_card (Accept / Decline, sent, DECLINED), invite_card (JOIN), friends_count, roblox_dialog,
+            bracelet, party_hat, server_grid (FULL servers)
   UI        hud_timer, second_card, stage_pill, health_bar, damage_text, ko_sticker, toast, login_screen,
             leaderboard, shop_grid, gamepass_card, comments_sheet, subscribe_button, joystick_ui, cursor
   FX        burst, glow, tint, flash, vignette, speed_lines, shockwave, impact_star, sparkles, confetti,
@@ -997,7 +999,7 @@ def platform(ctx, x, y, w, col="#2cd5fc", depth=26, num=None, h=60):
 
 
 def obby(ctx, T, y_lava=1080, cols=("#2cd5fc", "#fa3a9f", "#f7e04a", "#a694e1", "#4fd16a"), start=1, n=8,
-         x0=-40, dx=200, y_top=880, rise=-40):
+         x0=-40, dx=200, y_top=880, rise=-40, nums=True):
     """Sky + lava + a run of numbered platforms going right. Returns platform top centres."""
     game_sky(ctx)
     block_clouds(ctx, T)
@@ -1006,7 +1008,7 @@ def obby(ctx, T, y_lava=1080, cols=("#2cd5fc", "#fa3a9f", "#f7e04a", "#a694e1", 
     for i in range(n):
         x = x0 + i * dx
         y = y_top + i * rise + (i % 2) * 30
-        platform(ctx, x, y, 130 if i else 220, cols[i % len(cols)], num=start + i)
+        platform(ctx, x, y, 130 if i else 220, cols[i % len(cols)], num=(start + i) if nums else None)
         tops.append((x + (65 if i else 110), y))
     return tops
 
@@ -4038,4 +4040,166 @@ def avatar_break(ctx, x, y, s, k, cols=("#e9c22c", "#1a68cf", "#9bbc36"), style_
         ctx.translate(cx, cy)
         ctx.rotate(spin * k)
         _st.block(ctx, -w * u / 2, -h * u / 2, w * u, h * u, 0.1 * u, hexc(col), 4)
+        ctx.restore()
+
+
+# ================================================================ friends (added for friend_noob.py)
+def friend_card(ctx, x, y, s, name, k=1.0, state="pending", face=("#e9c22c", "#4a2f22"), title="Friend Request"):
+    """A Roblox-style friend request card (centre x, y): avatar, name, and the state:
+    'pending' (Accept / Decline), 'sent' (Request Sent ✓), 'declined' (a red DECLINED stamp), 'friends' (Friends ✓).
+    k = seconds since it popped."""
+    if k < 0:
+        return
+    sc = s * (pop(k) if k < 0.6 else 1.0)
+    if sc <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    block(ctx, -240, -110, 480, 220, 20, hexc("#2b2d36"), 4, outline=hexc("#15161c"))
+    bold_text(ctx, title, -220, -80, 24, hexc("#9aa0b8"), align="l", shadow=False, stroke=0.0)
+    face_icon(ctx, -170, 0, 48, face[0], face[1], expr="grin")
+    bold_text(ctx, name, -105, -10, 32, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+    if state == "pending":
+        block(ctx, -105, 35, 150, 52, 12, hexc("#00b06f"), 3)
+        bold_text(ctx, "Accept", -30, 61, 24, (1, 1, 1), shadow=False, stroke=0.0)
+        block(ctx, 60, 35, 150, 52, 12, hexc("#4a4d5a"), 3, gloss=False)
+        bold_text(ctx, "Decline", 135, 61, 24, (1, 1, 1), shadow=False, stroke=0.0)
+    elif state in ("sent", "friends"):
+        block(ctx, -105, 35, 300, 52, 12, hexc("#3a3d4a"), 3, gloss=False)
+        bold_text(ctx, "Request Sent" if state == "sent" else "Friends", 20, 61, 24, (1, 1, 1), shadow=False,
+                  stroke=0.0)
+        check_mark(ctx, 165, 58, 18, 1.0)
+    ctx.restore()
+    if state == "declined":
+        stamp(ctx, x, y + 10 * s, "DECLINED", 1.0, size=70 * s)
+
+
+def invite_card(ctx, x, y, s, host, place, k=1.0, pressed=0.0):
+    """A party / game invite popup: '<host> invited you to <place>' with a green JOIN button (centre x, y)."""
+    if k < 0:
+        return
+    sc = s * (pop(k) if k < 0.6 else 1.0)
+    if sc <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    block(ctx, -250, -100, 500, 200, 20, hexc("#2b2d36"), 4, outline=hexc("#15161c"))
+    face_icon(ctx, -185, -20, 40, "#e9c22c", "#4a2f22", expr="grin")
+    bold_text(ctx, f"{host} invited you to", -130, -45, 22, hexc("#d8dbe6"), align="l", shadow=False, stroke=0.0)
+    bold_text(ctx, place, -130, -10, 28, YELLOW, align="l", shadow=False, stroke=0.0)
+    dy = 4 * clamp(pressed)
+    block(ctx, -130, 35 + dy, 200, 50, 12, hexc("#00b06f"), 3)
+    bold_text(ctx, "JOIN", -30, 60 + dy, 26, (1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def friends_count(ctx, x, y, n, s=1.0, col="#00b06f", label="Friends"):
+    """A 'Friends: 1,203' pill with a two-person icon (centre x, y)."""
+    txt = f"{label}: {int(n):,}"
+    w = text_width(ctx, txt, 32) + 100
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -w / 2, -32, w, 64, 32, hexc("#2b2d36"), 4, outline=c_(col))
+    for dx, r in ((-w / 2 + 34, 11), (-w / 2 + 52, 9)):
+        ctx.new_sub_path()
+        ctx.arc(dx, -8, r * 0.75, 0, 2 * PI)
+        ctx.new_sub_path()
+        ctx.arc(dx, 14, r, PI, 2 * PI)
+    ctx.set_source_rgb(*c_(col))
+    ctx.fill()
+    bold_text(ctx, txt, 22, 0, 32, (1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def roblox_dialog(ctx, x, y, s, k, title, msg, button="OK", col="#e8323a"):
+    """A generic Roblox-style notice (title bar in a colour, message, one button), e.g. 'Friend Limit Reached'."""
+    if k < 0:
+        return
+    sc = s * (pop(k) if k < 0.6 else 1.0)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    block(ctx, -280, -170, 560, 340, 18, hexc("#2b2d36"), 5, outline=hexc("#15161c"))
+    block(ctx, -280, -170, 560, 80, 18, c_(col), 4)
+    bold_text(ctx, title, 0, -130, 34, (1, 1, 1), shadow=False, stroke=0.12)
+    words, line, lines = msg.split(), "", []
+    for wd in words:
+        if text_width(ctx, line + " " + wd, 28) > 480 and line:
+            lines.append(line)
+            line = wd
+        else:
+            line = (line + " " + wd).strip()
+    lines.append(line)
+    for i, l in enumerate(lines[:3]):
+        bold_text(ctx, l, 0, -40 + i * 40, 28, hexc("#d8dbe6"), shadow=False, stroke=0.0)
+    block(ctx, -110, 85, 220, 60, 12, (1, 1, 1), 3, gloss=False)
+    bold_text(ctx, button, 0, 115, 28, INK, outline=(1, 1, 1), shadow=False, stroke=0.0)
+    ctx.restore()
+
+
+def bracelet(ctx, x, y, s=1.0, T=0.0):
+    """A friendship bracelet: a ring of colourful beads with a heart charm (centre x, y)."""
+    cols = ("#ff5fb0", "#ffd84a", "#4fd16a", "#2f6bd8", "#9d5cff", "#ff8a3d")
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s * 0.55)
+    for i in range(16):
+        a = i * 2 * PI / 16 + T * 0.5
+        bx, by = math.cos(a) * 90, math.sin(a) * 90
+        ctx.new_sub_path()
+        ctx.arc(bx, by, 20, 0, 2 * PI)
+        shape_fill(ctx, hexc(cols[i % len(cols)]), 3, by - 20, by + 20)
+    ctx.restore()
+    ctx.save()
+    ctx.translate(x, y + 70 * s)
+    ctx.scale(s, s)
+    ctx.move_to(0, 30)
+    ctx.curve_to(-50, -5, -30, -45, 0, -20)
+    ctx.curve_to(30, -45, 50, -5, 0, 30)
+    ctx.close_path()
+    shape_fill(ctx, RED, 4, -40, 30)
+    ctx.restore()
+
+
+def party_hat(ctx, x, y, s=1.0, col="#ff5fb0"):
+    """A striped cone party hat sitting on a head top at (x, y)."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    ctx.move_to(-50, 0)
+    ctx.line_to(0, -130)
+    ctx.line_to(50, 0)
+    ctx.close_path()
+    shape_fill(ctx, c_(col), 4, -130, 0)
+    for i in range(3):
+        yy = -30 - i * 35
+        ww = 50 * (1 + yy / 130)
+        ctx.move_to(-ww, yy)
+        ctx.line_to(ww, yy - 10)
+    ctx.set_source_rgb(1, 1, 1)
+    ctx.set_line_width(7)
+    ctx.stroke()
+    ctx.new_sub_path()
+    ctx.arc(0, -134, 14, 0, 2 * PI)
+    shape_fill(ctx, YELLOW, 3, -148, -120)
+    ctx.restore()
+
+
+def server_grid(ctx, x0, y0, n, T, cols=4, k_rows=None, w=150, h=96):
+    """A grid of n server tiles, each 'FULL 50/50' in red (top-left x0, y0). k_rows: seconds since each tile filled."""
+    for i in range(n):
+        cx, cy = x0 + (i % cols) * (w + 10), y0 + (i // cols) * (h + 10)
+        k = None if k_rows is None else k_rows[i]
+        if k is not None and k < 0:
+            continue
+        sc = pop(k) if (k is not None and k < 0.6) else 1.0
+        ctx.save()
+        ctx.translate(cx + w / 2, cy + h / 2)
+        ctx.scale(sc, sc)
+        block(ctx, -w / 2, -h / 2, w, h, 12, hexc("#2b2d36"), 3, outline=hexc("#15161c"))
+        bold_text(ctx, "FULL", 0, -h * 0.17, h * 0.32, RED, shadow=False, stroke=0.0)
+        bold_text(ctx, "50/50", 0, h * 0.22, h * 0.22, hexc("#d8dbe6"), shadow=False, stroke=0.0)
         ctx.restore()

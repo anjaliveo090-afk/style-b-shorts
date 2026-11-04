@@ -262,11 +262,6 @@ def music_ref(total, swell_at=None):
                 continue
             m = pluck(note(tones[i]), 0.9, 3, 5) * 0.33
             put(m * np.minimum(1, (len(m) - np.arange(len(m))) / (SR * 0.1)), t + k * beat / 2)
-        if perc > 0:
-            for k in (0, 2):
-                put(kick() * 0.32 * perc, t + k * beat)
-            for k in range(4):
-                put(wood(1250 if k % 2 else 1500) * 0.07 * perc, t + k * beat + beat / 2)
         t += beat * 4
         bar += 1
     if swell_at is not None:
@@ -311,11 +306,6 @@ def music(total, sad_from, sad_to):
             for k in range(4):
                 n = rng.standard_normal(int(SR * 0.05))
                 put((n - onepole(n, 5000)) * np.exp(-np.arange(len(n)) / SR * 80) * 0.15, t + k * beat + beat / 2)
-        if perc > 0:
-            for k in (0, 2):
-                put(kick() * 0.32 * perc, t + k * beat)
-            for k in range(4):
-                put(wood(1250 if k % 2 else 1500) * 0.07 * perc, t + k * beat + beat / 2)
         t += beat * 4
         bar += 1
     put(sum(pluck(note(m), 3.0, 4, 1.2) for m in (48, 55, 60, 64)) * 0.5, total - 2.8)
