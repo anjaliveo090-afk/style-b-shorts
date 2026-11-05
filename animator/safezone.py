@@ -27,6 +27,28 @@ MARGIN = 6
 
 _boxes = []
 _story = {"g": None}
+_pixel = {"on": False}   # story sets SAFE_BODY = True: characters are boxed by their REAL pixels (arms included)
+
+
+def _pixel_box(ctx, draw, q=0.25):
+    """Device-space box of the pixels draw(c) paints with ctx's transform and clip, on a 1/4-size surface
+    (alpha >= 40 %, so the soft ground shadow does not count). None when nothing shows."""
+    w, h = int(W * q), int(H * q)
+    surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h)
+    c = cairo.Context(surf)
+    x0, y0, x1, y1 = ctx.clip_extents()
+    pts = [ctx.user_to_device(px, py) for px, py in ((x0, y0), (x1, y0), (x0, y1), (x1, y1))]
+    xs, ys = [p[0] * q for p in pts], [p[1] * q for p in pts]
+    c.rectangle(min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys))
+    c.clip()
+    c.set_matrix(ctx.get_matrix().multiply(cairo.Matrix(q, 0, 0, q, 0, 0)))
+    draw(c)
+    surf.flush()
+    a = np.ndarray((h, w, 4), np.uint8, surf.get_data(), strides=(surf.get_stride(), 4, 1))[:, :, 3]
+    yy, xx = np.nonzero(a >= 100)
+    if len(xx) == 0:
+        return None
+    return xx.min() / q, yy.min() / q, (xx.max() + 1) / q, (yy.max() + 1) / q
 
 
 def _from_story():
@@ -49,8 +71,14 @@ def _install(module):
 
         def draw(self, ctx, x, y, s=1.0, *a, **kw):
             if _from_story():
-                r = 64 * s
-                _rec(ctx, x - half_k * r, y - top_k * r, x + half_k * r, y + 0.1 * r)
+                bb = None
+                if _pixel["on"]:
+                    bb = _pixel_box(ctx, lambda c: orig(self, c, x, y, s, *a, **kw))
+                    if bb:
+                        _boxes.append((*bb, "char"))
+                if not _pixel["on"]:
+                    r = 64 * s
+                    _rec(ctx, x - half_k * r, y - top_k * r, x + half_k * r, y + 0.1 * r)
             return orig(self, ctx, x, y, s, *a, **kw)
         cls.draw = draw
         patched.append((cls, "draw", orig))
@@ -152,7 +180,11 @@ def _solve(box, y0=Y0):
 
 
 def fit(shots, module, fps=5, iters=4, verbose=True):
-    """Adjust the camera keys of every shot in place so characters stay in the safe zone."""
+    """Adjust the camera keys of every shot in place so characters stay in the safe zone.
+    A story with SAFE_BODY = True is fitted on its characters' real pixels (outstretched arms included),
+    the user's rule "character sab safezone me" (2026-11-05). Older stories keep the 1.7r box, so their
+    patch renders still match."""
+    _pixel["on"] = bool(getattr(module, "SAFE_BODY", False))
     patched = _install(module)
     surf = cairo.ImageSurface(cairo.FORMAT_RGB24, W, H)
     moved = 0

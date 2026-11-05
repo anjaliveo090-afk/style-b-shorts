@@ -7,7 +7,9 @@ Checks, on screen, everything a viewer must see:
 Things crossing the frame edge (entering / leaving / off screen) are not counted.
 Zone (safezone.py): x 38..680, y 149..1013; below y 678 the right edge is x 599 (like/comment buttons).
 
-Usage (from animator/):  python3 safe_audit.py <story> [fps=4]
+Usage (from animator/):  python3 safe_audit.py <story> [fps=4] [--body]
+  --body  also check every WHOLE character (feet to head, arms) outside face close-ups (the user's rule:
+          "character sab safezone me")
 Prints one line per (shot, element) that leaves the zone, with the worst overflow in px and when."""
 import importlib
 import sys
@@ -23,6 +25,7 @@ from engine import H, W
 X0, X1, Y0, Y1, NX, NY = sz.X0, sz.X1, sz.Y0, sz.Y1, sz.NOTCH_X, sz.NOTCH_Y
 TOL = 4          # px of overflow that nobody can see
 _rec = []
+BODY = {"on": False}   # --body: also check every whole character (not only heads) outside face close-ups
 
 
 def _clip(ctx, x0, y0, x1, y1):
@@ -35,10 +38,35 @@ def _clip(ctx, x0, y0, x1, y1):
     return min(xs), min(ys), max(xs), max(ys)
 
 
+def _pixel_box(ctx, draw):
+    """Device-space box of what draw(c) paints (alpha >= 40 %, so the soft ground shadow does not count),
+    drawn with ctx's transform and limited to ctx's clip. None when nothing shows."""
+    import numpy as np
+    surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, W, H)
+    c = cairo.Context(surf)
+    x0, y0, x1, y1 = ctx.clip_extents()
+    pts = [ctx.user_to_device(px, py) for px, py in ((x0, y0), (x1, y0), (x0, y1), (x1, y1))]
+    c.rectangle(min(p[0] for p in pts), min(p[1] for p in pts), max(p[0] for p in pts) - min(p[0] for p in pts),
+                max(p[1] for p in pts) - min(p[1] for p in pts))
+    c.clip()
+    c.set_matrix(ctx.get_matrix())
+    draw(c)
+    surf.flush()
+    a = np.ndarray((H, W, 4), np.uint8, surf.get_data(), strides=(surf.get_stride(), 4, 1))[:, :, 3]
+    ys, xs = np.nonzero(a >= 100)
+    if len(xs) == 0:
+        return None
+    return float(xs.min()), float(ys.min()), float(xs.max() + 1), float(ys.max() + 1)
+
+
 def _install():
     orig_draw = style.Block.draw
 
     def draw(self, ctx, x, y, s=1.0, *a, **kw):
+        if BODY["on"]:                                   # the whole character: its REAL drawn pixels (arms too)
+            bb = _pixel_box(ctx, lambda c: orig_draw(self, c, x, y, s, *a, **kw))
+            if bb:
+                _rec.append(("body #%d (x %d)" % (sum(1 for k, _ in _rec if k.startswith("body")), x), bb))
         u = self.HW * 64 * s
         hy = y - 2.5 * u
         b = _clip(ctx, x - 0.55 * u, hy - 0.6 * u, x + 0.55 * u, hy + 0.55 * u)
@@ -63,8 +91,14 @@ def _install():
     st.bold_text = bold_text
 
 
-def overflow(b):
+def overflow(b, body=False):
     x0, y0, x1, y1 = b
+    if body:                     # a body cut by the frame edge is still outside the zone, unless it is mostly
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2          # off screen (walking in or out)
+        if not (0 <= cx <= W and 0 <= cy <= H):
+            return 0.0
+        right = NX if y1 > NY else X1
+        return max(0.0, X0 - x0, x1 - right, Y0 - y0, y1 - Y1)
     if x0 <= 1 or x1 >= W - 1 or y0 <= 1 or y1 >= H - 1:   # (boxes are clipped to the frame)
         return 0.0   # crossing the frame edge: entering/leaving the frame (or off screen), not placed there
     right = NX if y1 > NY else X1
@@ -96,17 +130,22 @@ def audit(module, fps=4):
                 ctx = cairo.Context(surf)
                 shot["overlay"](ctx, T - shot["start"], shot["end"] - shot["start"])
             for kind, b in _rec:
-                o = overflow(b)
+                if kind.startswith("body") and shot.get("closeup"):
+                    continue                             # a face close-up's body runs off the frame by design
+                o = overflow(b, body=kind.startswith("body"))
                 if o > TOL:
-                    key = (shot["start"], shot["draw"].__name__, kind.split(" (x")[0])
+                    key = (shot["start"], shot["draw"].__name__, kind.split(" (x")[0] if not kind.startswith("body")
+                           else kind)
                     if o > worst.get(key, (0,))[0]:
                         worst[key] = (o, T, tuple(round(v) for v in b))
     return worst
 
 
 if __name__ == "__main__":
-    mod = importlib.import_module(sys.argv[1])
-    res = audit(mod, int(sys.argv[2]) if len(sys.argv) > 2 else 4)
+    args = [a for a in sys.argv[1:] if a != "--body"]
+    BODY["on"] = "--body" in sys.argv
+    mod = importlib.import_module(args[0])
+    res = audit(mod, int(args[1]) if len(args) > 1 else 4)
     for (start, name, kind), (o, T, b) in sorted(res.items()):
         print(f"{start:6.2f} {name:22s} {kind:28s} out {o:5.0f}px at {T:6.2f}s  box {b}")
     print(f"{len(res)} elements outside the safe zone")

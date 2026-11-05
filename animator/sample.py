@@ -29,6 +29,8 @@ from style import Block
 
 TOTAL = 22.3
 engine.profile("set3")           # 60 fps + the motion measured frame by frame on reference set 3 (bumps, settle, whip)
+SAFE_BODY = True                  # whole characters in the safe zone (real-pixel fit); for close-ups copy closeup()
+                                  # from chat_filter_v2.py instead of kid_face + closeup=True (CLAUDE.md step 4)
 engine.LIPSYNC = False            # narrator only here; lip-sync only on character dialogue (CLAUDE.md)
 engine.ENERGY = 3.0               # livelier idle bounce/sway (non-camera motion target 5-8)
 MUSIC = dict(bpm=128, perc=0.6)   # music_game() kwargs (set 3); add start=3.0 or dips=[(t0, t1)] as needed

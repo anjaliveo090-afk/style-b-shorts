@@ -84,6 +84,10 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
    - Shots under a HUD use `top=250`.
    - Key props get `keep=[...]`.
    - `safezone.fit` runs inside `__main__` right before `render()`.
+   - **Whole characters in the zone (the user's rule, 2026-11-05: "character sab safezone me"), close-ups included:**
+     - put `SAFE_BODY = True` at the top of the story: `safezone.fit` then boxes every character by its real pixels (outstretched arms too), not the old 1.7r box;
+     - copy `closeup()` from `animator/chat_filter_v2.py`: it draws the reaction character whole (feet at y 995, head near (320, 465)) and returns `m, k` so face props (halo, sweat, keyboard, megaphone) follow the face. Do not mark those shots `closeup=True`; keep `closeup=True` / `fit=False` only for a character seen inside a frame (a peephole, a monitor);
+     - check with `python3 safe_audit.py <story> 4 --body` (real pixels, frame-edge cuts count) as well as the plain audit; both must print 0.
    - **Then run `cd animator && python3 safe_audit.py <story>`** and fix until it prints `0 elements outside the safe zone`. This is the user's rule: everything goes in the safe zone.
      - It replays every frame with the fitted camera and checks every head (side characters in close-ups too), every text (labels, name tags, bubbles, toasts, UI rows, stamps, cards) and the `keep` boxes.
      - Only things crossing the frame edge (entering or leaving) are allowed.
@@ -113,7 +117,7 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
      - the music key reads G.
    - `python3 analysis/frame_log.py $O/<story>_final.mp4 <subs.srt> $O/fl 4`: look at every sheet.
 7. **Send only `<story>_final.mp4` (NO captions)** to the user (SendUserFile), one file. This is the user's rule since 2026-11-05: "jab bhi mangu bina caption ke hi do". Do not burn captions unless the user asks for a captioned copy in that message (then see Defaults). Add the video to `videos.md`. Commit and push the story code; `output/` is git-ignored. Say honestly what could not match.
-8. **Fix requests:** patch only the shots or cues asked about. Edit those shot functions, keys or `SFX` entries, then re-render; a full render takes about 40 s per 20 s of video. `python3 <story>.py out.mp4 cues.json <first_frame> <last_frame>` renders only a frame range if needed. Never regenerate or redesign the rest.
+8. **Fix requests:** patch only the shots or cues asked about. Edit those shot functions, keys or `SFX` entries, then re-render only them: `cd animator && python3 patch_render.py <story> ../$O/clips/animation.mp4 ../$O/clips_fix/animation.mp4 ../$O/voice.mp3 <shot_start> ...` renders just those shots and splices them into the old animation frame-accurately (untouched frames are copied), then re-assemble from `clips_fix`. To find which shots a code change touched, compare the fitted camera keys and scene sources of the old (git HEAD) and new story. Never regenerate or redesign the rest.
 
 ## Defaults
 - **Captions are OFF by default, and only ONE video is delivered: the caption-free `<story>_final.mp4`** (the user's rule, 2026-11-05: "jab bhi mangu bina caption ke hi do"; it replaces the older "captions on" rule). Do not make or send a captioned copy unless the user asks for captions. When they do, burn reference-style captions onto the finished mp4 without re-rendering:

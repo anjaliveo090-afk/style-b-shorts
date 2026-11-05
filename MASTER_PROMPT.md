@@ -52,7 +52,8 @@ STEP 2 - VISUAL PLAN
 - Start every new story with engine.profile("set3"): 60 fps, impact bumps, settling punch-ins, whip pans
   (shot(..., whip=1)), head snaps (snap=), the "scream" face, sets.day_write chapter cards.
 - Show me the plan as a table (time | words | row | visual | camera | expression | SFX) before building.
-- Safe zone: the WHOLE character and key props inside x 38-680, y 149-1013
+- Safe zone: the WHOLE character (close-ups too: SAFE_BODY = True + closeup() from chat_filter_v2.py, check
+  with safe_audit.py <story> 4 --body) and key props inside x 38-680, y 149-1013
   (below y 678 only up to x 599). Face close-ups keep the face and labels inside.
   safezone.fit(SHOTS, sys.modules[__name__]) runs right before render().
 

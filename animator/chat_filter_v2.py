@@ -28,6 +28,7 @@ from style import Block
 
 engine.profile("set3")
 engine.ENERGY = 3.0
+SAFE_BODY = True        # safezone.fit boxes characters by their real pixels: whole characters stay in the zone
 engine.LIPSYNC = True
 TOTAL = 60.0
 SFX_GAIN = 0.28
@@ -61,9 +62,25 @@ def at(fn, T0):
     return lambda ctx, t, d: fn(ctx, T0 + t, d)
 
 
+CU_FEET, CU_X, CU_S = 995, 320, 2.3     # close-up framing that keeps the whole character in the safe zone
+
+
 def closeup(ctx, ch, expr, T, x=360, look=0.0, arms=("down", "down"), s=FACE_S, talk=False, bob=0.35, dy=0,
-            snap=None):
-    ch.draw(ctx, x, 560 + 2.5 * U1 * s + dy, s, expr, T, arms=arms, look=look, talk=talk, bob=bob, snap=snap)
+            snap=None, fit=True):
+    """A reaction close-up. fit=True (the user's rule, 2026-11-05: "character sab safezone me"): the character is
+    drawn whole, feet at y 995, so no part of it sits under the Shorts UI; the head lands at about (320, 465).
+    Returns (m, k): m(px, py) maps a point placed for the old full-frame close-up (head centre (x, 560), scale s)
+    onto the new framing, k is the size factor, so face props (halo, sweat, keyboard...) follow the face.
+    fit=False keeps the old full-frame close-up (only for a character shown inside a frame, e.g. a peephole)."""
+    if not fit:
+        ch.draw(ctx, x, 560 + 2.5 * U1 * s + dy, s, expr, T, arms=arms, look=look, talk=talk, bob=bob, snap=snap)
+        return (lambda px, py: (px, py)), 1.0
+    s2 = min(CU_S + 0.05, s * CU_S / FACE_S)
+    k = s2 / s
+    nx = CU_X + (x - 360) * k
+    ch.draw(ctx, nx, CU_FEET, s2, expr, T, arms=arms, look=look, talk=talk, bob=bob, snap=snap)
+    hx, hy = nx, CU_FEET - 2.5 * U1 * s2
+    return (lambda px, py: (hx + (px - x) * k, hy + (py - 560) * k)), k
 
 
 def benny(ctx, x, y, s, expr, T, tag=True, name="Benny", **kw):
@@ -185,9 +202,10 @@ def s_spawn(ctx, T, d):
 
 def s_angel(ctx, T, d):
     st.burst(ctx, T, "#fff6c4", "#8fd0ff", cy=560, spin=0.3)
-    closeup(ctx, BENNY, keyed(T, [(0, "happy"), (4.15, "stars")]), T, arms=("hold", "hold"), snap=snap_at(T, 4.15))
-    halo(ctx, 360, 330, 150, T)
-    st.hearts(ctx, T, 3.85, 360, 520, n=6, seed=4)
+    m, k = closeup(ctx, BENNY, keyed(T, [(0, "happy"), (4.15, "stars")]), T, arms=("hold", "hold"),
+                   snap=snap_at(T, 4.15))
+    halo(ctx, *m(360, 330), 150 * k, T)
+    st.hearts(ctx, T, 3.85, *m(360, 520), n=6, seed=4)
 
 
 def s_safe(ctx, T, d):
@@ -214,8 +232,8 @@ def s_obby(ctx, T, d):
 
 def s_type(ctx, T, d):
     st.burst(ctx, T, "#ffe27a", "#f29a2e", cy=560, spin=0.4)
-    closeup(ctx, BENNY, "grin", T, arms=("hold", "hold"), dy=40)
-    st.keyboard(ctx, 360, 950, 1.0, T, mash=1.0)
+    m, k = closeup(ctx, BENNY, "grin", T, arms=("hold", "hold"), dy=40)
+    st.keyboard(ctx, *m(360, 950), 1.6 * k, T, mash=1.0)
     st.sfx_word(ctx, 180, 380, "TAP TAP", T - 6.8, col=st.BLUE, size=40, tilt=-0.15)
 
 
@@ -257,7 +275,7 @@ def s_spectate(ctx, T, d):
 
 # ================================================================ the server runs away
 def crowd_line(ctx, T, expr, y=1000, s=0.75, arms=("down", "down")):
-    xs = (90, 180, 270, 450, 540, 630)
+    xs = (110, 192, 274, 446, 528, 610)
     for i, x in enumerate(xs):
         P[i].draw(ctx, x, y, s, expr, T, arms=arms, look=0.5 if x < 360 else -0.5)
     return xs
@@ -266,7 +284,7 @@ def crowd_line(ctx, T, expr, y=1000, s=0.75, arms=("down", "down")):
 def s_freeze(ctx, T, d):
     world(ctx, T, 1000)
     shocked = T >= 9.53
-    crowd_line(ctx, T, "shock" if shocked else "happy", arms=("up", "up") if shocked else ("wave", "down"))
+    crowd_line(ctx, T, "shock" if shocked else "happy", arms=("up", "up") if shocked else ("down", "wave"))
     benny(ctx, 360, 1000, 0.95, "grin", T, arms=("wave", "down"))
     if shocked:
         for i, x in enumerate((90, 270, 450, 630)):
@@ -296,10 +314,11 @@ def s_run(ctx, T, d):
 # ================================================================ the lava player
 def s_spot(ctx, T, d):
     st.burst(ctx, T, "#bfe3ff", "#2f6bd8", cy=560, spin=0.4)
-    closeup(ctx, BENNY, keyed(T, [(0, "neutral"), (11.36, "shock")]), T, arms=("hold", "hold"), snap=snap_at(T, 11.36))
-    binoculars(ctx, 360, 545, 1.5)
+    m, k = closeup(ctx, BENNY, keyed(T, [(0, "neutral"), (11.36, "shock")]), T, arms=("hold", "hold"),
+                   snap=snap_at(T, 11.36))
+    binoculars(ctx, *m(360, 545), 1.5 * k)
     if T >= 11.36:
-        st.speech_bubble(ctx, 560, 300, "!", 70, T - 11.36, tail=(-1, 1))
+        st.speech_bubble(ctx, *m(560, 300), "!", 70, T - 11.36, tail=(-1, 1))
 
 
 def s_edge(ctx, T, d):
@@ -333,18 +352,18 @@ def s_die(ctx, T, d):
 
 def s_what(ctx, T, d):
     st.burst(ctx, T, "#ffd27a", "#ff7a1a", cy=560, spin=0.5)
-    closeup(ctx, LAVA_GUY, keyed(T, [(0, "worried"), (14.19, "scream")]), T, arms=("up", "up"), s=4.6, dy=30,
-            snap=snap_at(T, 14.19))
-    style.sweat(ctx, 570, 430, 1.2, T)
+    m, k = closeup(ctx, LAVA_GUY, keyed(T, [(0, "worried"), (14.19, "scream")]), T, arms=("up", "up"), s=4.6, dy=30,
+                   snap=snap_at(T, 14.19))
+    style.sweat(ctx, *m(570, 430), 1.2 * k, T)
     label(ctx, "WHAT?!", 360, 300, 96, fg=st.YELLOW, scale=pop(T - 14.19) if T >= 14.19 else 0.0)
 
 
 def s_innocent(ctx, T, d):
     st.burst(ctx, T, "#fff6c4", "#8fd0ff", cy=560, spin=0.3)
-    closeup(ctx, BENNY, keyed(T, [(0, "worried"), (15.39, "forced")]), T, arms=("shrug", "shrug"),
-            snap=snap_at(T, 15.39))
-    halo(ctx, 360, 330, 150, T)
-    style.sweat(ctx, 560, 440, 1.0, T)
+    m, k = closeup(ctx, BENNY, keyed(T, [(0, "worried"), (15.39, "forced")]), T, arms=("shrug", "shrug"),
+                   snap=snap_at(T, 15.39))
+    halo(ctx, *m(360, 330), 150 * k, T)
+    style.sweat(ctx, *m(560, 440), k, T)
     st.speech_bubble(ctx, 520, 250, "SORRY!", 52, T - 15.2, tail=(-1, 1))
 
 
@@ -402,8 +421,8 @@ def s_knock(ctx, T, d):
         if T >= tk:
             sh += math.sin((T - tk) * 60) * 8 * math.exp(-(T - tk) * 10)
     st.house_block(ctx, 300 + sh, 1000, 1.05, door_k=0.0, sign="")
-    benny(ctx, 590, 1000, 1.0, "grin", T, arms=("up", "down"), tag=False)
-    st.sfx_word(ctx, 300, 560, "KNOCK!", T - 19.83, col=st.YELLOW, size=56, tilt=-0.15)
+    benny(ctx, 570, 1000, 1.0, "grin", T, arms=("up", "down"), tag=False)
+    st.sfx_word(ctx, 335, 560, "KNOCK!", T - 19.83, col=st.YELLOW, size=56, tilt=-0.15)
     st.sfx_word(ctx, 380, 720, "KNOCK!", T - 20.19, col=st.YELLOW, size=50, tilt=0.12, seed=5)
 
 
@@ -412,16 +431,16 @@ def s_peephole(ctx, T, d):
     ctx.paint()
     ctx.save()
     ctx.new_sub_path()
-    ctx.arc(360, 620, 270, 0, 2 * PI)
+    ctx.arc(330, 620, 245, 0, 2 * PI)
     ctx.clip()
     st.street(ctx, T, y_ground=1250)
     ctx.translate(360, 620)
     ctx.scale(1.15, 1.15)
     ctx.translate(-360, -620)
-    closeup(ctx, BENNY, "crazy", T, arms=("wave", "down"), dy=80)
+    closeup(ctx, BENNY, "crazy", T, arms=("wave", "down"), x=330, dy=80, fit=False)
     ctx.restore()
     ctx.new_sub_path()
-    ctx.arc(360, 620, 270, 0, 2 * PI)
+    ctx.arc(330, 620, 245, 0, 2 * PI)
     ctx.set_source_rgb(*hexc("#8a90a8"))
     ctx.set_line_width(26)
     ctx.stroke()
@@ -453,9 +472,10 @@ def s_locks(ctx, T, d):
 # ================================================================ security booth, names, hiding
 def s_notdone(ctx, T, d):
     st.burst(ctx, T, "#e2c8ff", "#7a3fd8", cy=560, spin=0.5)
-    closeup(ctx, BENNY, keyed(T, [(0, "smirk"), (24.43, "smug")]), T, arms=("down", "down"), snap=snap_at(T, 24.43))
+    m, k = closeup(ctx, BENNY, keyed(T, [(0, "smirk"), (24.43, "smug")]), T, arms=("down", "down"),
+                   snap=snap_at(T, 24.43))
     if T >= 24.43:
-        style.sparkle(ctx, 450, 470, 46 * pop(T - 24.43))
+        style.sparkle(ctx, *m(450, 470), 46 * k * pop(T - 24.43))
     label(ctx, "NOT DONE", 360, 300, 80, fg=(1, 1, 1), scale=pop(T - 24.77) if T >= 24.77 else 0.0)
 
 
@@ -475,8 +495,8 @@ def s_booth(ctx, T, d):
 
 def s_megaphone(ctx, T, d):
     st.burst(ctx, T, "#ffe27a", "#ff7a1a", cy=560, spin=0.6)
-    closeup(ctx, BENNY, "laugh", T, arms=("hold", "down"), x=330)
-    st.megaphone(ctx, 440, 640, 1.2, ang=-0.25, T=T)
+    m, k = closeup(ctx, BENNY, "laugh", T, arms=("hold", "down"), x=330)
+    st.megaphone(ctx, *m(440, 640), 1.2 * k, ang=-0.25, T=T)
     st.speech_bubble(ctx, 470, 270, "ATTENTION!", 48, T - 26.62, tail=(-1, 1))
 
 
@@ -485,7 +505,8 @@ def s_cctv(ctx, T, d):
     k_on = [T - (27.12 + i * 0.12) for i in range(6)]
     hi = int((T - 27.5) * 5) % 6 if T >= 27.5 else -1
     st.cctv_wall(ctx, 60, 300, 3, 2, NAMES, T, hi=hi, k_on=k_on)
-    benny(ctx, 360, 1000, 0.85, "smug", T, arms=("hold", "hold"), tag=False)
+    if T < 27.9:                                                      # the next shot zooms into one screen
+        benny(ctx, 360, 1000, 0.85, "smug", T, arms=("hold", "hold"), tag=False)
     label(ctx, "ALL NAMES", 360, 950, 60, bg=st.RED, scale=pop(T - 28.08) if T >= 28.08 else 0.0)
 
 
@@ -544,15 +565,16 @@ def s_still(ctx, T, d):
     st.burst(ctx, T, "#ffe27a", "#f29a2e", cy=560, spin=0.3)
     if int(T * 3) % 2 == 0:
         st.tint(ctx, (1, 0.1, 0.1), 0.18)                            # the siren still flashing outside
-    closeup(ctx, BENNY, "happy", T, arms=("hold", "hold"), dy=40)
-    st.keyboard(ctx, 360, 950, 1.0, T, mash=1.0)
+    m, k = closeup(ctx, BENNY, "happy", T, arms=("hold", "hold"), dy=40)
+    st.keyboard(ctx, *m(360, 950), 1.6 * k, T, mash=1.0)
     st.sfx_word(ctx, 540, 380, "TYPE TYPE", T - 32.92, col=st.BLUE, size=38, tilt=0.12)
 
 
 def s_help(ctx, T, d):
     st.burst(ctx, T, "#fff6c4", "#8fd0ff", cy=560, spin=0.3)
-    closeup(ctx, BENNY, keyed(T, [(0, "happy"), (34.14, "stars")]), T, arms=("down", "wave"), snap=snap_at(T, 34.14))
-    halo(ctx, 360, 330, 150, T)
+    m, k = closeup(ctx, BENNY, keyed(T, [(0, "happy"), (34.14, "stars")]), T, arms=("down", "wave"),
+                   snap=snap_at(T, 34.14))
+    halo(ctx, *m(360, 330), 150 * k, T)
     msg = typed("I'm here to help :)", T, 33.66, cps=26)
     if msg:
         st.speech_bubble(ctx, 360, 230, msg, 44, 1.0, tail=(0, 1))
@@ -670,9 +692,10 @@ def s_hashout(ctx, T, d):
 # ================================================================ Benny tries to explain
 def s_explain(ctx, T, d):
     st.burst(ctx, T, "#c4c8e8", "#4a4f8a", cy=560, spin=0.15)
-    closeup(ctx, BENNY, keyed(T, [(0, "worried"), (43.63, "sad")]), T, arms=("shrug", "shrug"), snap=snap_at(T, 43.63))
-    style.sweat(ctx, 560, 440, 1.0, T)
-    style.sweat(ctx, 170, 470, 0.8, T + 0.4)
+    m, k = closeup(ctx, BENNY, keyed(T, [(0, "worried"), (43.63, "sad")]), T, arms=("shrug", "shrug"),
+                   snap=snap_at(T, 43.63))
+    style.sweat(ctx, *m(560, 440), k, T)
+    style.sweat(ctx, *m(170, 470), 0.8 * k, T + 0.4)
 
 
 def s_typefail(ctx, T, d):
@@ -701,23 +724,24 @@ def s_namelog(ctx, T, d):
 
 def s_again(ctx, T, d):
     st.burst(ctx, T, "#c4f0b0", "#2e9c46", cy=560, spin=0.5)
-    closeup(ctx, BENNY, keyed(T, [(0, "angry"), (47.14, "determined")]), T, arms=("punch", "punch"),
+    m, k = closeup(ctx, BENNY, keyed(T, [(0, "angry"), (47.14, "determined")]), T, arms=("punch", "punch"),
             snap=snap_at(T, 47.14))
-    style.anger_mark(ctx, 520, 380, 1.4, T)
+    style.anger_mark(ctx, *m(520, 380), 1.4 * k, T)
     label(ctx, "AGAIN!", 360, 300, 88, bg=st.RED, scale=pop(T - 47.0) if T >= 47.0 else 0.0)
 
 
 def s_yell1(ctx, T, d):
     st.burst(ctx, T, "#ffb3b3", "#c0303a", cy=560, spin=0.8)
-    closeup(ctx, BENNY, "scream", T, arms=("up", "up"), talk=talking("benny", T), snap=snap_at(T, 47.55))
+    m, k = closeup(ctx, BENNY, "scream", T, arms=("up", "up"), talk=talking("benny", T), snap=snap_at(T, 47.55))
     st.speech_bubble(ctx, 360, 260, "####!", 80, T - 47.55, tail=(0, 1))
-    style.shake_lines(ctx, 360, 560, 280, 260, T, n=3, lw=9)
+    style.shake_lines(ctx, *m(360, 560), 280 * k, 260 * k, T, n=3, lw=7)
 
 
 def s_yell2(ctx, T, d):
     st.burst(ctx, T, "#bfe3ff", "#2f6bd8", cy=600, spin=-0.8)
-    closeup(ctx, BENNY, "crazy", T, arms=("hold", "down"), x=335, talk=talking("benny", T), snap=snap_at(T, 48.75))
-    st.megaphone(ctx, 445, 640, 1.2, ang=-0.3, T=T)
+    m, k = closeup(ctx, BENNY, "crazy", T, arms=("hold", "down"), x=335, talk=talking("benny", T),
+                   snap=snap_at(T, 48.75))
+    st.megaphone(ctx, *m(445, 640), 1.2 * k, ang=-0.3, T=T)
     for i in range(3):
         if T >= 48.8 + i * 0.15:
             st.speech_bubble(ctx, 470 - i * 70, 240 + i * 90, "####!", 56 - i * 6, T - 48.8 - i * 0.15,
@@ -825,10 +849,10 @@ def punch(t0, z0, c0, t_key, z1, c1, m=0.13):
 
 C = (360, 700)
 G = (360, 760)
-CU = dict(closeup=True, keep=FACE_KEEP)
+CU = dict()                          # close-ups keep the whole character in the zone now (no closeup flag)
 TOPK = (60, 220, 660, 380)          # the label / bubble band at the top
 
-shot(0.00, s_hook, [(0.0, 1.0, (360, 680)), (0.47, 1.08, (360, 660), 0.1)], shake=(0.47, 10), closeup=True,
+shot(0.00, s_hook, [(0.0, 1.0, (360, 680)), (0.47, 1.08, (360, 660), 0.1)], shake=(0.47, 10),
      keep=[(165, 200, 555, 760), (200, 920, 520, 990)])
 shot(0.86, at(s_run, 10.4), punch(0.86, 1.0, G, 0.9, 1.06, (360, 740), 0.1))
 shot(1.22, at(s_panic, 32.0), punch(1.22, 1.0, G, 1.26, 1.06, (360, 740), 0.1))
@@ -846,11 +870,11 @@ shot(9.04, at(s_freeze, 9.04), punch(9.04, 1.0, G, 9.53, 1.06, (360, 740), 0.1),
 shot(9.99, at(s_run, 9.99), punch(9.99, 1.0, G, 10.3, 1.04, (360, 740), 0.12), whip=1)
 shot(11.05, at(s_spot, 11.05), punch(11.05, 1.0, C, 11.36, 1.1, (360, 650), 0.1), **CU)
 shot(12.15, at(s_edge, 12.15), punch(12.15, 1.0, (330, 760), 12.55, 1.08, (320, 740), 0.12), keep=[(160, 240, 560, 820)])
-shot(13.18, at(s_die, 13.18), [(13.18, 1.0, C), (14.19, 1.12, (360, 640), 0.9)], closeup=True,
+shot(13.18, at(s_die, 13.18), [(13.18, 1.0, C), (14.19, 1.12, (360, 640), 0.9)],
      keep=[(165, 200, 555, 760)])
-shot(14.19, at(s_what, 14.19), punch(14.19, 1.0, C, 14.3, 1.1, (360, 650), 0.08), shake=(0.0, 22), closeup=True,
+shot(14.19, at(s_what, 14.19), punch(14.19, 1.0, C, 14.3, 1.1, (360, 650), 0.08), shake=(0.0, 22),
      keep=[(110, 220, 610, 760)])
-shot(14.97, at(s_innocent, 14.97), punch(14.97, 1.0, C, 15.39, 1.08, (360, 660), 0.12), closeup=True,
+shot(14.97, at(s_innocent, 14.97), punch(14.97, 1.0, C, 15.39, 1.08, (360, 660), 0.12),
      keep=[(165, 200, 640, 760)])
 shot(16.10, at(s_crack, 16.1), punch(16.1, 1.0, (360, 740), 16.45, 1.08, (400, 760), 0.1), shake=(0.35, 10),
      keep=[(120, 230, 600, 820)])
@@ -867,7 +891,7 @@ shot(22.98, at(s_locks, 22.98), punch(22.98, 1.0, (360, 720), 23.65, 1.05, (360,
 shot(24.02, at(s_notdone, 24.02), punch(24.02, 1.0, C, 24.43, 1.1, (380, 650), 0.12), **CU)
 shot(25.26, at(s_booth, 25.26), punch(25.26, 1.0, G, 25.73, 1.06, (360, 740), 0.12), whip=1,
      keep=[(150, 380, 620, 1000)])
-shot(26.53, at(s_megaphone, 26.53), punch(26.53, 1.0, C, 26.62, 1.08, (360, 660), 0.1), closeup=True,
+shot(26.53, at(s_megaphone, 26.53), punch(26.53, 1.0, C, 26.62, 1.08, (360, 660), 0.1),
      keep=[(110, 200, 640, 760)])
 shot(27.09, at(s_cctv, 27.09), punch(27.09, 1.0, (360, 660), 27.48, 1.04, (360, 660), 0.12), keep=[(55, 290, 665, 1000)])
 shot(27.90, at(s_cctv, 27.9), [(27.9, 1.6, (340, 380)), (28.6, 1.7, (340, 380), 0.6)])
@@ -877,7 +901,7 @@ shot(30.68, at(s_mods, 30.68), punch(30.68, 1.0, G, 31.0, 1.05, (360, 740), 0.12
 shot(31.62, at(s_panic, 31.62), punch(31.62, 1.0, G, 31.73, 1.06, (360, 740), 0.1), shake=(0.11, 8),
      keep=[(80, 240, 640, 1000)])
 shot(32.33, at(s_still, 32.33), punch(32.33, 1.0, C, 32.92, 1.06, (360, 680), 0.12), **CU)
-shot(33.66, at(s_help, 33.66), punch(33.66, 1.0, C, 34.14, 1.08, (360, 660), 0.12), closeup=True,
+shot(33.66, at(s_help, 33.66), punch(33.66, 1.0, C, 34.14, 1.08, (360, 660), 0.12),
      keep=[(110, 180, 610, 760)])
 shot(34.48, at(s_devs, 34.48), punch(34.48, 1.0, G, 35.06, 1.05, (360, 740), 0.12), keep=[(90, 240, 630, 1000)])
 shot(35.50, at(s_reports, 35.5), punch(35.5, 1.0, (360, 700), 35.88, 1.06, (360, 680), 0.12), keep=[(80, 240, 640, 900)])
@@ -891,14 +915,14 @@ shot(40.93, at(s_feed, 40.93), punch(40.93, 1.0, (360, 640), 41.54, 1.05, (360, 
 shot(41.93, at(s_hashout, 41.93), punch(41.93, 1.0, (360, 700), 42.57, 1.06, (380, 720), 0.12), keep=[(60, 240, 640, 1000)])
 shot(42.92, at(s_explain, 42.92), punch(42.92, 1.0, C, 43.63, 1.06, (360, 670), 0.12), **CU)
 shot(43.89, at(s_typefail, 43.89), punch(43.89, 1.0, (360, 640), 44.8, 1.05, (360, 640), 0.12), keep=[(50, 380, 670, 840)])
-shot(44.92, at(s_name, 44.92), punch(44.92, 1.0, C, 45.46, 1.1, (360, 650), 0.1), shake=(0.54, 8), closeup=True,
+shot(44.92, at(s_name, 44.92), punch(44.92, 1.0, C, 45.46, 1.1, (360, 650), 0.1), shake=(0.54, 8),
      keep=[(110, 200, 610, 760)])
 shot(45.93, at(s_namelog, 45.93), punch(45.93, 1.0, (360, 640), 46.0, 1.05, (360, 640), 0.1), shake=(0.07, 8),
      keep=[(50, 260, 670, 840)])
 shot(46.80, at(s_again, 46.8), punch(46.8, 1.0, C, 47.14, 1.1, (360, 650), 0.1), **CU)
-shot(47.55, at(s_yell1, 47.55), punch(47.55, 1.0, C, 47.6, 1.12, (360, 650), 0.06), shake=(0.0, 18), closeup=True,
+shot(47.55, at(s_yell1, 47.55), punch(47.55, 1.0, C, 47.6, 1.12, (360, 650), 0.06), shake=(0.0, 18),
      keep=[(110, 180, 610, 760)])
-shot(48.75, at(s_yell2, 48.75), punch(48.75, 1.0, C, 48.8, 1.1, (340, 650), 0.06), shake=(0.0, 14), closeup=True,
+shot(48.75, at(s_yell2, 48.75), punch(48.75, 1.0, C, 48.8, 1.1, (340, 650), 0.06), shake=(0.0, 14),
      keep=[(110, 180, 610, 760)], dutch=-0.08)
 shot(49.95, at(s_yell3, 49.95), punch(49.95, 1.0, G, 50.0, 1.06, (360, 740), 0.06), shake=(0.0, 12),
      keep=[(60, 300, 660, 1000)])
