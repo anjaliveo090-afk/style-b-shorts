@@ -20,6 +20,8 @@ Groups:
   friends   friend_card (Accept / Decline, sent, DECLINED), invite_card (JOIN), friends_count, roblox_dialog,
             bracelet, party_hat, server_grid (FULL servers)
   chat      house_block (roleplay house, door_k), security_booth, spectate_pill (eye + SPECTATING)
+  filter    word_block, filter_machine (funnel in, # out, gears), megaphone, siren, cctv_wall, trash_can, bush,
+            cardboard_box (added for chat_filter_v2.py)
   UI        hud_timer, second_card, stage_pill, health_bar, damage_text, ko_sticker, toast, login_screen,
             leaderboard, shop_grid, gamepass_card, comments_sheet, subscribe_button, joystick_ui, cursor
   FX        burst, glow, tint, flash, vignette, speed_lines, shockwave, impact_star, sparkles, confetti,
@@ -4269,3 +4271,197 @@ def spectate_pill(ctx, x, y, s=1.0, txt="SPECTATING"):
     ctx.fill()
     bold_text(ctx, txt, 18, 0, 30, (1, 1, 1), shadow=False, stroke=0.0)
     ctx.restore()
+
+
+# ================================================================ chat filter v2 (added for chat_filter_v2.py)
+def word_block(ctx, x, y, txt, s=1.0, col="#ff4f5a", rot=0.0, fg=(1, 1, 1)):
+    """A chunky chat-word tile (centre x, y): a coloured rounded block with the word in bold white."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(rot)
+    ctx.scale(s, s)
+    w = text_width(ctx, txt, 40) + 50
+    block(ctx, -w / 2, -36, w, 72, 16, c_(col), 5)
+    bold_text(ctx, txt, 0, 0, 40, c_(fg), shadow=False, stroke=0.12)
+    ctx.restore()
+
+
+def _gear(ctx, x, y, r, ang, col):
+    n = 8
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(ang)
+    for i in range(n * 2):
+        a = i * PI / n
+        rr = r if i % 2 == 0 else r * 0.78
+        a2 = a + PI / n
+        (ctx.move_to if i == 0 else ctx.line_to)(math.cos(a) * rr, math.sin(a) * rr)
+        ctx.line_to(math.cos(a2) * rr, math.sin(a2) * rr)
+    ctx.close_path()
+    shape_fill(ctx, c_(col), 4, -r, r)
+    ctx.new_sub_path()
+    ctx.arc(0, 0, r * 0.3, 0, 2 * PI)
+    ctx.set_source_rgb(*INK)
+    ctx.fill()
+    ctx.restore()
+
+
+def filter_machine(ctx, x, y, s, T, glow_a=0.0, spin=1.0, sign="CHAT FILTER"):
+    """The chat-filter machine (bottom centre x, y): a funnel on top that scary words drop into, a body with a
+    lit sign and turning gears, an output chute at the bottom right where '#' tiles pop out.
+    Returns (funnel_mouth_x, funnel_mouth_y, chute_x, chute_y) in world coords."""
+    if s <= 0.01:
+        return (x, y, x, y)
+    if glow_a > 0:
+        glow(ctx, x, y - 330 * s, 520 * s, (0.5, 0.8, 1.0), glow_a)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    ctx.move_to(-230, -690)                                              # funnel
+    ctx.line_to(230, -690)
+    ctx.line_to(80, -520)
+    ctx.line_to(-80, -520)
+    ctx.close_path()
+    shape_fill(ctx, hexc("#9aa0b8"), 6, -690, -520)
+    block(ctx, -240, -710, 480, 34, 10, hexc("#c9cde0"), 5)
+    block(ctx, -220, -530, 440, 530, 26, hexc("#2f6bd8"), 7)              # body
+    block(ctx, -180, -490, 360, 90, 16, hexc("#141a2e"), 5, gloss=False)  # sign
+    bold_text(ctx, sign, 0, -445, 40, hexc("#6fe6ff"), outline=hexc("#0b2a4a"), shadow=False, stroke=0.1)
+    _gear(ctx, -100, -280, 70, T * 2.5 * spin, "#ffcc33")
+    _gear(ctx, 20, -230, 52, -T * 3.3 * spin, "#ff8a3d")
+    for i in range(3):                                                   # blinking lights
+        on = int(T * 6 + i) % 3 == 0
+        ctx.new_sub_path()
+        ctx.arc(-140 + i * 50, -110, 16, 0, 2 * PI)
+        shape_fill(ctx, hexc("#4fd16a") if on else hexc("#2a5a3a"), 3, -126, -94)
+    block(ctx, 140, -170, 160, 90, 14, hexc("#3a3f55"), 5, gloss=False)   # output chute
+    block(ctx, 280, -150, 30, 50, 8, hexc("#1e2230"), 3, gloss=False)
+    ctx.restore()
+    return (x, y - 690 * s, x + 300 * s, y - 125 * s)
+
+
+def megaphone(ctx, x, y, s=1.0, ang=-0.2, T=0.0, waves=True):
+    """A red-and-white megaphone held at (x, y) (the handle), pointing right and a bit up; sound arcs in front."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(ang)
+    ctx.scale(s, s)
+    block(ctx, -20, -10, 40, 70, 10, hexc("#3a3f55"), 4, gloss=False)    # handle
+    ctx.move_to(-30, -50)
+    ctx.line_to(170, -110)
+    ctx.line_to(170, 70)
+    ctx.line_to(-30, 20)
+    ctx.close_path()
+    shape_fill(ctx, hexc("#ff4f5a"), 5, -110, 70)
+    block(ctx, 160, -120, 30, 200, 12, (1, 1, 1), 4)
+    block(ctx, -60, -55, 40, 80, 12, (1, 1, 1), 4)
+    if waves:
+        for i in range(3):
+            k = (T * 2.5 + i / 3) % 1
+            ctx.new_sub_path()
+            ctx.arc(190, -20, 40 + 90 * k, -0.6, 0.6)
+            ctx.set_source_rgba(1, 1, 1, 0.9 * (1 - k))
+            ctx.set_line_width(10)
+            ctx.stroke()
+    ctx.restore()
+
+
+def siren(ctx, x, y, s, T, a=1.0):
+    """A rotating red alarm light (bottom centre x, y) with sweeping beams across the frame."""
+    ang = T * 6
+    ctx.save()
+    for k in (0, PI):
+        ctx.move_to(x, y - 60 * s)
+        ctx.line_to(x + math.cos(ang + k - 0.25) * 2000, y - 60 * s + math.sin(ang + k - 0.25) * 2000)
+        ctx.line_to(x + math.cos(ang + k + 0.25) * 2000, y - 60 * s + math.sin(ang + k + 0.25) * 2000)
+        ctx.close_path()
+    ctx.set_source_rgba(1, 0.15, 0.15, 0.22 * a)
+    ctx.fill()
+    ctx.restore()
+    block(ctx, x - 70 * s, y - 30 * s, 140 * s, 34 * s, 8 * s, hexc("#3a3f55"), 4, gloss=False)
+    ctx.move_to(x - 55 * s, y - 30 * s)
+    ctx.curve_to(x - 55 * s, y - 130 * s, x + 55 * s, y - 130 * s, x + 55 * s, y - 30 * s)
+    ctx.close_path()
+    shape_fill(ctx, hexc("#ff3b3b"), 4, y - 130 * s, y - 30 * s)
+    glow(ctx, x, y - 70 * s, 160 * s, (1, 0.2, 0.2), 0.6 * (0.6 + 0.4 * math.sin(T * 12)) * a)
+
+
+def cctv_wall(ctx, x0, y0, cols, rows, names, T, hi=-1, sw=190, sh=150, gap=14, k_on=None):
+    """A wall of CCTV screens (top-left x0, y0): each shows a player face with a name strip and scanlines;
+    hi = the index highlighted with a red frame; k_on[i] = seconds since screen i switched on (None = on)."""
+    faces = (("#e9c22c", "#4a2f22"), ("#c89f82", "#2a1a14"), ("#f0c9a8", "#f2c14e"), ("#7a4a2e", "#2a1a14"),
+             ("#e6ddd6", "#e8323a"), ("#e9c22c", "#5a3020"))
+    for i in range(cols * rows):
+        cx, cy = x0 + (i % cols) * (sw + gap), y0 + (i // cols) * (sh + gap)
+        block(ctx, cx, cy, sw, sh, 10, hexc("#2b2f45"), 4, gloss=False)
+        k = None if k_on is None else k_on[i]
+        if k is not None and k < 0:
+            continue
+        ctx.save()
+        rrect(ctx, cx + 10, cy + 10, sw - 20, sh - 20, 6)
+        ctx.clip()
+        ctx.set_source_rgb(*hexc("#1c3a2a"))
+        ctx.paint()
+        sk, hc = faces[i % len(faces)]
+        face_icon(ctx, cx + sw / 2, cy + sh * 0.42, 34, sk, hc, expr="neutral")
+        for j in range(0, int(sh), 6):                                   # scanlines
+            ctx.rectangle(cx, cy + j + (T * 40) % 6, sw, 2)
+        ctx.set_source_rgba(0, 0, 0, 0.18)
+        ctx.fill()
+        ctx.restore()
+        block(ctx, cx + 10, cy + sh - 40, sw - 20, 30, 6, hexc("#141a2e"), 2, gloss=False)
+        bold_text(ctx, names[i % len(names)], cx + sw / 2, cy + sh - 25, 18, (1, 1, 1), shadow=False, stroke=0.0)
+        if int(T * 3) % 2 == 0:
+            ctx.new_sub_path()
+            ctx.arc(cx + 22, cy + 22, 6, 0, 2 * PI)
+            ctx.set_source_rgb(*RED)
+            ctx.fill()
+        if i == hi:
+            rrect(ctx, cx - 4, cy - 4, sw + 8, sh + 8, 12)
+            ctx.set_source_rgb(*RED)
+            ctx.set_line_width(7)
+            ctx.stroke()
+
+
+def trash_can(ctx, x, y, s=1.0, lid=0.0):
+    """A grey trash can (bottom centre x, y); lid 0..1 lifts the lid (something peeks out)."""
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -70, -170, 140, 170, 14, hexc("#8a90a8"), 5)
+    for i in range(3):
+        ctx.move_to(-40 + i * 40, -150)
+        ctx.line_to(-40 + i * 40, -20)
+    ctx.set_source_rgb(*hexc("#6a7088"))
+    ctx.set_line_width(6)
+    ctx.stroke()
+    ctx.save()
+    ctx.translate(0, -175 - 60 * lid)
+    ctx.rotate(-0.5 * lid)
+    block(ctx, -82, -16, 164, 30, 10, hexc("#a0a6bc"), 5)
+    ctx.restore()
+    ctx.restore()
+
+
+def bush(ctx, x, y, s=1.0, T=0.0, shake=0.0):
+    """A round green bush (bottom centre x, y); shake 0..1 rustles it."""
+    dx = math.sin(T * 40) * 8 * shake
+    for bx, by, r in ((-60, -60, 60), (0, -95, 75), (60, -60, 60)):
+        ctx.new_sub_path()
+        ctx.arc(x + (bx + dx) * s, y + by * s, r * s, 0, 2 * PI)
+    shape_fill(ctx, hexc("#3fae4a"), 5 * s, y - 170 * s, y)
+
+
+def cardboard_box(ctx, x, y, s=1.0, peek=0.0, T=0.0):
+    """A cardboard box (bottom centre x, y) with two eyes peeking from a slot when peek > 0."""
+    block(ctx, x - 90 * s, y - 140 * s, 180 * s, 140 * s, 8 * s, hexc("#c99a5e"), 5)
+    block(ctx, x - 90 * s, y - 150 * s, 180 * s, 26 * s, 6 * s, hexc("#b8844e"), 4, gloss=False)
+    if peek > 0:
+        block(ctx, x - 50 * s, y - 100 * s, 100 * s, 30 * s, 8 * s, hexc("#2a1e2e"), 2, gloss=False)
+        for ex in (-20, 20):
+            ctx.new_sub_path()
+            ctx.arc(x + ex * s + math.sin(T * 3) * 4 * s, y - 85 * s, 8 * s * peek, 0, 2 * PI)
+            ctx.set_source_rgb(1, 1, 1)
+            ctx.fill()

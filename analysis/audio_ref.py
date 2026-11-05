@@ -7,7 +7,8 @@ The soundtrack is first split into voice and music+SFX with analysis/separate.py
 mostly tonal lines); the music bed is the quiet floor of that stem between SFX.
 
 Usage: audio_ref.py video.mp4 [subs.srt] out_prefix
-  env MDX_MODEL = path of UVR-MDX-NET-Inst_HQ_3.onnx (stems are cached as out_prefix_inst/voice.wav)
+  env MDX_MODEL = path of UVR-MDX-NET-Inst_HQ_3.onnx (stems are cached as out_prefix_inst/voice.wav and
+  re-made when the video is newer than them)
 Writes out_prefix.json, out_prefix_spec.png (spectrogram + markers), out_prefix_sfx.png
 (the frame at every SFX, to see which visual it was put on)."""
 import json
@@ -49,7 +50,9 @@ def rolling_pct(x, win, q):
 
 def stems(video, prefix):
     inst, voice = prefix + "_inst.wav", prefix + "_voice.wav"
-    if not os.path.exists(inst):
+    # re-separate when the video is newer than the cached stems (a re-mix with a new SFX_GAIN keeps the same
+    # prefix; the old cache silently measured the previous mix)
+    if not os.path.exists(inst) or os.path.getmtime(inst) < os.path.getmtime(video):
         import separate
         model = os.environ.get("MDX_MODEL", str(HERE / "models" / "UVR-MDX-NET-Inst_HQ_3.onnx"))
         separate.main(video, model, prefix)
