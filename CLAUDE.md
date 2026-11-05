@@ -75,6 +75,7 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
    - **Every video is a Roblox video (the user's rule): show the Roblox world.** `sets.py` section "roblox":
      - **money is always Robux**: `robux()` icon (never a plain gold coin), `robux_pile`, `robux_counter`, `number_counter(..., icon=True)`;
      - Roblox UI for game moments: `purchase_prompt` (Buy Item / Buy Now), `robux_pack` (store), `esc_menu` (Reset Character / Leave / Resume), `player_list`, `hotbar`, `disconnect_dialog` (kicked, Error Code 267), `teleport_screen`, `experience_tile`, plus `game_toast` ("X joined the game"), `name_pill`, `game_hud`;
+     - the **in-game interface** on in-game shots: `roblox_topbar` (menu / chat / backpack buttons + "Players: N") and `roblox_chat` (a live chat whose lines tell the story; system lines like "X joined the game" in grey). Draw them as a screen-space `overlay` and give those shots `top=345` (see `hud_ov` / `HUD_SHOTS` in `animator/chat_filter_v2.py`);
      - Roblox items and moments: `dominus`, `valk`, `bloxy_cola`, `avatar_break` (falling apart when you die), the classic `style.NOOB`, studded `baseplate`, `spawn_pad`, `obby`; usernames from `ROBLOX_NAMES`;
      - everything is redrawn in our cartoon style. **Never paste the official ROBLOX wordmark/logo or real game screenshots** (trademark/copyright claims; the reference channel does not use them either). The word "Roblox" in titles and on-screen text is fine.
 4. **Contact sheet with the safe zone** before the full render:

@@ -152,6 +152,42 @@ def pop_out(ctx, ch, x, y, s, T, t0, expr="happy", rise=1.0):
             arms=("up", "up") if k > 0 else ("down", "down"), shadow=False)
 
 
+
+# ================================================================ Roblox in-game HUD (screen-space overlay)
+Y_, PK_, BL_, GR_, OR_, CY_, RD_ = "#ffd84a", "#ff5fb0", "#6fc3ff", "#4fd16a", "#ff8a3d", "#6fe6ff", "#ff4f5a"
+CHAT_LOG = [   # (time posted, name or None for a system line, text, name colour) - the story told in the game chat
+    (2.85, None, "Benny joined the game", None), (5.65, None, "Benny joined Lava Obby", None),
+    (7.9, "Benny", "I'm watching you.", Y_), (8.3, "BloxKid", "??", PK_), (8.9, "PizzaGamer99", "bro what", BL_),
+    (9.7, "ObbyQueen", "RUNNN", GR_), (10.4, None, "ObbyQueen left the game", None),
+    (13.75, "Benny", "You're going to die.", Y_), (14.3, "LavaJumper", "WHAT", OR_),
+    (15.6, "Benny", "the next jump is broken", Y_), (16.5, "LavaJumper", "oh. thx", OR_),
+    (17.3, None, "Benny joined Roleplay Town", None), (20.3, "Benny", "*knock knock*", Y_),
+    (21.5, "Benny", "I know where you live.", Y_), (22.1, "CozyCat", "HELPPP", PK_),
+    (23.4, None, "CozyCat locked every door", None), (26.7, "Benny", "ATTENTION EVERYONE", Y_),
+    (28.1, "Benny", "I have everyone's names.", Y_), (29.9, "Builder_Bob", "hide!!", BL_),
+    (31.4, "[MOD] Kai", "STAY CALM", RD_), (32.1, "[MOD] Max", "im not calm", RD_),
+    (34.2, "Benny", "I'm here to help :)", Y_), (40.3, None, "Chat filter is now ON", None),
+    (45.6, "Benny", "My name is ####", Y_), (47.7, "Benny", "####", Y_), (48.9, "Benny", "####", Y_),
+    (50.1, "Benny", "####!", Y_), (51.3, "BloxKid", "lol hes harmless", PK_), (52.8, "ObbyQueen", "phew", GR_),
+    (56.0, None, "Benny is now ####", None), (57.2, "PizzaGamer99", "add me ####!", BL_),
+    (57.6, "CozyCat", "me too!!", PK_),
+]
+
+
+def players_at(T):
+    return 24 if T < 16.88 else (31 if T < 25.0 else (50 if T < 30.6 else 53))
+
+
+def hud(ctx, T):
+    """The Roblox interface over the game shots: top bar + Players pill + the chat window (screen-space)."""
+    st.roblox_topbar(ctx, T, players=players_at(T))
+    st.roblox_chat(ctx, CHAT_LOG, T, w=420, size=23)
+
+
+def hud_ov(T0):
+    return lambda ctx, t, d: hud(ctx, T0 + t)
+
+
 # ================================================================ hook (0 - 2.7 s)
 def s_hook(ctx, T, d):
     st.burst(ctx, T, "#d6a8ff", "#5a1fa0", cy=560, spin=0.5)
@@ -227,7 +263,6 @@ def s_obby(ctx, T, d):
     benny(ctx, x, y, 0.95, "laugh" if p < 1 else "grin", T, arms=("up", "up"), pose="jump" if 0 < p < 1 else "stand",
           tag=p >= 1)
     st.sfx_word(ctx, x1 + 40, y1 - 300, "BOING!", T - 6.3, col=st.PINK, size=50)
-    st.game_toast(ctx, 360, 210, "Benny", "joined the game", T - 5.62, icon_col=st.YELLOW)
 
 
 def s_type(ctx, T, d):
@@ -269,7 +304,7 @@ def s_spectate(ctx, T, d):
     hop = abs(math.sin((T - 8.17) * 5)) * 120
     P[0].draw(ctx, x + 60, y - hop, 0.95, "happy", T, arms=("up", "up"), pose="jump" if hop > 20 else "stand")
     viewfinder(ctx, T)
-    st.spectate_pill(ctx, 360, 260, 1.2, txt="SPECTATING: BloxKid")
+    st.spectate_pill(ctx, 360, 925, 1.1, txt="SPECTATING: BloxKid")
     st.face_icon(ctx, 590, 860, 34, "#e9c22c", "#ffd84a", expr="grin")
 
 
@@ -387,7 +422,7 @@ def s_crack(ctx, T, d):
         ctx.stroke()
     ctx.restore()
     LAVA_GUY.draw(ctx, 200, 780, 0.9, keyed(T, [(0, "neutral"), (16.45, "shock")]), T, arms=("up", "down"))
-    st.sfx_word(ctx, 520, 560, "CRACK!", T - 16.45, col=st.RED, size=56)
+    st.sfx_word(ctx, 470, 560, "CRACK!", T - 16.45, col=st.RED, size=56)
     label(ctx, "NEXT JUMP", 360, 300, 74, bg=st.BLUE, scale=pop(T - 16.17) if T >= 16.17 else 0.0)
 
 
@@ -397,8 +432,7 @@ def s_town(ctx, T, d):
     p = clamp((T - 16.95) / 1.2)
     benny(ctx, lerp(60, 360, ease(p)), 1000, 0.95, "happy", T, pose="walk" if p < 1 else "stand",
           walk_phase=T * 2, arms=("wave", "down"))
-    st.stage_pill(ctx, 360, 300, "ROLEPLAY TOWN", s=1.0, col="#7a3fd8")
-    st.game_toast(ctx, 360, 210, "Benny", "joined Roleplay Town", T - 17.3, icon_col=st.PINK)
+    st.stage_pill(ctx, 360, 380, "ROLEPLAY TOWN", s=1.0, col="#7a3fd8")
 
 
 def s_house(ctx, T, d):
@@ -938,6 +972,15 @@ shot(57.96, at(s_friends, 57.96), punch(57.96, 1.0, (360, 660), 58.4, 1.04, (360
 SHOTS = S
 _rw_draw, _rw_ov = st.rewind_shot(SHOTS, [57.5, 48.2, 40.5, 21.3, 14.4, 0.0])
 shot(59.25, _rw_draw, [(59.25, 1.0, (360, 640))], overlay=_rw_ov, blur=False, closeup=True, keep=[])
+HUD_SHOTS = {0.86: 10.4, 1.22: 32.0, 2.72: 2.72, 4.44: 4.44, 5.6: 5.6, 8.17: 8.17, 9.04: 9.04, 9.99: 9.99,
+             12.15: 12.15, 16.1: 16.1, 16.88: 16.88, 18.57: 18.57, 19.72: 19.72, 21.89: 21.89, 22.98: 22.98,
+             25.26: 25.26, 29.35: 29.35,
+             30.68: 30.68, 31.62: 31.62, 49.95: 49.95, 51.07: 51.07, 52.51: 52.51, 55.64: 55.64, 56.82: 56.82}
+for sh in S:
+    t0 = HUD_SHOTS.get(round(sh["start"], 2))
+    if t0 is not None:
+        sh["overlay"] = hud_ov(t0)
+        sh["top"] = 345                                   # characters and labels stay below the HUD
 S.sort(key=lambda sh: sh["start"])
 for k, s in enumerate(SHOTS):
     s["end"] = SHOTS[k + 1]["start"] if k + 1 < len(SHOTS) else TOTAL

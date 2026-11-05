@@ -22,6 +22,8 @@ Groups:
   chat      house_block (roleplay house, door_k), security_booth, spectate_pill (eye + SPECTATING)
   filter    word_block, filter_machine (funnel in, # out, gears), megaphone, siren, cctv_wall, trash_can, bush,
             cardboard_box (added for chat_filter_v2.py)
+  game HUD  roblox_topbar (menu / chat / backpack buttons, Players pill; no official logo), roblox_chat (in-game chat
+            window, last 3 messages); screen-space, inside the safe zone: draw them in a shot overlay
   UI        hud_timer, second_card, stage_pill, health_bar, damage_text, ko_sticker, toast, login_screen,
             leaderboard, shop_grid, gamepass_card, comments_sheet, subscribe_button, joystick_ui, cursor
   FX        burst, glow, tint, flash, vignette, speed_lines, shockwave, impact_star, sparkles, confetti,
@@ -4465,3 +4467,74 @@ def cardboard_box(ctx, x, y, s=1.0, peek=0.0, T=0.0):
             ctx.arc(x + ex * s + math.sin(T * 3) * 4 * s, y - 85 * s, 8 * s * peek, 0, 2 * PI)
             ctx.set_source_rgb(1, 1, 1)
             ctx.fill()
+
+
+# ================================================================ Roblox in-game HUD (added for chat_filter_v2.py)
+def roblox_topbar(ctx, T, players=None, chat_on=True, y=182):
+    """The in-game top bar, screen-space, inside the Shorts safe zone: a menu button (three lines, NOT the official
+    logo), a chat button (lit when the chat is open), a backpack button, and an optional 'Players: N' pill."""
+    for i, kind in enumerate(("menu", "chat", "bag")):
+        x = 70 + i * 66
+        rrect(ctx, x - 26, y - 26, 52, 52, 12)
+        ctx.set_source_rgba(0.08, 0.09, 0.14, 0.72 if not (kind == "chat" and chat_on) else 0.92)
+        ctx.fill()
+        ctx.set_source_rgb(1, 1, 1)
+        if kind == "menu":
+            for j in (-9, 0, 9):
+                rrect(ctx, x - 13, y + j - 2.5, 26, 5, 2.5)
+                ctx.fill()
+        elif kind == "chat":
+            rrect(ctx, x - 14, y - 12, 28, 20, 6)
+            ctx.fill()
+            ctx.move_to(x - 6, y + 7)
+            ctx.line_to(x - 10, y + 15)
+            ctx.line_to(x + 2, y + 7)
+            ctx.close_path()
+            ctx.fill()
+        else:
+            rrect(ctx, x - 12, y - 8, 24, 22, 5)
+            ctx.fill()
+            ctx.set_line_width(4)
+            ctx.new_sub_path()
+            ctx.arc(x, y - 8, 7, PI, 2 * PI)
+            ctx.stroke()
+    if players is not None:
+        txt = f"Players: {int(players)}"
+        w = text_width(ctx, txt, 22) + 46
+        rrect(ctx, 670 - w, y - 22, w, 44, 22)
+        ctx.set_source_rgba(0.08, 0.09, 0.14, 0.72)
+        ctx.fill()
+        ctx.new_sub_path()
+        ctx.arc(670 - w + 22, y, 6, 0, 2 * PI)
+        ctx.set_source_rgb(*GREEN)
+        ctx.fill()
+        bold_text(ctx, txt, 670 - w + 34, y, 22, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+
+
+def roblox_chat(ctx, lines, T, x=44, y=222, w=400, n=3, size=21):
+    """The in-game chat window (screen-space, top-left, inside the safe zone): a translucent panel with the last n
+    messages. lines = [(t_posted, name, text, name_colour), ...]; name None = a grey system line. A message slides
+    in when posted."""
+    shown = [l for l in lines if l[0] <= T][-n:]
+    lh = size * 1.45
+    h = n * lh + 16
+    rrect(ctx, x, y, w, h, 12)
+    ctx.set_source_rgba(0.08, 0.09, 0.14, 0.55)
+    ctx.fill()
+    ctx.save()
+    rrect(ctx, x, y, w, h, 12)
+    ctx.clip()
+    for i, (t0, name, text, col) in enumerate(shown):
+        k = clamp((T - t0) / 0.15)
+        yy = y + 8 + (n - len(shown) + i + 0.5) * lh + (1 - k) * lh * 0.6
+        if name is None:
+            bold_text(ctx, text, x + 14, yy, size * 0.95, hexc("#b8bccb"), align="l", shadow=False, stroke=0.0)
+            continue
+        tag = name + ":"
+        bold_text(ctx, tag, x + 14, yy, size, c_(col), align="l", shadow=False, stroke=0.0)
+        tx = x + 22 + text_width(ctx, tag, size)
+        room = x + w - 12 - tx
+        while text and text_width(ctx, text, size) > room:
+            text = text[:-2] + "…" if len(text) > 2 else ""
+        bold_text(ctx, text, tx, yy, size, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+    ctx.restore()

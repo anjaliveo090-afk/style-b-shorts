@@ -48,7 +48,7 @@ STEP 2 - VISUAL PLAN
   action; the game UI tells quits, invites, gifts and counts (visual_grammar.md rows 21-30).
 - Every video is Roblox: money is always the Robux icon (sets.robux, robux_counter, number_counter(icon=True)),
   game moments use the redrawn Roblox UI (purchase_prompt, esc_menu, player_list, hotbar, disconnect_dialog,
-  teleport_screen, game_toast). Never the official ROBLOX logo or real screenshots.
+  teleport_screen, game_toast; in-game interface: roblox_topbar + roblox_chat as a screen-space overlay with top=345, see chat_filter_v2.py). Never the official ROBLOX logo or real screenshots.
 - Start every new story with engine.profile("set3"): 60 fps, impact bumps, settling punch-ins, whip pans
   (shot(..., whip=1)), head snaps (snap=), the "scream" face, sets.day_write chapter cards.
 - Show me the plan as a table (time | words | row | visual | camera | expression | SFX) before building.
