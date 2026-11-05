@@ -123,6 +123,22 @@ Send one of these in a new chat on this repo:
 
 The script comes back in the voice-tool format (`Narrator: [curious] … [break] …`, `Mom: [angry] …`), with characters and emotions.
 
+**Long videos (~8 min):** say "long video" in the message, e.g.
+- `Read script_guide.md section 7 and give me 10 long video titles.`
+- `Read script_guide.md section 7 and write the long video script for: <title>`
+
+These follow the two long references:
+- the 15-beat long sheet, 5 or 7 days, 1,000-1,150 words;
+- a name before every line (Narrator, Kid, Mom, Dad, Game, side characters).
+
+## Analysing a voice (characters, lines, tone)
+Attach the audio + SRT and ask: `Analyse this audio: how many characters, who says what, which tone and emotion.`
+
+Claude follows script_guide.md section 8:
+- It separates the voice if there is music and runs `analysis/voice_cast.py`.
+- It hand-checks the speakers from the story and corrects the emotions.
+- It returns every speaker's lines, pitch and tones, plus the full script in the voice-tool format.
+
 ## Sending YouTube analytics (after uploading)
 Send in a chat on this repo:
 `Analytics for "<YouTube title>": retention <x>%, drops at <time> ("<line>") [reason if you know it]`

@@ -329,3 +329,165 @@ Set 3 confirms the rules below: no gap over 0.52 s in the middle, a cut or a pop
 5. **A `[long pause]` twist** gets `MUSIC dips=[(t0, t1)]`, a darker tint or a spotlight, and a slow push on the face.
 6. **The ending:** the last 0.5-1.0 s after the final word is a `sets.rewind_shot` montage of 4-6 earlier shots played backwards, ending on the first frame. This replaces the plain `s_end` freeze.
 7. **The captions** (when asked for) stay on the last words through a gap; `assembler/captions.py` already holds each caption until the next unless the pause is longer than 0.6 s.
+
+---
+
+## 7. Long videos (~8 min): learned from 2 references (2026-11-05)
+
+The user sent the audio + SRT of two long videos in this same visual style:
+- **What If the WHOLE WORLD Became Roblox?** (8:08, 7 days)
+- **What If You Got Sucked INTO Roblox?** (8:26, 5 days)
+
+**Data** (in `analysis/ref_data/`):
+- `long_*_script.txt`: the full scripts in the user's format, every sentence with its speaker and emotion. Study them, never reuse the lines.
+- `long_*_cast.md`: every line with its pitch, loudness and speed.
+- `long_*_roles.json`: the hand-checked speaker times.
+- `long_*.srt`.
+
+**How they were analysed:**
+- The voice was separated from the music (`separate.py`).
+- `analysis/voice_cast.py` measured every sentence (see section 8).
+- The speakers were hand-checked from the story; the character emotions were hand-corrected.
+
+Everything in sections 1-6 is for ~55 s Shorts. Use this section when the user asks for a **long video** title, script or analysis.
+
+### 7.1 Long titles
+**Formula:** `What If` + **you / the WHOLE WORLD / your family / your school** + **a crossover verb** + `Roblox?`
+- Real life and Roblox **merge**: the world becomes Roblox, or you go into it.
+- CAPS go on the **scope** word (WHOLE WORLD) or the **direction** word (INTO).
+- 6-8 words, always a question that ends in "Roblox?".
+
+| Pattern | Reference | Fresh examples (ours) |
+|---|---|---|
+| The real world turns into Roblox | What If the WHOLE WORLD Became Roblox? | What If Your SCHOOL Became Roblox? · What If Your HOUSE Turned Into an OBBY? · What If Real Life Had LAG? |
+| You go into Roblox | What If You Got Sucked INTO Roblox? | What If You Got TRAPPED in a Roblox Obby? · What If You Woke Up INSIDE Your Roblox Avatar? |
+| Roblox comes out | – | What If Roblox Came INTO the Real World? · What If Your Roblox Avatar Came to LIFE? |
+| One game rule hits real life | (Rule one … Rule four in WHOLE WORLD) | What If Real Life Had a RESET Button? · What If Real Life Had ADMIN Commands? · What If Real Life Had a CHAT FILTER? |
+| A family member goes in | (Mom / Dad holding the tablet in SUCKED) | What If DAD Got Sucked Into Roblox? · What If Your Whole FAMILY Lived in Roblox? |
+
+**The test for a long title:** it must give **5-7 different days**: home, school, money, parents playing, the game's owner or admins, a scary game, a shutdown. One gag is enough for a Short; a long title needs a whole world.
+
+**When asked for long titles:** give 10, two per pattern, and mark the 3 strongest. Our own ideas only.
+
+### 7.2 Measured shape
+| What | WHOLE WORLD | SUCKED INTO | Rule for our long scripts |
+|---|---|---|---|
+| Length | 488 s | 506 s | **8-8.5 min** |
+| Words | 1,078 (132/min) | 1,073 (127/min) | **1,000-1,150 words** |
+| Speed while talking | 2.9 words/s | 2.9 words/s | same as Shorts |
+| Sentences | 180, median 5 words; 31 % ≤ 3 words | 253, median 4 words; 48 % ≤ 3 words | short sentences, many 1-3 word fragments |
+| Character lines | 59 of 180 sentences (25 % of words) | 105 of 253 (34 % of words) | **30-35 % of sentences are character lines** |
+| Days | 7 (Day 1-4 51-61 s, Day 5-6 45-50 s, **Day 7 = 107 s climax**) | 5 (Day 1 105 s, Day 2 88 s, Day 3 68 s, Day 4 61 s, **Day 5 = 102 s climax**) | 5 or 7 days, 45-105 s each; **the last day is the longest** |
+| Intro before Day 1 | 36.5 s | 51.8 s | **35-52 s** |
+| Subscribe CTA | 4:18 (53 %), 12 s | 5:13 (62 %), 13 s | **at 53-62 %, between two days, 10-13 s** |
+| Comment CTA | 7:52 (97 %) | 8:09 (97 %) | **≈ 97 %, then the loop line** |
+| Pauses between sentences | median 0.52 s, 36 over 0.8 s | median 0.48 s, 28 over 0.8 s | longer breaths than Shorts |
+| Long pauses (1.2-2.2 s) | before every Day, both CTAs and the resolution | the same | **1.3-2 s before each "Day N" and each CTA** |
+| Dramatic silence | – | **3.5 s** after "closer and closer and…" (the moment you are pulled in) | at most one, at the transformation |
+| Voice running | 83 % | 85 % | – |
+| Music + SFX under the voice | −17 dB, rising to −11 dB in the gaps | −16.5 / −11 dB | **music ≈ 16-17 dB under the voice**, louder in gaps |
+| Music | ~125 bpm, centred on G | ~117 bpm, centred on D | `music_game` (G, 128 bpm) is close |
+
+### 7.3 The long beat sheet (both references follow it)
+| # | Time | Beat | WHOLE WORLD | SUCKED INTO |
+|---|---|---|---|---|
+| 1 | 0-4 s | **Hook**: the title as a question | Narrator: "What if you woke up and the whole world became Roblox?" | "What if you got sucked into Roblox?" |
+| 2 | 4-11 s | **Stakes flash-forward**: the number of days + how bad the last day gets | "Seven days, one game, and by day seven, the world had 60 seconds left." | "…trapped inside the game for five whole days. And by day five, you were running for your life!" |
+| 3 | 12-18 s | *(optional)* **Cold open**: the climax scene played early, with dialogue + a deadpan narrator tag; repeated word for word at the real climax | – | Kid: "Mom! Mom! Press leave! Please, press leave!" · Narrator: "Mom couldn't hear you. Mom was eating chips." (again at 7:01) |
+| 4 | 11-25 s | **"I can explain"**: the Kid rewinds the story, the Narrator starts it | Kid: "Okay, okay, I can explain." · "It all started with a pop-up." | Kid: "Okay, I can explain." · "It all started with one jump." |
+| 5 | 20-50 s | **The trigger**: a time stamp → the cause → the Kid's careless line → an ominous one-liner → a silent beat | "Last night, 2 a.m." → pop-up "Turn the world into Roblox? Yes or yes." → Kid: "Sure, whatever." → "You pressed yes." | "Friday night." → stuck on a jump for 3 h → Kid: "If I was in there, I'd make that jump easy." → "Careful what you wish for." → 3.5 s silence |
+| 6 | Day 1 (~1-1.7 min) | **Discovery**: body and home turn into Roblox, as a quick question-answer list; the Kid reacts to his own body; every running gag gets its first stage | hands = blocks, bed? plastic, floor? studs, name tag, toothbrush in the hotbar "Equipped.", stairs take half your health, Mom's words in a chat bubble, Dad walking into a wall | landing on a spawn point, face is a sticker, the emote menu (Happy. Sad. Angry. Super happy.), everyone jumping, XXProGamerXX dancing |
+| 7 | Day 1-2 | **The rules**: numbered, each one with its gag at once; every rule pays off later | Day 2: "Rule one … Rule four" (jump ×5 → obby; red = lava; respawn on clean sheets; idle → disconnected) | the **mentor** (an old noob, here since 2006) gives "only two rules" + a time rule (1 day = 10 minutes out there) |
+| 8 | Days 2-4 (45-90 s each) | **One new domain a day**, 4-8 gags each: narrator setup → a character punch line or a deadpan narrator tag | neighbourhood obby → school (NPC teacher, math obby, badge) → money becomes Robux (ice cream game passes, Dad a free player, Mom's 40 hats) | Mom holds the tablet (walks you into walls, spins the camera, avatar shop tutu) → Dad's pizza tycoon → you are free and build LEAVE |
+| 9 | 53-62 % | **Subscribe CTA, as a joke with a reward AND a punishment**; it comes right after a cliff-hanger and right before the next day's turn (`lessons.md` rule 3) | "Oh, and everyone who subscribes gets a golden name tag in the new world. … Everyone who doesn't? Default noob avatar forever." → "Day five, something is wrong." | "…gets a VIP pass for when you get sucked in! Your own server! No chat filter! Don't subscribe? Dad gets your tablet! Enjoy the pizza!" → "Day four. Dad is snoring. Nobody is holding the tablet." |
+| 10 | 2nd-last day | **"Something is wrong"**: the threat appears, the tone drops to whispering / suspense | lag (ping 9,000, delayed "Ow."), then the **owner's mouse cursor** editing the world | the dog's paw joins "the scariest game on Roblox" |
+| 11 | last day (100-110 s) | **Climax**: a countdown (60 → 30 → 10 s) or a chase. The Kid's plan uses earlier setups, and **every earlier character returns** | server shutdown; the whole town stacks into a tower (Mom in 40 hats, the lemonade kid, the bully, Dad's T-pose = "the perfect platform") to reach the pop-up's NO | Mr. Snuggles chase; the cold open plays for real; "If Mom won't press leave, I'll make her want to!" → his face fills Mom's screen → she presses leave |
+| 12 | ~93 % | **Resolution list**: back to normal, each gag paid off | "Grass is grass. Plastic is not plastic. Mom has one hat again. Dad can put his arms down." Dad: "And I finally made it to the car!" | "Real couch. Real living room. And a face that can frown again." Mom: "Sweetie, you were gone for like an hour." |
+| 13 | ~95 % | **"Almost."**: one leftover from the game | "Breakfast, sweetie!" still pops up in a chat bubble | the tutu and the bunny ears came with you |
+| 14 | ~97 % | **Comment CTA**: one game word, before the last beat (`lessons.md` rule 4) | "Comment oof if you'd turn the world into Roblox." | "Comment join if you jump into Roblox!" |
+| 15 | last 6-10 s | **Loop line**: a system message + the Kid's panic sends the story back to the start | Game: "Update failed. Rolling back to day one." · Kid: "No, no, no! Not day one!" | Game: "You left the game. Rejoin." · Kid: "Mom! No! Don't press rejoin!" |
+
+### 7.4 The cast: who speaks, what, and how (measured)
+One voice performer does every part. The narrator's own voice (~160 Hz) also plays Dad, Mom, the mentor and the NPCs. A second, high, pitched-up voice carries most Kid and Game lines.
+
+| Speaker | WORLD: lines / words / pitch | SUCKED: lines / words / pitch | What they say | Emotions (in order of use) |
+|---|---|---|---|---|
+| **Narrator** | 121 / 811 / 158 Hz | 148 / 709 / 161 Hz | 2nd person "you", present tense; every Day word, rule, list, both CTAs; dry tags after big lines ("Delayed ow.", "Still 99 robux.", "He's seven.", "Feet first.", "Nobody has ever known.") | calm (facts) → excited (escalations, "!") → deadpan (tags) → whispering / soft ("something is wrong", reveals) → curious (the "Your bed?" questions) |
+| **Kid** ("you") | 22 / 108 / 324 Hz | 50 / 154 / 374 Hz | first-person reactions to his own body and the world; the careless trigger line; smug one-liners; panicked shouts; the plan; the loop line | excited, confused, nervous, panicked, smug, pleading, whispering (realisations), tired |
+| **Mom** | 7 / 24 / 267 Hz | 25 / 85 / 284 Hz | "sweetie" lines (warm words, absurd situation); gets hooked on one Roblox thing (hats, the avatar shop); clueless with the controls; the big scream at the climax | sweet → excited ("Ooh!", "Buy!") → confused → screaming |
+| **Dad** | 11 / 47 / 129 Hz | 12 / 28 / 172 Hz | a **running gag in 3-4 stages** with a payoff (walks into a wall "I'm just going to the car" → disconnected → T-pose "I'm fine" → the perfect platform → "I finally made it to the car!"); or an addiction ("Just one more upgrade.") | deadpan denial ("I'm fine."), shocked ("800 Robux?!"), proud, excited |
+| **Game** (system voice) | 12 / 53 / ~700 Hz | 3 / 11 / ~870 Hz | Roblox UI messages read flatly, and each is a joke: "Equipped." "You have been disconnected. Reason, idle for 20 minutes." "You do not own this item." "Update complete." "Joining the scariest game on Roblox." "You left the game. Rejoin." | robotic (flat, very high or processed) |
+| **Mentor** (Old Noob) | – | 15 / 86 / 138 Hz | explains the rules, calls the hero "kid", one dry joke ("Good luck with the chat filter."), the final goodbye line | chuckling, serious, whispering ("Listen close.") |
+| **Side voices** | Teacher NPC (repeats one robotic line twice), Coach, Neighbor ("Ahh!"), Crowd ("Help! No! What do we do?") | – | one line each, for a gag | robotic-cheerful, screaming, panicked |
+| **Silent characters** | the bully, the lemonade customer, the mouse cursor (the owner) | XXProGamerXX, Mr. Snuggles | shown only; the narrator describes them | – |
+
+**Voice contrast for our voice tool:**
+- Kid: about +12 semitones over the narrator.
+- Mom: +9 semitones.
+- Dad / mentor: −2 to −3 semitones.
+- Game: very high and flat, or a robot effect.
+
+### 7.5 Joke techniques (use them, with our own content)
+- **Two-beat joke**: a setup, then a 1-4 word tag. "You look at your hands. They're blocks." · "Dad checks his wallet. Zero Robux. He's been a free player his whole life."
+- **Question-answer fragments**: "Your bed? Plastic. Your floor? Covered in tiny little studs." · "Infinite sprinkles? 400."
+- **Rule of three, the third one absurd**: "the roof, then the neighbor's roof, then a passing bird." · "And spins it. And spins it. And spins it!"
+- **A Roblox mechanic as a real-life joke**: daily reward alarm, toothbrush in the hotbar, fall damage on the stairs, click to eat, idle disconnect, respawn on clean sheets, game passes, T-pose, lag/ping, an unanchored part falling, copy-paste, chat filter hashtags, emotes as faces, everybody jumping, server shutdown, rejoin.
+- **Word-by-word dialogue**: "Mom. Stop. Spinning. The sky." · "Dad. Press. Leave." → the filter: "Dad. Press. Hashtag, hashtag, hashtag."
+- **A misread reveal**: the LEAVE letters seen from the back → "E-V-A-E-L. … Evel! What a pretty name for a castle!"
+- **Running gags in 3-4 stages, all paid off in the resolution** (Dad + the car, Mom + the hats, the chat filter, the tutu).
+- **Callbacks in the climax**: the solution is built from earlier gags (the tower of characters, the pop-up's NO, the cold-open line).
+- **Time contrast**: "And here, a whole night goes by. Out there, Dad's been playing for six minutes."
+
+### 7.6 Writing a long script (rules)
+Use the user's format (section 3): `Speaker: [emotion] text`, a blank line between speaker turns, and **a name before every line**.
+
+1. **Speaker names:** Narrator, Kid, Mom, Dad, Game, and side characters by role (Teacher NPC, Old Noob, Coach, Crowd, Neighbor…).
+   - Every Roblox message is its own `Game:` line with `[robotic]`.
+2. **Length:** 1,000-1,150 words.
+   - 5 or 7 days of 110-150 words each; the last day 200-250 words.
+   - The intro (beats 1-5) is 60-105 words.
+3. **Characters:** 30-35 % of sentences are character lines, so most turns are 1-3 sentences long.
+   - Every day has at least 2 characters and 4-10 character lines.
+   - Dad and Mom each get one running gag that returns 3-4 times.
+4. **Emotions:**
+   - Use the section 4 tags.
+   - Add the long-video tags: `[nervous]`, `[panicked]`, `[smug]`, `[scared]`, `[proud]`, `[tired]`, `[dizzy]`, `[serious]`, `[sneaky]`, `[screaming]`, `[robotic]`.
+   - Change the tag whenever the feeling changes.
+5. **Pauses:**
+   - `[break]` between sentences.
+   - `[pause]` after a punch line.
+   - `[long pause]` before every "Day N" and each CTA.
+   - At most one dramatic silence (the transformation).
+6. **Analytics rules still apply** (`lessons.md`):
+   - The hook question comes in ≤ 4 s and the stakes by ~11 s.
+   - The subscribe CTA comes right after a cliff-hanger and right before a turn.
+   - The comment CTA comes before the loop line.
+   - The last spoken line loops into the start.
+7. **What to give when asked for a long script:**
+   - the full script;
+   - then a 1-line speaker list with the line count per speaker;
+   - the Day map (Day → domain → main gag);
+   - the estimated length (words ÷ 130 per minute).
+
+## 8. Analysing a voice the user sends (who speaks, what, and how)
+When the user sends an audio (+ SRT) and asks how many characters there are, who says what, and with which tone or emotion:
+
+1. **If it has music** (a finished video), separate the voice first:
+   `python3 analysis/separate.py <audio> analysis/models/UVR-MDX-NET-Inst_HQ_3.onnx output/<name>/sep`.
+   About 8 minutes for an 8-minute file.
+2. **First pass:** `python3 analysis/voice_cast.py <voice> <subs.srt> output/<name>/auto`. It works sentence by sentence:
+   - **time:** a sentence boundary inside a cue moves to the quietest point;
+   - **pitch:** median and range;
+   - **loudness, speed** and breathiness;
+   - **audio voice:** voices are clustered only when they are clearly apart (silhouette ≥ 0.3); usually one performer does every part;
+   - **speaker:** from the words: narration vs first-person and reaction lines, "sweetie" → Mom, "Mom," → Kid, game / UI messages → Game, the protagonist ("you" → Kid, or the named hero);
+   - **emotion:** each line compared with its own speaker's average, plus punctuation.
+3. **Hand-check the speakers from the story.** The first pass got 77 % (WORLD) and 75 % (SUCKED) of the sentences right, and 83-91 % on narrator vs character.
+   - Write `[[t0, t1, "Speaker"], …]` for every character line.
+   - Re-run with `--roles <file>`: the pitch and tone baselines are then per real speaker.
+4. **Read `cast.md`** (every line with its numbers) and correct the character emotions by ear and context.
+5. **Report in Hinglish:**
+   - how many speakers and how many audio voices;
+   - each speaker's lines, words, pitch and main tones;
+   - the full script in the user's format (`script.txt`);
+   - the structure: days, CTAs, pauses.

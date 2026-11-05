@@ -32,6 +32,16 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
   - It writes `voice.mp3`, `subs.srt` and `speakers.json` (who speaks when, used for lip-sync), with one voice per character and the pauses kept short.
   - Kokoro cannot act emotions: the tags only change speed, volume and pitch. Say so; the user's own voice tool is better for final videos.
 - **Another topic or script:** bend it into the reference topic world with section 5 (Roblox + family antagonist + Day ladder + zero-crash + twist + loop). Keep the user's core idea.
+- **Long videos (~8 min)** ("long video title / script"):
+  - Use `script_guide.md` **section 7**, learned from the user's 2 long references (`analysis/ref_data/long_*_script.txt`): What If the WHOLE WORLD Became Roblox?, What If You Got Sucked INTO Roblox?
+  - Titles: the crossover formula (real life ↔ Roblox) in 5 patterns; give 10 and mark the 3 strongest.
+  - Scripts: the 15-beat long sheet (hook → stakes flash-forward → "Okay, I can explain" → trigger → Day 1 discovery → numbered rules → one domain per day → subscribe CTA at 53-62 % → "something is wrong" → callback climax → resolution → "Almost." → comment CTA → system-message loop line).
+  - 1,000-1,150 words, 30-35 % character lines, **a speaker name before every line** (Narrator, Kid, Mom, Dad, Game, side characters).
+  - After the script, give the speaker list with line counts, the Day map and the estimated length.
+- **"Analyse this audio" (characters, who says what, tone / emotion):** follow `script_guide.md` **section 8**.
+  - Separate the voice if there is music, then run `python3 analysis/voice_cast.py <voice> <srt> <out>`.
+  - Hand-check the speakers into a roles JSON and re-run with `--roles`.
+  - Correct the character emotions, then report in Hinglish: speakers, lines, pitch, tones, and the full script in the user's format.
 
 ## Read first
 | File | What it holds |
@@ -42,7 +52,7 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
 | `style_bible.md` | Look: format and safe zone, characters in head-widths, faces and the 19 expressions, palette, sets, STYLE LOCK |
 | `visual_grammar.md` | Measured pace and camera; **section 2 = phrase type → what is shown → camera → reaction** (rows 1-20) |
 | `sound_design.md` | Measured music and SFX, the mix defaults and the target numbers |
-| `script_guide.md` | Titles, the script format with characters and emotions, the 14-beat sheet, bending other topics, and the measured silent parts (what is on screen during them) |
+| `script_guide.md` | Titles, the script format with characters and emotions, the 14-beat sheet, bending other topics, the measured silent parts (what is on screen during them), **section 7: long ~8 min videos** (titles, 15-beat sheet, cast, joke techniques) and **section 8: analysing a voice** (`analysis/voice_cast.py`) |
 | `animator/sample.py` | **The template story.** Copy it for every new video |
 | `animator/style.py` | Characters: `Block` (same `draw()` signature as the old `style2.Char2`), the cast `KID`, `KID_GAME`, `MOM`, `MOM_ROBE`, `DAD`, `GRANDMA`, `NOOB`, `BOSS`, `crowd_member(i)`, `back_figure`, and the FX `sweat`, `anger_mark`, `shake_lines`, `sparkle` |
 | `animator/sets.py` | Places, props, game UI and FX (list at the top of the file) |
