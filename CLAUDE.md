@@ -112,11 +112,11 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
      - SFX median -4 to -9 dB;
      - the music key reads G.
    - `python3 analysis/frame_log.py $O/<story>_final.mp4 <subs.srt> $O/fl 4`: look at every sheet.
-7. **Burn the captions** (see Defaults), then **send only `<story>_final_captions.mp4`** to the user (SendUserFile), one file. Add the video to `videos.md`. Commit and push the story code; `output/` is git-ignored. Say honestly what could not match.
+7. **Send only `<story>_final.mp4` (NO captions)** to the user (SendUserFile), one file. This is the user's rule since 2026-11-05: "jab bhi mangu bina caption ke hi do". Do not burn captions unless the user asks for a captioned copy in that message (then see Defaults). Add the video to `videos.md`. Commit and push the story code; `output/` is git-ignored. Say honestly what could not match.
 8. **Fix requests:** patch only the shots or cues asked about. Edit those shot functions, keys or `SFX` entries, then re-render; a full render takes about 40 s per 20 s of video. `python3 <story>.py out.mp4 cues.json <first_frame> <last_frame>` renders only a frame range if needed. Never regenerate or redesign the rest.
 
 ## Defaults
-- **Captions are ON by default, and only ONE video is delivered: the captioned one** (the user's rule, to save credits). Never send a caption-free copy unless the user asks for it. Burn reference-style captions onto the finished mp4 without re-rendering:
+- **Captions are OFF by default, and only ONE video is delivered: the caption-free `<story>_final.mp4`** (the user's rule, 2026-11-05: "jab bhi mangu bina caption ke hi do"; it replaces the older "captions on" rule). Do not make or send a captioned copy unless the user asks for captions. When they do, burn reference-style captions onto the finished mp4 without re-rendering:
   1. Write `animator/captions/<story>.json`: `[[first_word_index_or_time, "TEXT", colour or null], ...]`, one entry per caption, using the rules in `style_bible.md` section 1 (example: `animator/captions/no_break.json`).
   2. Run `python3 assembler/captions.py $O/<story>_final.mp4 $O/words/aligned.json animator/captions/<story>.json $O/<story>_final_captions.mp4 animator/<story>.py`. Use `auto` instead of the JSON for a quick automatic version.
      - The last argument (the story) is **always passed**: the user asked that text already on screen is never repeated in a caption.

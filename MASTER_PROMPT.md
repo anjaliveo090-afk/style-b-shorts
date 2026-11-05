@@ -65,8 +65,9 @@ STEP 3 - BUILD AND CHECK FRAMES
   (labels, name tags, bubbles, toasts, UI rows, stamps, cards) and every keep box, on every frame.
 
 STEP 4 - MY DEFAULTS
-- Always add reference-style captions with assembler/captions.py (see CLAUDE.md Defaults), never repeating
-  text that is already on screen at that moment. Send me ONLY the captioned mp4, one file, no caption-free copy. Lip-sync only when a character speaks dialogue (not the narrator). No camera whoosh.
+- NO captions: send me ONLY <story>_final.mp4, one file, without captions (my rule since 2026-11-05). Add
+  captions with assembler/captions.py (see CLAUDE.md Defaults, never repeating on-screen text) only when I ask
+  for them. Lip-sync only when a character speaks dialogue (not the narrator). No camera whoosh.
 - Hard cuts: render(xfade=0, grain=2, fade_in=0, fade_out=0), loop back to the first frame.
 - Music: audio.music_game() (MUSIC = dict(bpm=128, perc=0.6, dips=[...]), written as music.wav) at --music-volume 0.45.
 - SFX: about 1.0-1.1 per second on visual events, SFX_GAIN = 0.2 (the voiceflow voice); mostly pops, ticks and
