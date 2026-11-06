@@ -22,6 +22,8 @@ Groups:
   chat      house_block (roleplay house, door_k), security_booth, spectate_pill (eye + SPECTATING)
   filter    word_block, filter_machine (funnel in, # out, gears), megaphone, siren, cctv_wall, trash_can, bush,
             cardboard_box (added for chat_filter_v2.py)
+  leave     welcome_sign (billboard, letters pop in), balloons (a bobbing bunch), leave_button (big LEAVE GAME),
+            doorbell, thought_cloud, pizza (pepperoni / cheese) (added for leave_noob.py)
   game HUD  roblox_topbar (menu / chat / backpack buttons, Players pill; no official logo), roblox_chat (in-game chat
             window, last 3 messages); screen-space, inside the safe zone: draw them in a shot overlay
   UI        hud_timer, second_card, stage_pill, health_bar, damage_text, ko_sticker, toast, login_screen,
@@ -1717,8 +1719,8 @@ def lava_bridge(ctx, x0, x1, y, T, built=1.0, lava=1.0, n=7):
         glow(ctx, (x0 + x1) / 2, y + 20, (x1 - x0) * 0.7, (1, 0.5, 0.1), 0.35 * lava)
 
 
-def lemonade_stand(ctx, x, y, s, T, sign="LEMONADE"):
-    """Wooden lemonade stand; (x, y) = bottom centre."""
+def lemonade_stand(ctx, x, y, s, T, sign="LEMONADE", goods="lemonade"):
+    """Wooden lemonade stand; (x, y) = bottom centre. goods="pizza" puts pizza boxes + a pizza on the counter."""
     ctx.save()
     ctx.translate(x, y)
     ctx.scale(s, s)
@@ -1745,9 +1747,14 @@ def lemonade_stand(ctx, x, y, s, T, sign="LEMONADE"):
     rrect(ctx, -150, -150, 300, 70, 12)
     shape_fill(ctx, (1, 1, 1), 4, -150, -80, outline=INK)
     bold_text(ctx, sign, 0, -115, 40, hexc("#e8b020"), outline=(1, 1, 1), shadow=False, stroke=0.02)
-    block(ctx, -40, -260, 80, 90, 14, hexc("#ffe45c"), 4, outline=INK)    # jug
-    for cx_ in (-140, 110):
-        block(ctx, cx_, -215, 34, 45, 6, (1, 1, 1), 3, outline=INK, gloss=False)
+    if goods == "pizza":
+        for i in range(3):
+            pizza_box(ctx, -110, -170 - i * 34, 120, 34)
+        pizza(ctx, 90, -205, 62, T=T)
+    else:
+        block(ctx, -40, -260, 80, 90, 14, hexc("#ffe45c"), 4, outline=INK)    # jug
+        for cx_ in (-140, 110):
+            block(ctx, cx_, -215, 34, 45, 6, (1, 1, 1), 3, outline=INK, gloss=False)
     ctx.restore()
 
 
@@ -4538,3 +4545,178 @@ def roblox_chat(ctx, lines, T, x=44, y=222, w=400, n=3, size=21):
             text = text[:-2] + "…" if len(text) > 2 else ""
         bold_text(ctx, text, tx, yy, size, (1, 1, 1), align="l", shadow=False, stroke=0.0)
     ctx.restore()
+
+
+# ================================================================ leave (added for leave_noob.py)
+BALLOON_COLS = ("#ff4f5a", "#ffd84a", "#4fd16a", "#2f6bd8", "#ff5fb0", "#9d5cff", "#ff8a3d")
+
+
+def balloons(ctx, x, y, s=1.0, T=0.0, n=5, seed=1, lift=0.0, droop=0.0, lean=0.0, cols=BALLOON_COLS):
+    """A bunch of n balloons tied at (x, y) (the knot), fanned upward and bobbing. lift raises the whole bunch
+    (px); droop 0..1 lets them sag sideways (a sad, deflating bunch); lean tilts the whole bunch (radians, + = right)."""
+    if s <= 0.01 or n <= 0:
+        return
+    rnd = random.Random(seed)
+    tops = []
+    for i in range(n):
+        ang = (i - (n - 1) / 2) * 0.3 + rnd.uniform(-0.08, 0.08)
+        ang = ang * (1 + 2.2 * droop) + (0.9 * droop if ang >= 0 else -0.9 * droop) + lean
+        ln = (200 + rnd.uniform(-30, 50)) * s
+        bx = x + math.sin(ang) * ln + math.sin(T * 2.1 + i * 1.7) * 7 * s
+        by = y - math.cos(ang) * ln - lift + math.cos(T * 1.8 + i) * 6 * s
+        tops.append((bx, by, cols[(i + seed) % len(cols)]))
+    for bx, by, _ in tops:                                            # strings
+        ctx.move_to(x, y)
+        ctx.curve_to(x, y - 40 * s, bx + 10 * s, by + 90 * s, bx, by + 46 * s)
+    ctx.set_source_rgb(*INK)
+    ctx.set_line_width(max(1.5, 3 * s))
+    ctx.stroke()
+    for bx, by, col in sorted(tops, key=lambda t: t[1]):
+        c = c_(col)
+        ctx.move_to(bx - 9 * s, by + 52 * s)                           # knot
+        ctx.line_to(bx, by + 42 * s)
+        ctx.line_to(bx + 9 * s, by + 52 * s)
+        ctx.close_path()
+        shape_fill(ctx, c, max(1.5, 3 * s), by + 42 * s, by + 52 * s)
+        ellipse(ctx, bx, by, 38 * s, 46 * s)
+        shape_fill(ctx, c, max(2, 5 * s), by - 46 * s, by + 46 * s)
+        ellipse(ctx, bx - 13 * s, by - 18 * s, 8 * s, 14 * s)          # shine
+        ctx.set_source_rgba(1, 1, 1, 0.7)
+        ctx.fill()
+
+
+def welcome_sign(ctx, x, y, s=1.0, T=0.0, k_letters=None, txt="WELCOME!"):
+    """A giant billboard on two posts; (x, y) = ground under its middle (board 600 x 280 at s=1, top at y-560 s).
+    k_letters = seconds since the letters started popping in (one every 0.09 s); None shows them all."""
+    if s <= 0.01:
+        return
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    for px in (-230, 204):
+        block(ctx, px, -300, 26, 300, 4, hexc("#8a5a3a"), 4, gloss=False)
+    block(ctx, -300, -560, 600, 280, 26, hexc("#ffb84a"), 7)
+    block(ctx, -278, -538, 556, 236, 16, hexc("#fff6d6"), 0, outline=hexc("#fff6d6"), gloss=False)
+    cols = ("#ff4f5a", "#ff8a3d", "#e8b020", "#4fd16a", "#2f6bd8", "#9d5cff", "#ff5fb0", "#ff4f5a")
+    n = len(txt)
+    size = min(110, 520 / max(1, n) * 1.45)
+    for i, ch in enumerate(txt):
+        kk = None if k_letters is None else k_letters - i * 0.09
+        if kk is not None and kk < 0:
+            continue
+        sc = pop(kk) if (kk is not None and kk < 0.6) else 1.0
+        bold_text(ctx, ch, -250 + (i + 0.5) * 500 / n, -420, size, c_(cols[i % len(cols)]), scale=sc, shadow=False)
+    ctx.restore()
+    balloons(ctx, x - 300 * s, y - 540 * s, 0.55 * s, T, n=3, seed=2)
+    balloons(ctx, x + 300 * s, y - 540 * s, 0.55 * s, T, n=3, seed=5)
+
+
+def leave_button(ctx, x, y, s, T, pressed=0.0, glow_a=0.0, col="#2f6bd8", top="LEAVE", bottom="GAME"):
+    """Big menu button 'LEAVE GAME' with an exit-door icon (pressed 0..1 squashes it); same build as reset_button."""
+    if s <= 0.01:
+        return
+    if glow_a > 0:
+        glow(ctx, x, y, 440 * s, (0.4, 0.6, 1.0), glow_a)
+    c = c_(col)
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(s, s)
+    block(ctx, -270, -60, 540, 170, 50, dark(c, 0.45), 7, outline=INK, gloss=False)
+    dy = 30 * clamp(pressed)
+    block(ctx, -260, -120 + dy, 520, 190, 50, c, 7, outline=INK)
+    ix, iy = -170, -25 + dy                                           # exit icon: a door frame + an arrow out
+    ctx.rectangle(ix - 40, iy - 52, 58, 104)
+    ctx.set_source_rgb(1, 1, 1)
+    ctx.set_line_width(12)
+    ctx.stroke()
+    ctx.move_to(ix - 6, iy)
+    ctx.line_to(ix + 46, iy)
+    ctx.set_line_width(14)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.stroke()
+    ctx.move_to(ix + 34, iy - 26)
+    ctx.line_to(ix + 64, iy)
+    ctx.line_to(ix + 34, iy + 26)
+    ctx.close_path()
+    ctx.fill()
+    bold_text(ctx, top, 60, -60 + dy, 70, (1, 1, 1), stroke=0.14)
+    bold_text(ctx, bottom, 60, 10 + dy, 56, (1, 1, 1), stroke=0.16)
+    ctx.restore()
+
+
+def doorbell(ctx, x, y, s=1.0, pressed=0.0, glow_a=0.0):
+    """A doorbell plate (brass ring, round white button that sinks when pressed); centre (x, y)."""
+    if s <= 0.01:
+        return
+    if glow_a > 0:
+        glow(ctx, x, y, 200 * s, (1.0, 0.9, 0.5), glow_a)
+    block(ctx, x - 80 * s, y - 120 * s, 160 * s, 240 * s, 34 * s, hexc("#b0743c"), max(2, 6 * s))
+    ctx.new_sub_path()
+    ctx.arc(x, y, 56 * s, 0, 2 * PI)
+    shape_fill(ctx, hexc("#ffcc33"), max(2, 6 * s), y - 56 * s, y + 56 * s)
+    r = 38 * s * (1 - 0.12 * clamp(pressed))
+    ctx.new_sub_path()
+    ctx.arc(x, y + 3 * s * clamp(pressed), r, 0, 2 * PI)
+    shape_fill(ctx, (1, 1, 1) if pressed < 0.5 else hexc("#ffe9a8"), max(2, 5 * s), y - r, y + r)
+
+
+def thought_cloud(ctx, x, y, w, h, k=1.0, tail=(-1, 1)):
+    """A thought bubble: a puffy cloud (centre x, y, size w x h) + two small circles toward the thinker
+    (tail = direction). Pops in over k seconds (k < 0: hidden)."""
+    if k < 0:
+        return
+    sc = pop(k) if k < 0.6 else 1.0
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(sc, sc)
+    puffs = [(math.cos(a) * w * 0.38, math.sin(a) * h * 0.34) for a in (i * 2 * PI / 9 for i in range(9))]
+    r = min(w, h) * 0.3
+    small = [(tail[0] * w * 0.42, tail[1] * h * 0.62, r * 0.32), (tail[0] * w * 0.55, tail[1] * h * 0.86, r * 0.18)]
+    for pass_ in (0, 1):                     # outline pass (thick ink), then white fill: one merged cloud
+        for px, py in puffs:
+            ctx.new_sub_path()
+            ctx.arc(px, py, r, 0, 2 * PI)
+        ellipse(ctx, 0, 0, w * 0.4, h * 0.36)
+        for px, py, rr in small:
+            ctx.new_sub_path()
+            ctx.arc(px, py, rr, 0, 2 * PI)
+        if pass_ == 0:
+            ctx.set_source_rgb(*INK)
+            ctx.set_line_width(12)
+            ctx.stroke()
+        else:
+            ctx.set_source_rgb(1, 1, 1)
+            ctx.fill()
+    ctx.restore()
+
+
+def pizza(ctx, x, y, r, kind="pepperoni", T=0.0):
+    """A whole pizza seen from above (centre x, y, radius r): crust, sauce, cheese, pepperoni dots or plain cheese."""
+    ctx.new_sub_path()
+    ctx.arc(x, y, r, 0, 2 * PI)
+    shape_fill(ctx, hexc("#e8b062"), max(2, r * 0.07), y - r, y + r)
+    ctx.new_sub_path()
+    ctx.arc(x, y, r * 0.84, 0, 2 * PI)
+    ctx.set_source_rgb(*hexc("#e8503a"))
+    ctx.fill()
+    ctx.new_sub_path()
+    ctx.arc(x, y, r * 0.78, 0, 2 * PI)
+    ctx.set_source_rgb(*hexc("#ffd84a"))
+    ctx.fill()
+    if kind == "pepperoni":
+        for a, d in ((0.3, 0.45), (1.6, 0.5), (2.9, 0.42), (4.2, 0.5), (5.4, 0.4), (0.0, 0.0)):
+            ctx.new_sub_path()
+            ctx.arc(x + math.cos(a) * r * d, y + math.sin(a) * r * d, r * 0.15, 0, 2 * PI)
+            shape_fill(ctx, hexc("#c0303a"), max(1.5, r * 0.03), y - r, y + r)
+    else:                                                             # cheese: melted bubbles
+        for a, d in ((0.5, 0.45), (2.0, 0.5), (3.4, 0.4), (4.9, 0.5), (0.0, 0.0)):
+            ellipse(ctx, x + math.cos(a) * r * d, y + math.sin(a) * r * d, r * 0.14, r * 0.1)
+            ctx.set_source_rgb(*hexc("#fff3b0"))
+            ctx.fill()
+    for i in range(6):                                                # slice lines
+        a = i * PI / 3
+        ctx.move_to(x, y)
+        ctx.line_to(x + math.cos(a) * r * 0.82, y + math.sin(a) * r * 0.82)
+    ctx.set_source_rgba(*hexc("#d89a30"), 0.8)
+    ctx.set_line_width(max(1.5, r * 0.035))
+    ctx.stroke()

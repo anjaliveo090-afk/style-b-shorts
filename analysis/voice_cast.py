@@ -190,7 +190,7 @@ TO_PARENT = re.compile(r"^(mom|mommy|mum|dad|daddy)\b[,!.]", re.I)
 TO_KID = re.compile(r"\b(kid|sweetie)\b[?!.]?$|^(listen|careful|good luck|then move)", re.I)
 
 
-def line_kind(s, narr_voice):
+def line_kind(s, narr_voice, base_hz=None):
     """'narration', 'dialogue' or 'system' (a game / UI voice), with a score for the dialogue guess."""
     t = s["text"].strip().strip('"\u201c\u201d')
     if SYSTEM.search(t) and not FIRST.search(t):
@@ -210,6 +210,8 @@ def line_kind(s, narr_voice):
         score -= 2
     if s["voice"] != narr_voice and s["voice_conf"] >= 0.3:
         score += 3
+    if base_hz and s["hz"] and s["words"] <= 5 and t[-1:] in "!?" and 12 * np.log2(s["hz"] / base_hz) >= 4:
+        score += 4                               # the narrator acts a character: a short shout far above his pitch
     return "dialogue" if score >= 2 else "narration"
 
 
@@ -233,8 +235,10 @@ def name_speakers(segs, lab):
     narr_voice = vname[order[0]]
     for s, l in zip(segs, lab):
         s["voice"] = vname[l]
+    hz_all = [s["hz"] for s in segs if s["hz"] and s["voice"] == narr_voice and s["words"] >= 6]
+    base_hz = float(np.median(hz_all)) if hz_all else None
     for s in segs:
-        s["kind"] = line_kind(s, narr_voice)
+        s["kind"] = line_kind(s, narr_voice, base_hz)
     hero = protagonist(segs)
     prev = None
     for s in segs:
