@@ -1,0 +1,68 @@
+{
+ "summary": {
+  "video": "dad_noobking.mp4",
+  "duration": 55.97,
+  "speech_share": 0.93,
+  "gaps_total": 4,
+  "gaps_per_10s": 0.7,
+  "gap_median": 0.23,
+  "gap_p90": 0.28,
+  "gap_max": 0.29,
+  "gaps_over_0_6s": 0,
+  "gaps_with_sfx": 2,
+  "lead_in": 0.0,
+  "tail": 1.03
+ },
+ "gaps": [
+  {
+   "t0": 29.66,
+   "t1": 29.95,
+   "dur": 0.29,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 10.8,
+   "before": "yone who subscribes joins the noob army.",
+   "after": "Day 5."
+  },
+  {
+   "t0": 40.64,
+   "t1": 40.84,
+   "dur": 0.2,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": -8.0,
+   "before": "I spent all my Robux on this skin!",
+   "after": "One bonk with the Royal Scepter."
+  },
+  {
+   "t0": 45.43,
+   "t1": 45.63,
+   "dur": 0.2,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 6.5,
+   "before": "And your skin is a noob now.",
+   "after": "My Robux!"
+  },
+  {
+   "t0": 49.97,
+   "t1": 50.23,
+   "dur": 0.26,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 10.5,
+   "before": "Now, who knows how to jump?",
+   "after": "Comment noob if your dad's a noob too!"
+  },
+  {
+   "t0": 54.94,
+   "t1": 55.97,
+   "dur": 1.03,
+   "position": "end",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 15.9,
+   "before": "Wait, which button goes back?",
+   "after": ""
+  }
+ ]
+}
