@@ -1252,7 +1252,8 @@ SFX = []
 
 def shot(t0, fn, cam=None, sfx=(), hud=False, players=412, whip=None, shake=None, **p):
     draw = (lambda ctx, t, d, fn=fn, t0=t0, p=p: fn(ctx, t0 + t, t0, **p))
-    sh = dict(start=t0, draw=draw, keys=cam or [(t0, 1.0, C)], vignette=0.12)
+    sh = dict(start=t0, draw=draw, keys=cam or [(t0, 1.0, C)], vignette=0.12, _fn=fn, _p=p, _t0=t0, _hud=hud,
+              _players=players)
     if hud:
         sh["overlay"] = (lambda ctx, t, d, t0=t0, pl=players: draw_hud(ctx, t0 + t, pl))
     if whip:
@@ -1691,6 +1692,120 @@ shot(463.14, s_cu, punch(463.14, 463.2, 1.15, (450, 260)), sfx=[(0.0, BOOM, 1.2)
      expr="scream", bg=RED_, arms=("up", "up"), bubble="MOM!", btime=463.14)
 SHOTS = S
 S.sort(key=lambda sh: sh["start"])
+
+
+# ---------------------------------------------------------------- the beat pass (2026-11-07: "hook jaisa poori video")
+# The hook was rebuilt with a new picture on every key word. The body keeps its scenes, but every shot longer than
+# BEAT_MAX is cut on aligned word starts into ~1.2 s beats; each later beat gets a new framing (a punch-in on the
+# scene's subject, then a medium framing), a soft cut sound, and a bump when a shouted ("!") word lands in it.
+BEAT_MAX, BEAT_LEN, BEAT_MIN = 1.9, 1.2, 0.7
+HOOK_END = 9.62
+
+
+def _focus(sh):
+    """Two alternative framings [(zoom, (x, y)), ...] for a scene: its subject close, then medium."""
+    n, p = sh["_fn"].__name__, sh["_p"]
+    if n == "s_cu":
+        side = p.get("side", 1)
+        return [(1.2, (660 if side > 0 else 620, 380)), (1.1, (560 if side > 0 else 720, 370))]
+    if n == "s_stone_mic":
+        return [(1.25, (500, 500)), (1.1, (640, 420))]
+    if n == "s_stare":
+        return [(1.25, (640, 440)), (1.12, (640, 400))]
+    if n == "s_combo":
+        return [(1.15, (640, 360)), (1.1, (760, 330))]
+    if n == "class_scene":
+        kx = p.get("kid_x", 640)
+        return [(1.5, (kx, 470)), (1.3, (p.get("teacher_x", 170) + 120, 430) if p.get("teacher", True) else
+                                   (kx + 180, 440))]
+    if n == "s_parking":
+        x = {"wave": 220, "sweat": 300, "sleep": 520, "jump": 220}.get(p.get("dad", "wave"), 300)
+        return [(1.7, (x + 60, 470)), (1.3, (x + 200, 430))]
+    if n == "s_cafe":
+        return [(1.45, (560, 480)), (1.35, (260, 420))]
+    if n in ("s_hall", "s_bonk"):
+        return [(1.45, (600, 470)), (1.25, (760, 430))]
+    if n in ("s_library",):
+        return [(1.6, (480, 470)), (1.4, (760, 430))]
+    if n in ("s_bedroom", "s_study", "s_flashback6"):
+        return [(1.5, (560, 450)), (1.3, (700, 400))]
+    if n in ("s_adults",):
+        return [(1.7, (640, 520)), (1.5, (260, 440))]
+    if n in ("s_roof",):
+        return [(1.5, (640, 470)), (1.25, (640, 360))]
+    if n in ("s_emote",):
+        return [(1.35, (800, 360)), (1.4, (320, 430))]
+    if n in ("s_boss", "s_fight", "s_panic", "s_boom", "s_answers", "s_fireball", "s_bubbles", "s_hit",
+             "s_juice_throw", "s_swing", "s_erased", "s_cheer", "s_mom_unicorn", "s_sprint_jump", "s_gym_doors"):
+        return [(1.35, (760, 300)), (1.3, (420, 470))]
+    if n in ("s_school_wide", "s_crowd_tags", "s_normal", "s_walkhome", "s_lightsout", "s_skip", "s_front_row",
+             "s_stare", "s_speaker", "s_gym_loading"):
+        return [(1.4, (640, 480)), (1.2, (640, 380))]
+    return [(1.2, (640, 380)), (1.1, (640, 370))]
+
+
+def _words():
+    import json
+    try:
+        return json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                           "../output/whole_school/words/srt_words.json")))
+    except OSError:
+        return []
+
+
+def _beats(shots):
+    words = _words()
+    starts = [(w["start"], w["word"]) for w in words if isinstance(w.get("start"), (int, float))]
+    out = []
+    for sh in shots:
+        a, b = sh["start"], sh["end"]
+        if a < HOOK_END or sh.get("_fn") is None or b - a <= BEAT_MAX:
+            out.append(sh)
+            continue
+        n_cut = max(1, int(round((b - a) / BEAT_LEN)) - 1)
+        cuts = []
+        for j in range(1, n_cut + 1):
+            target = a + (b - a) * j / (n_cut + 1)
+            cand = [t for t, _ in starts if a + BEAT_MIN <= t <= b - BEAT_MIN and all(abs(t - c) >= BEAT_MIN
+                                                                                      for c in cuts)]
+            if cand:
+                t = min(cand, key=lambda t: abs(t - target))
+                if abs(t - target) < 0.6:
+                    cuts.append(t - 0.04)                             # the cut lands just before the word
+        cuts = sorted(cuts)
+        if not cuts:
+            out.append(sh)
+            continue
+        alts = _focus(sh)
+        bounds = [a] + cuts + [b]
+        for k in range(len(bounds) - 1):
+            s0, s1 = bounds[k], bounds[k + 1]
+            if k == 0:
+                first = dict(sh)
+                out.append(first)
+                continue
+            z, f = alts[(k - 1) % len(alts)]
+            fn, p, t0 = sh["_fn"], sh["_p"], sh["_t0"]
+            sub = dict(sh, start=s0, keys=[(s0, z, f)], _beat=True,
+                       draw=(lambda ctx, t, d, fn=fn, p=p, t0=t0, s0=s0: fn(ctx, s0 + t, t0, **p)))
+            sub.pop("shake", None)
+            sub.pop("whip", None)
+            if sh.get("overlay") and sh.get("_hud"):
+                sub["overlay"] = (lambda ctx, t, d, s0=s0, pl=sh["_players"]: draw_hud(ctx, s0 + t, pl))
+            shout = [t for t, w in starts if s0 + 0.05 <= t < s1 - 0.1 and w.endswith("!")]
+            if shout:
+                sub["shake"] = (shout[0] - s0, 9)
+            near = any(abs(st_ - s0) < 0.2 for st_, _f, _v in SFX)
+            if not near:
+                SFX.append((s0, POP if k % 2 else SW, 0.38))
+            out.append(sub)
+    return out
+
+
+for _k, _s in enumerate(S):
+    _s["end"] = S[_k + 1]["start"] if _k + 1 < len(S) else 463.75
+S[:] = _beats(S)
+SHOTS = S
 _rw_draw, _rw_ov = st.rewind_shot(SHOTS, [441.0, 381.0, 305.0, 225.0, 140.0, 0.0])
 S.append(dict(start=463.75, draw=_rw_draw, keys=[(463.75, 1.0, C)], overlay=_rw_ov, blur=False, vignette=0.12))
 SFX.append((463.75, "whip.wav", 0.9))
