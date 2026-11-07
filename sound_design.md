@@ -122,3 +122,53 @@ These were calibrated by measuring assembled mp4s with `audio_ref.py` (section 4
 | Kind mix | ~40% pop, 25% tick, 20-30% thud, ~10% ding | 32% / 39% / 25% / 4% | 55% / 15% / 25% / 5% |
 
 Known gap: the references' music has a percussive share of 0.14-0.22. `music_game` alone has about 0.07, because noise hats and kicks get counted as SFX by the analyser, so they were left out. In a full mix it reads 0.2, because SFX tails leak into the measure.
+
+## 5. Situation score: the music follows the story (the user's rule, 2026-11-07)
+"video me background music sab nahi diye ho situation ke hisaab se isko fix karo": one cheeky game tune under a whole
+video (even with dips) is not enough. **The music changes with the situation**, with a hard music cut on the same beat
+as the picture's cut. `animator/score.py` does it:
+- The story defines `SCORE = [(t, mood), ...]` (the first at 0) and `STINGS = [(t, kind), ...]`. Its `__main__` writes
+  `music.wav` with `score.music_score(TOTAL, SCORE, STINGS)`; to remake only the music:
+  `cd animator && python3 score.py <story> ../output/<story>/music.wav`, then re-assemble (no re-render).
+- Every mood is normalised to the steady level of `music_game` and offset by its `db`, so the same `--music-volume`
+  (0.45 Shorts, 0.35 long) still works. Every mood stays centred on G (the key check still reads G), attacks >= 8 ms, no
+  noise, never total silence (a stop is `drone`).
+- `python3 score.py --demo <dir>` writes 8 s of every mood and sting to listen to.
+
+| Situation | Mood | bpm | Sound | dB |
+|---|---|---|---|---|
+| Hook, CTAs, the loop rewind | `hype` | 136 | the game tune, busier riff, kick on every beat | 0 |
+| Ordinary in-game fun, rules, shop | `game` | 128 | `music_game` itself | -1 |
+| First sight of the new world | `wonder` | 108 | celesta arpeggios, soft pad (G D/F# Em C) | -1 |
+| Night, bedroom, before the wish | `night` | 76 | music box over a pad (Gm Eb Cm D) | -4.5 |
+| The wish / system message being applied | `magic` | 120 | climbing 16th celesta that swells | -1.5 |
+| A joke scene (attendance, Dad, Mom, report card) | `comedy` | 116 | tuba oom-pah, pizzicato, staccato bassoon riff | -1 |
+| Bored adults, a dull class | `awkward` | 70 | elevator e-piano maj7 chords, clock tick | -3.5 |
+| A small fail or a sad line ("Still.", muted) | `sad` | 66 | slow pad + e-piano (Gm Eb Bb D) | -4 |
+| The low point of the climax (health 1) | `low` | 60 | heartbeat under a dark pad | -4 |
+| Running, sprinting | `chase` | 156 | driving bass, 16th square lead | 0 |
+| The admin / principal / villain | `villain` | 96 | low "dun dun DUN" tuba march, timpani | -1.5 |
+| Whispering, sneaking | `sneaky` | 100 | tiptoe pizzicato | -2.5 |
+| Silly-spooky (zombie) | `spooky` | 108 | wobbly theremin over walking pizzicato | -1.5 |
+| An embarrassing love moment (kiss emote) | `romance` | 84 (3/4) | cheesy waltz, violin | -1.5 |
+| An announcement of the danger | `ominous` | 58 | low drone G/Ab, heartbeat, timpani | -3 |
+| A clue, a note, a secret | `mystery` | 92 | celesta arpeggio, clock tick | -3 |
+| The problem found / the plan | `tension` | 112 | low 16th ostinato G-Bb-Ab, rising | -2 |
+| Training / studying montage | `montage` | 124 | determined G Bm C D, four on the floor | -0.5 |
+| The cool pro character | `cool` | 96 | G dorian e-piano groove, finger snaps | -2 |
+| The boss reveal | `boss` | 84 | heavy low brass, timpani, dark choir (Gm Ab) | +1 |
+| The fight | `battle` / `countdown` | 150 | driving bass, brass stabs, toms (+ a ticking clock) | +0.5 |
+| The comeback | `heroic` | 140 | brass melody G Eb F G | +0.5 |
+| The last seconds of the fight | `final` | 164 | heroic + running celesta | +1 |
+| The win | `triumph` | 128 | G C D G brass fanfare, marimba | +0.5 |
+| Back to normal, the ending | `warm` | 92 | soft guitar arpeggio, pad | -2.5 |
+| A one-beat stop ("Literally.", "Mostly.", lights out) | `drone` | – | a quiet G pad | -11 |
+
+Stings (`STINGS`): `hit` / `hit_major` on a reveal or a big hit, `rise` (ENDS at its time) into a reveal, `drop`
+(power-down) on a blackout or "let me explain", `fail` (sad trombone) on a fail, `fanfare` on a win or an entrance,
+`sparkle` on a level-up or a magic moment. Skip a sting where a `boom` SFX already lands.
+
+How many cues: a long video ~50 (one per situation, every 5-15 s; whole_school has 53 cues and 16 stings); a Short
+3-6 (game → the twist → the win). Measured on whole_school: music -16.7 dB under the voice overall (long references
+16-17 dB), -19/-20 dB under night/sad/awkward lines, -12/-15 dB under the boss/battle/final run; key G major (0.84);
+2-15 notes/s and a centroid of 420-1410 Hz across the moods.

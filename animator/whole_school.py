@@ -25,7 +25,68 @@ engine.ENERGY = 3.0
 engine.LIPSYNC = True
 TOTAL = 464.6
 SFX_GAIN = 0.24
-MUSIC = dict(bpm=128, perc=0.6, dips=[(31.7, 34.6), (263.4, 270.8), (316.5, 326.8)])
+MUSIC = dict(bpm=128, perc=0.6, dips=[(31.7, 34.6), (263.4, 270.8), (316.5, 326.8)])   # v1/v2 bed (one tune)
+# v3 (2026-11-07, "background music situation ke hisaab se"): the music follows every situation (score.py moods).
+SCORE = [
+    (0.0, "hype"),          # hook: five days, one school, fighting the final exam
+    (9.62, "drone"),        # "Literally." (one beat of air before the fight)
+    (10.48, "battle"),      # cold open: "Leo, the eraser!" ... a juice box
+    (16.78, "drone"),       # "Okay, let me explain." (tape stop)
+    (19.2, "night"),        # Sunday night, 11 p.m., the homework is still blank
+    (27.16, "magic"),       # "Request received." ... "Applying to whole school."
+    (31.76, "drone"),       # every light in the house goes out
+    (34.68, "wonder"),      # Day 1: the school is made of shiny blocks
+    (47.56, "game"),        # name tags, the inventory locker, the juice box
+    (59.3, "comedy"),       # attendance by player list: Shadow Ninja, Pizza lover, Toilet Destroyer 9000
+    (77.72, "game"),        # the bell teleports everyone
+    (84.86, "awkward"),     # except you: science is full, 40-year-olds doing taxes
+    (98.38, "comedy"),      # Dad and the 40-stage parking-lot obby
+    (106.48, "sad"),        # Dad reached stage two. You walked home.
+    (109.26, "game"),       # Day 2: the rules, XP, Priya level 99
+    (124.62, "sad"),        # "You're level one. Still."
+    (126.8, "game"),        # rule two: running is a game pass
+    (134.6, "chase"),       # you buy it and sprint down the hall
+    (138.98, "drone"),      # straight into the principal
+    (141.02, "villain"),    # Principal Stone, the admin crown, /detention, the cage on the roof
+    (153.76, "sneaky"),     # rule three: chat bubbles, whispering to Leo
+    (164.12, "drone"),      # "Including Miss Pebble." "I can read."
+    (166.46, "sad"),        # /mute: three little dots for the rest of the day
+    (172.42, "comedy"),     # Dad: stage seven
+    (175.94, "game"),       # Day 3: the shop-NPC lunch lady
+    (190.68, "spooky"),     # mystery meat: ZOMBIE for 10 minutes
+    (204.3, "comedy"),      # Supermom1987 joined the game, the pet unicorn
+    (221.86, "romance"),    # the kiss emote, hearts in front of 412 players
+    (234.52, "ominous"),    # the speakers crackle: the final exam has a health bar
+    (244.62, "hype"),       # subscribe: the golden hall pass
+    (258.78, "mystery"),    # Day 4: a fourth slot, a note from Shadow Ninja, the library
+    (270.88, "tension"),    # the admin panel: summer vacation DELETED, "beat the final exam"
+    (294.72, "montage"),    # studying for the first time in your life
+    (306.14, "cool"),       # Priya: "I work alone, but I really like summer."
+    (316.6, "comedy"),      # Dad sleeping in the parking lot
+    (321.74, "ominous"),    # Day 5, 2:59 p.m., the gym doors open
+    (326.8, "boss"),        # the final exam: a 50-foot test paper with teeth
+    (333.7, "battle"),      # question one: math fireballs
+    (346.92, "countdown"),  # summer deleted in 60 seconds
+    (351.18, "tension"),    # "Wait, rule three."
+    (355.34, "heroic"),     # Priya says every answer out loud: combo x412
+    (371.78, "countdown"),  # 30 seconds, pop quiz
+    (374.64, "low"),        # it hits you: health 1
+    (378.46, "heroic"),     # Leo's juice box, Super Mom joins
+    (392.52, "final"),      # 10 seconds: sprint, the unicorn, Dad at stage 40, the eraser swing
+    (406.86, "drone"),      # ERASED (the hit rings out)
+    (407.7, "triumph"),     # defeated, new admin, the chant, summer restored
+    (426.8, "warm"),        # a real bell, everything is normal, Dad drives you home
+    (444.44, "drone"),      # "Mostly."
+    (444.88, "comedy"),     # the report card: grade level 1
+    (454.28, "hype"),       # comment XP
+    (457.0, "mystery"),     # "New update available: Roblox School 2" ... "Mom!"
+    (463.75, "hype"),       # the rewind lands on the hook (same music as frame 1)
+]
+STINGS = [                  # one-shot music hits; "rise" ENDS at its time. None where a boom SFX already lands.
+    (9.62, "hit"), (16.78, "drop"), (31.76, "drop"), (34.68, "sparkle"), (106.48, "fail"), (138.98, "hit"),
+    (281.3, "hit"), (326.8, "rise"), (326.8, "hit"), (366.94, "hit_major"), (387.6, "fanfare"),
+    (406.86, "rise"), (406.86, "hit_major"), (424.56, "fanfare"), (449.88, "fanfare"), (463.14, "hit"),
+]
 GROUND = ss.GROUND
 C = (640, 360)
 U1 = Block.HW * 64
@@ -1819,7 +1880,8 @@ if __name__ == "__main__":
               open(sys.argv[2], "w"), indent=1)
     out_dir = os.path.dirname(os.path.abspath(sys.argv[2]))
     if not os.path.exists(os.path.join(out_dir, "music.wav")):
-        audio.save(os.path.join(out_dir, "music.wav"), audio.music_game(TOTAL, **MUSIC))
+        import score
+        score.save_raw(os.path.join(out_dir, "music.wav"), score.music_score(TOTAL, SCORE, STINGS))
     engine.set_voice(os.path.join(out_dir, "voice.mp3"))
     kw = {}
     if len(sys.argv) > 4:

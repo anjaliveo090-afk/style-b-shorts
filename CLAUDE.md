@@ -57,6 +57,7 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
 | `animator/style.py` | Characters: `Block` (same `draw()` signature as the old `style2.Char2`), the cast `KID`, `KID_GAME`, `MOM`, `MOM_ROBE`, `DAD`, `GRANDMA`, `NOOB`, `BOSS`, `crowd_member(i)`, `back_figure`, and the FX `sweat`, `anger_mark`, `shake_lines`, `sparkle` |
 | `animator/sets.py` | Places, props, game UI and FX (list at the top of the file) |
 | `animator/audio.py` | Synthesised SFX + `music_game()` |
+| `animator/score.py` | **The situation score**: the music changes mood with the story (`SCORE` / `STINGS` in the story, `sound_design.md` section 5) |
 | `animator/engine.py` | Camera keys and render. Do not change unless broken |
 | `animator/safezone.py` | Keeps characters, labels and `keep` boxes in the Shorts safe zone |
 
@@ -78,7 +79,7 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
    - Put a **sound-word sticker** (`sets.sfx_word`: SPLAT!, BUMP!, YOINK!) on every physical action, and let the **game UI tell** quits, invites, gifts and counts (`visual_grammar.md` rows 21-30).
    - Write the plan as a table (time | words | row | what is shown | camera | expression | SFX) before coding.
 3. **Build** `animator/<story>.py` by copying `animator/sample.py`:
-   - Keep its helpers: `shot`, `punch`, `kid_face` / `FACE_*` close-ups, `SFX_GAIN`, `MUSIC`, `TOTAL`, the loop ending (`s_end` = first frame), and the `__main__` block (it writes `cues.json` and `music.wav`).
+   - Keep its helpers: `shot`, `punch`, `kid_face` / `FACE_*` close-ups, `SFX_GAIN`, `TOTAL`, the music cues `SCORE` / `STINGS` (copy them from `animator/whole_school.py`; they replace `MUSIC`), the loop ending (`s_end` = first frame), and the `__main__` block (it writes `cues.json` and `music.wav`).
    - `animator/report_noob.py` is a second, full 60 s example (48 shots). Its helpers include `closeup()`, a named game character with a name tag, a developer at a desk, and the report/ban props.
    - Add new places or props to `animator/sets.py` in the same style: `style.block` / `shape_fill`, self-coloured outlines, palette from `style_bible.md` section 5. Never copy the reference channel's characters, logos or text.
    - Use our cast from `style.py`, or new `Block(...)` looks.
@@ -113,7 +114,7 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
      --music $O/music.wav --music-volume 0.45 --crf 20 --out $O/<story>_final.mp4
    ```
    - No `--srt` here: the captions are burned afterwards with `assembler/captions.py` (step 7).
-   - The story writes `music.wav` from its `MUSIC` settings (a late start, dips under dramatic beats).
+   - The story writes `music.wav` from its `SCORE` / `STINGS` (the situation score, `score.py`); older stories from their `MUSIC` settings.
    - A 60 s render takes about 1.5 min.
 6. **Measure** against the targets, and fix anything outside them before sending:
    - `python3 analysis/new_visuals.py $O/clips/animation.mp4`: a new visual every 1.1-1.3 s (1.6 at most).
@@ -151,6 +152,8 @@ The user's rule (2026-11-07): long videos are delivered in **16:9, 1920x1080**. 
 - **Render:** a 7.7 min video at 1080p30 takes about 35 min in one process. Use the 4 parallel frame ranges of
   `output/whole_school/render_all.sh` (frames=(a, b), then an ffmpeg concat), then `assembler/assemble.py` as usual
   with `--music-volume 0.35`.
+- **Music:** a situation score with a cue at every situation change (~50 cues, `SCORE` / `STINGS` in
+  `animator/whole_school.py`, `sound_design.md` section 5), never one tune for the whole video.
 
 ## Defaults
 - **Captions are OFF by default, and only ONE video is delivered: the caption-free `<story>_final.mp4`** (the user's rule, 2026-11-05: "jab bhi mangu bina caption ke hi do"; it replaces the older "captions on" rule). Do not make or send a captioned copy unless the user asks for captions. When they do, burn reference-style captions onto the finished mp4 without re-rendering:
@@ -178,7 +181,8 @@ The user's rule (2026-11-07): long videos are delivered in **16:9, 1920x1080**. 
   - `draw, ov = sets.rewind_shot(SHOTS, [t1, t2, …, 0.0])` plays 4-6 earlier shot times backwards and lands exactly on the first frame.
   - Use it as the last shot with keys `[(start, 1.0, (360, 640))]`, `overlay=ov`, `blur=False`, `closeup=True`, `keep=[]`.
   - Add `whip.wav` at its start.
-- **Music:** `music_game` with `MUSIC = dict(bpm=128, perc=0.6, dips=[...])` at `--music-volume 0.45` (set 3; older stories: 0.5-0.55, no perc).
+- **Music follows the situation** (the user's rule, 2026-11-07: "background music situation ke hisaab se"): every new story defines `SCORE = [(t, mood), ...]` and `STINGS = [(t, kind), ...]` and its `__main__` writes `music.wav` with `score.music_score(TOTAL, SCORE, STINGS)` (moods and when to use them: `sound_design.md` section 5). Plan the mood of every part in the shot table: night → `night`, a joke → `comedy`, a fail → `sad` + a `fail` sting, the danger → `ominous`, a clue → `mystery`, the boss → `boss`, the fight → `battle` / `heroic` / `final`, the win → `triumph`, the ending → `warm`. A Short has 3-6 cues, a long video ~50. Mix at `--music-volume 0.45` (Shorts) or 0.35 (long). To change only the music: `cd animator && python3 score.py <story> ../$O/music.wav`, then re-assemble (no re-render).
+  - Older stories: `music_game` with `MUSIC = dict(bpm=128, perc=0.6, dips=[...])` at `--music-volume 0.45` (set 3; older still: 0.5-0.55, no perc).
 - **SFX:** about 1.0-1.1 per second, `SFX_GAIN = 0.2` for the user's voiceflow voice (0.28 measured -3.6 dB; the new target is about -7). Mostly pops (every sticker, card, label), ticks and dings; **only 3-5 booms per video**. Always measure and adjust (see `sound_design.md` section 3).
 
 ## Limits to state honestly
