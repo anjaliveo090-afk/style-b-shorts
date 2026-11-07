@@ -64,11 +64,15 @@ def main():
         p = os.path.join(tmp, f"patch_{k:03d}.mp4")
         engine.render(mod.SHOTS, mod.TOTAL, p, xfade=0.0, grain=2, fade_out=0.0, fade_in=0.0, frames=(a, b))
         parts.append((a, b, p))
-    inputs, filters, labels, pos, idx = ["-i", old], [], [], 0, 1
+    # each untouched piece reads the old video through its OWN input: one shared input trimmed twice makes ffmpeg
+    # queue every frame of the later piece in memory (killed for lack of RAM on a 1080p long video)
+    inputs, filters, labels, pos, idx = [], [], [], 0, 0
     for a, b, p in parts + [(n, n, None)]:
         if a > pos:
-            filters.append(f"[0:v]trim=start_frame={pos}:end_frame={a},setpts=PTS-STARTPTS[s{len(labels)}]")
+            inputs += ["-i", old]
+            filters.append(f"[{idx}:v]trim=start_frame={pos}:end_frame={a},setpts=PTS-STARTPTS[s{len(labels)}]")
             labels.append(f"[s{len(labels)}]")
+            idx += 1
         if p:
             inputs += ["-i", p]
             filters.append(f"[{idx}:v]setpts=PTS-STARTPTS[s{len(labels)}]")
