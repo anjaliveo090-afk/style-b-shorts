@@ -130,6 +130,28 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
 7. **Send only `<story>_final.mp4` (NO captions)** to the user (SendUserFile), one file. This is the user's rule since 2026-11-05: "jab bhi mangu bina caption ke hi do". Do not burn captions unless the user asks for a captioned copy in that message (then see Defaults). Add the video to `videos.md`. Commit and push the story code; `output/` is git-ignored. Say honestly what could not match.
 8. **Fix requests:** patch only the shots or cues asked about. Edit those shot functions, keys or `SFX` entries, then re-render only them: `cd animator && python3 patch_render.py <story> ../$O/clips/animation.mp4 ../$O/clips_fix/animation.mp4 ../$O/voice.mp3 <shot_start> ...` renders just those shots and splices them into the old animation frame-accurately (untouched frames are copied), then re-assemble from `clips_fix`. To find which shots a code change touched, compare the fitted camera keys and scene sources of the old (git HEAD) and new story. Never regenerate or redesign the rest.
 
+## Long videos in 16:9 (voice + SRT of a long script)
+The user's rule (2026-11-07): long videos are delivered in **16:9, 1920x1080**. Example: `animator/whole_school.py`
+("What If the WHOLE SCHOOL Became Roblox?", 7:44, 244 shots).
+- **Format:** put `os.environ["STYLEB_ASPECT"] = "16x9"` at the very top of the story, before any toolkit import.
+  - The world is then 1280x720, rendered at OUT_SCALE 1.5 = 1920x1080.
+  - Set `engine.FPS = 30` after `engine.profile("set3")`.
+  - Shorts are unchanged.
+- **Places and props:** landscape places and props are in `animator/school_sets.py` (ground line y 640). Portrait-only
+  UI (`hotbar`, `roblox_topbar`) takes position parameters (`cx`, `left` / `right`); wrap other portrait panels in a
+  `ctx.translate`.
+- **Safe zone:** the Shorts safe zone does not apply (no `safezone.fit`, no `safe_audit`). Keep text and faces about
+  5 % inside the frame and away from the HUD (top-left chat, top-right Players).
+- **Shots:** one shot per SRT cue, and split cues longer than ~3 s.
+  - Use the generic scenes (`s_cu` close-up with a bubble, `s_card` DAY card, `s_big` text card, `s_ui` Roblox UI)
+    plus place scenes.
+  - Lip-sync from a `DIALOGUE` dict.
+- **Preview:** `cd animator && python3 preview_ls.py <story> <out.png> <t_from> <t_to>` renders one frame per shot.
+  Check every part before the full render.
+- **Render:** a 7.7 min video at 1080p30 takes about 35 min in one process. Use the 4 parallel frame ranges of
+  `output/whole_school/render_all.sh` (frames=(a, b), then an ffmpeg concat), then `assembler/assemble.py` as usual
+  with `--music-volume 0.35`.
+
 ## Defaults
 - **Captions are OFF by default, and only ONE video is delivered: the caption-free `<story>_final.mp4`** (the user's rule, 2026-11-05: "jab bhi mangu bina caption ke hi do"; it replaces the older "captions on" rule). Do not make or send a captioned copy unless the user asks for captions. When they do, burn reference-style captions onto the finished mp4 without re-rendering:
   1. Write `animator/captions/<story>.json`: `[[first_word_index_or_time, "TEXT", colour or null], ...]`, one entry per caption, using the rules in `style_bible.md` section 1 (example: `animator/captions/no_break.json`).

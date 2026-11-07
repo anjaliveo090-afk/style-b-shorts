@@ -76,9 +76,10 @@ def bold_text(ctx, s, x, y, size, fill=(1, 1, 1), outline=INK, scale=1.0, tilt=0
         ctx.fill()
     ctx.move_to(ox, oy)
     ctx.text_path(s)
-    ctx.set_source_rgb(*c_(outline))
-    ctx.set_line_width(size * stroke)
-    ctx.stroke_preserve()
+    if outline is not None:                    # outline=None: plain text (chalk, handwriting)
+        ctx.set_source_rgb(*c_(outline))
+        ctx.set_line_width(size * stroke)
+        ctx.stroke_preserve()
     ctx.set_source_rgb(*c_(fill))
     ctx.fill()
     ctx.restore()
@@ -3887,11 +3888,11 @@ def player_list(ctx, x, y, names, T, s=1.0, stat=None, me=None):
     ctx.restore()
 
 
-def hotbar(ctx, y, items, sel=None, T=0.0):
+def hotbar(ctx, y, items, sel=None, T=0.0, cx=360):
     """The inventory hotbar: numbered square slots in a row (centre x 360); items = [draw_fn or None, ...],
     draw_fn(ctx, cx, cy, size). Keep y <= 960 so it stays in the safe zone."""
     n = len(items)
-    x0 = 360 - n * 98 / 2
+    x0 = cx - n * 98 / 2
     for i, fn in enumerate(items):
         bx = x0 + i * 98
         rrect(ctx, bx, y - 44, 88, 88, 10)
@@ -4477,11 +4478,11 @@ def cardboard_box(ctx, x, y, s=1.0, peek=0.0, T=0.0):
 
 
 # ================================================================ Roblox in-game HUD (added for chat_filter_v2.py)
-def roblox_topbar(ctx, T, players=None, chat_on=True, y=182):
+def roblox_topbar(ctx, T, players=None, chat_on=True, y=182, right=670, left=70):
     """The in-game top bar, screen-space, inside the Shorts safe zone: a menu button (three lines, NOT the official
     logo), a chat button (lit when the chat is open), a backpack button, and an optional 'Players: N' pill."""
     for i, kind in enumerate(("menu", "chat", "bag")):
-        x = 70 + i * 66
+        x = left + i * 66
         rrect(ctx, x - 26, y - 26, 52, 52, 12)
         ctx.set_source_rgba(0.08, 0.09, 0.14, 0.72 if not (kind == "chat" and chat_on) else 0.92)
         ctx.fill()
@@ -4508,14 +4509,14 @@ def roblox_topbar(ctx, T, players=None, chat_on=True, y=182):
     if players is not None:
         txt = f"Players: {int(players)}"
         w = text_width(ctx, txt, 22) + 46
-        rrect(ctx, 670 - w, y - 22, w, 44, 22)
+        rrect(ctx, right - w, y - 22, w, 44, 22)
         ctx.set_source_rgba(0.08, 0.09, 0.14, 0.72)
         ctx.fill()
         ctx.new_sub_path()
-        ctx.arc(670 - w + 22, y, 6, 0, 2 * PI)
+        ctx.arc(right - w + 22, y, 6, 0, 2 * PI)
         ctx.set_source_rgb(*GREEN)
         ctx.fill()
-        bold_text(ctx, txt, 670 - w + 34, y, 22, (1, 1, 1), align="l", shadow=False, stroke=0.0)
+        bold_text(ctx, txt, right - w + 34, y, 22, (1, 1, 1), align="l", shadow=False, stroke=0.0)
 
 
 def roblox_chat(ctx, lines, T, x=44, y=222, w=400, n=3, size=21):

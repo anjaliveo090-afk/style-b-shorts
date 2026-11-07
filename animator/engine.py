@@ -3,13 +3,21 @@
 Scenes draw in a 720x1280 "world"; each shot has a camera (zoom + centre,
 eased over the shot) and shots are joined with cross-dissolves."""
 import math
+import os
 import random
 import subprocess
 
 import cairo
 import numpy as np
 
-W, H, FPS = 720, 1280, 30
+# Frame format. Shorts (default): a 720x1280 world rendered 1:1. Long videos: STYLEB_ASPECT=16x9 in the environment
+# BEFORE any toolkit import gives a 1280x720 world rendered at OUT_SCALE 1.5 = 1920x1080 (set it at the top of the
+# story: os.environ["STYLEB_ASPECT"] = "16x9"; every module then reads the landscape W, H).
+ASPECT = os.environ.get("STYLEB_ASPECT", "9x16")
+if ASPECT == "16x9":
+    W, H, FPS, OUT_SCALE = 1280, 720, 30, 1.5
+else:
+    W, H, FPS, OUT_SCALE = 720, 1280, 30, 1.0
 INK = (0.10, 0.09, 0.12)
 PI = math.pi
 LIPSYNC = True  # False: mouths keep the scene expression instead of following the voice
@@ -902,11 +910,17 @@ def key_camera(keys, T):
     return drift(keys[-1], T - keys[-1][0])
 
 
+def _pixels(surf):
+    return np.ndarray((surf.get_height(), surf.get_width(), 4), np.uint8, surf.get_data(),
+                      strides=(surf.get_stride(), 4, 1))
+
+
 def _motion_blur(surf, dx, dy):
-    """Directional blur for fast camera moves (screen px per frame)."""
+    """Directional blur for fast camera moves (world px per frame, scaled to the output)."""
     import cv2
-    a = np.ndarray((H, W, 4), np.uint8, surf.get_data())
-    lx, ly = int(min(abs(dx) * 0.9, 41)), int(min(abs(dy) * 0.9, 41))
+    a = _pixels(surf)
+    dx, dy = dx * OUT_SCALE, dy * OUT_SCALE
+    lx, ly = int(min(abs(dx) * 0.9, 41 * OUT_SCALE)), int(min(abs(dy) * 0.9, 41 * OUT_SCALE))
     if lx < 5 and ly < 5:
         return
     b = a
@@ -935,6 +949,8 @@ def _draw_shot(shot, t, surf, rng_noise):
     ctx = cairo.Context(surf)
     ctx.set_source_rgb(0, 0, 0)
     ctx.paint()
+    if OUT_SCALE != 1.0:
+        ctx.scale(OUT_SCALE, OUT_SCALE)          # everything below draws in world units
     d = shot["end"] - shot["start"]
     # ease=False: reference-style move that starts fast and settles (ease-out)
     p = ease(t / d) if shot.get("ease", True) else 1 - (1 - clamp(t / d)) ** 1.3
@@ -986,14 +1002,14 @@ def _draw_shot(shot, t, surf, rng_noise):
     _vignette(ctx, shot.get("vignette", 0.45))
     surf.flush()
     if shot.get("dof", 0) and keys:
-        _dof(surf, (W / 2, H * 0.47), shot["dof"])
+        _dof(surf, (W / 2 * OUT_SCALE, H * 0.47 * OUT_SCALE), shot["dof"])
     elif shot.get("dof", 0) and "focus" in shot:
         fx, fy = shot["focus"]
-        _dof(surf, ((fx - cx) * z + W / 2, (fy - cy) * z + H / 2), shot["dof"])
+        _dof(surf, (((fx - cx) * z + W / 2) * OUT_SCALE, ((fy - cy) * z + H / 2) * OUT_SCALE), shot["dof"])
     if keys and shot.get("blur", True):
         _motion_blur(surf, *shot["_vel"])
     if shot.get("sepia"):
-        a = np.ndarray((H, W, 4), np.uint8, surf.get_data())
+        a = _pixels(surf)
         g = a[:, :, :3].astype(np.float32).mean(axis=2, keepdims=True)
         tone = np.array([0.62, 0.82, 1.0], np.float32)  # B, G, R
         a[:, :, :3] = np.clip(g * tone * 1.05 + 10, 0, 255).astype(np.uint8)
@@ -1003,22 +1019,24 @@ def _draw_shot(shot, t, surf, rng_noise):
 def _dof(surf, focus, strength):
     """Depth of field: sharp around the focus point, blurred toward the edges."""
     import cv2
-    a = np.ndarray((H, W, 4), np.uint8, surf.get_data())
-    blur = cv2.GaussianBlur(a, (0, 0), strength)
-    ys, xs = np.ogrid[0:H, 0:W]
-    d = np.sqrt(((xs - focus[0]) / (W * 0.42)) ** 2 + ((ys - focus[1]) / (H * 0.3)) ** 2)
+    a = _pixels(surf)
+    oh, ow = a.shape[:2]
+    blur = cv2.GaussianBlur(a, (0, 0), strength * OUT_SCALE)
+    ys, xs = np.ogrid[0:oh, 0:ow]
+    d = np.sqrt(((xs - focus[0]) / (ow * 0.42)) ** 2 + ((ys - focus[1]) / (oh * 0.3)) ** 2)
     m = np.clip(d - 0.6, 0, 1)[..., None].astype(np.float32)
     a[:] = (a * (1 - m) + blur * m).astype(np.uint8)
     surf.mark_dirty()
 
 
 def render(shots, total, out_path, xfade=0.22, grain=9, fade_out=0.6, frames=None, fade_in=0.25):
-    surf_a = cairo.ImageSurface(cairo.FORMAT_RGB24, W, H)
-    surf_b = cairo.ImageSurface(cairo.FORMAT_RGB24, W, H)
+    ow, oh = int(round(W * OUT_SCALE)), int(round(H * OUT_SCALE))
+    surf_a = cairo.ImageSurface(cairo.FORMAT_RGB24, ow, oh)
+    surf_b = cairo.ImageSurface(cairo.FORMAT_RGB24, ow, oh)
     rs = np.random.default_rng(3)
-    noise = [rs.integers(-grain, grain + 1, (H, W, 1), dtype=np.int16) for _ in range(6)]
+    noise = [rs.integers(-grain, grain + 1, (oh, ow, 1), dtype=np.int16) for _ in range(6)]
     cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-f", "rawvideo",
-           "-pix_fmt", "bgr0", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
+           "-pix_fmt", "bgr0", "-s", f"{ow}x{oh}", "-r", str(FPS), "-i", "-",
            "-c:v", "libx264", "-preset", "medium", "-crf", "17", "-pix_fmt", "yuv420p", str(out_path)]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     nframes = int(round(total * FPS))
@@ -1044,7 +1062,7 @@ def render(shots, total, out_path, xfade=0.22, grain=9, fade_out=0.6, frames=Non
             ctx.set_source_rgba(0, 0, 0, 1 - T / fade_in)
             ctx.paint()
         surf_a.flush()
-        a = np.ndarray((H, W, 4), np.uint8, surf_a.get_data())
+        a = _pixels(surf_a)
         n = noise[f % len(noise)]
         a[:, :, :3] = np.clip(a[:, :, :3].astype(np.int16) + n, 0, 255).astype(np.uint8)
         proc.stdin.write(a.tobytes())
