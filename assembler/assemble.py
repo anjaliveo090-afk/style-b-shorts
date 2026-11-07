@@ -80,13 +80,15 @@ def main():
     p.add_argument("--font", default="Arial")
     p.add_argument("--crf", type=int, default=20, help="x264 quality, higher = smaller file")
     p.add_argument("--out", default="final.mp4")
+    p.add_argument("--size", default="720x1280", help="output WxH (long 16:9 videos: 1920x1080)")
     a = p.parse_args()
 
     clips = sorted(f for f in Path(a.clips).iterdir() if f.suffix.lower() in VIDEO_EXT)
     if not clips:
         sys.exit(f"no video clips found in {a.clips}")
     durs = [probe_duration(c) for c in clips]
-    global FPS
+    global FPS, W, H
+    W, H = (int(v) for v in a.size.lower().split("x"))
     fr = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=r_frame_rate",
                          "-of", "csv=p=0", str(clips[0])], capture_output=True, text=True).stdout.strip()
     if fr:
