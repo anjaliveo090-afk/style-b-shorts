@@ -219,6 +219,172 @@ def s_title(ctx, T, t0, label=True):
         lbl(ctx, "ROBLOX SCHOOL?!", 640, 672, 74, T, 1.75, fg=st.YELLOW)
 
 
+# ---------------------------------------------------------------- the hook (rebuilt 2026-11-07: "hook boring hai")
+# lessons.md rule 1: the stake in the first frame, a new picture every <= 0.8 s in the first 3 s.
+# Word times (align_words): whole 0.46, school 0.82, became 1.36, Roblox 1.82, days 2.96, One 4.10, Friday 5.75,
+# fighting 7.78, final 8.46, exam 8.83.
+BLOCK_COLS = ("#ff4f5a", "#4f8bff", "#4fd16a", "#ffd84a", "#9d5cff", "#ff8a3d")
+
+
+def falling_blocks(ctx, T, n=16, speed=620, seed=0):
+    for i in range(n):
+        x = (i * 97 + 40 + seed * 31) % 1300 - 10
+        y = ((T * speed + i * 157) % 980) - 140
+        sz = 38 + (i * 13) % 34
+        ctx.save()
+        ctx.translate(x, y)
+        ctx.rotate(T * (1.5 + (i % 3)) + i)
+        style.block(ctx, -sz / 2, -sz / 2, sz, sz, 6, hexc(BLOCK_COLS[i % len(BLOCK_COLS)]), 4)
+        ctx.new_sub_path()
+        ctx.arc(0, -sz * 0.18, sz * 0.18, 0, 2 * PI)
+        ctx.set_source_rgba(1, 1, 1, 0.45)
+        ctx.fill()
+        ctx.restore()
+
+
+def s_hk_face(ctx, T, t0):
+    st.burst(ctx, T, "#ffd27a", "#ff4f2a", cx=640, cy=330, spin=0.8)
+    falling_blocks(ctx, T)
+    KID.draw(ctx, 640, 800, 2.15, "scream", T, arms=("up", "up"), snap=snap_at(T, 0.05), bob=0.6)
+    style.shake_lines(ctx, 640, 330, 300, 260, T, n=3, lw=9)
+    st.label(ctx, "ROBLOX SCHOOL?!", 640, 600, 80, fg=st.YELLOW, scale=min(1.0, pop(T) + 0.35))
+
+
+def s_hk_slam(ctx, T, t0, t_land=0.82):
+    st.game_sky(ctx)
+    st.block_clouds(ctx, T, y0=40, y1=260, n=6)
+    st.baseplate(ctx, GROUND)
+    k = clamp((T - t0) / (t_land - t0))
+    lift = 0.0 if T >= t_land else (1 - k * k) * 560
+    if T < t_land:                                                     # its shadow grows on the ground
+        style_k = 0.2 + 0.6 * k
+        ctx.save()
+        ctx.translate(640, GROUND + 20)
+        ctx.scale(1, 0.12)
+        ctx.new_sub_path()
+        ctx.arc(0, 0, 520 * style_k, 0, 2 * PI)
+        ctx.restore()
+        ctx.set_source_rgba(0, 0, 0, 0.25 * k)
+        ctx.fill()
+    ss.school_ext(ctx, T, cx=640, s=0.9, lift=lift, ground=False)
+    if T >= t_land:
+        st.shockwave(ctx, 640, GROUND + 10, (T - t_land) / 0.5, r_max=760)
+        st.dust(ctx, 640, GROUND + 20, clamp((T - t_land) / 0.5), n=10, spread=620, r=40)
+        st.sfx_word(ctx, 1020, 200, "SLAM!", T - t_land, col=st.RED, size=78)
+    for i, x in enumerate((150, 1130)):
+        P[i].draw(ctx, x, GROUND + 60, 0.8, "shock" if T >= t_land else "neutral", T, arms=("up", "up") if
+                  T >= t_land else ("down", "down"), look=0.5 if x < 640 else -0.5, snap=snap_at(T, t_land))
+
+
+def normal_school(ctx, cx=640, s=0.9):
+    """A plain, grey, everyday school (before it turns into Roblox)."""
+    ctx.save()
+    ctx.translate(cx, GROUND)
+    ctx.scale(s, s)
+    style.block(ctx, -560, -420, 1120, 420, 4, hexc("#b8b0a0"), 5, gloss=False)
+    style.block(ctx, -150, -540, 300, 140, 4, hexc("#a8a090"), 5, gloss=False)
+    for row in range(2):
+        for i in (-4, -3, -2, 2, 3, 4):
+            style.block(ctx, i * 110 - 40, -360 + row * 150, 80, 90, 2, hexc("#7a8a9a"), 3, gloss=False)
+    style.block(ctx, -95, -230, 190, 230, 4, hexc("#6a5a4a"), 5, gloss=False)
+    ctx.restore()
+
+
+def s_hk_become(ctx, T, t0, t_sweep=1.36, dur=0.42):
+    st.game_sky(ctx, top="#b8c4d8", bottom="#e0e6ee")
+    st.baseplate(ctx, GROUND, col="#7a9a6a")
+    normal_school(ctx)
+    sx = lerp(-200, 1500, clamp((T - t_sweep) / dur))
+    ctx.save()
+    ctx.rectangle(-400, -400, sx + 400, 1600)
+    ctx.clip()
+    ss.school_ext(ctx, T, cx=640, s=0.9)
+    ctx.restore()
+    st.glow(ctx, sx, 360, 220, (1, 1, 0.85), 0.9)
+    ctx.set_source_rgba(1, 1, 1, 0.85)
+    ctx.rectangle(sx - 14, -100, 28, 1000)
+    ctx.fill()
+    st.sparkles(ctx, T, sx, 360, spread=300, n=14, seed=4, c=(1, 1, 1))
+
+
+def s_hk_roblox(ctx, T, t0, t_word=1.85):
+    ss.school_ext(ctx, T, cx=640, s=0.9)
+    names = ("Leo", "Priya_99", "BloxKid", "xX_Ninja_Xx")
+    for i, (x, nm) in enumerate(zip((130, 300, 980, 1150), names)):
+        P[i + 3].draw(ctx, x, GROUND + 60, 0.72, "stars" if T >= t_word else "happy", T, arms=("up", "up"),
+                      snap=snap_at(T, t_word))
+        tag(ctx, x, 0.72, nm, y=GROUND + 60)
+    st.bold_text(ctx, "ROBLOX?!", 640, 330, 170, st.YELLOW, scale=pop(T - t_word) if T >= t_word else 0.0,
+                 tilt=-0.06)
+
+
+def s_hk_days(ctx, T, t0):
+    st.burst(ctx, T, "#e2c8ff", "#7a3fd8", cx=640, cy=330, spin=0.4)
+    for i, day in enumerate(("MON", "TUE", "WED", "THU", "FRI")):
+        k = T - (2.45 + i * 0.12)
+        if k < 0:
+            continue
+        sc = 0.62 * (pop(k) if k < 0.6 else 1.0)
+        ss.calendar(ctx, 160 + i * 240, 300, sc, top=day, big=str(i + 1), col="#e8323a" if i == 4 else "#4f8bff")
+    if T >= 2.96:
+        st.bold_text(ctx, "5 DAYS", 640, 600, 120, (1, 1, 1), scale=pop(T - 2.96))
+
+
+def s_hk_one(ctx, T, t0, t_word=4.1):
+    ss.school_ext(ctx, T, cx=640, s=0.85)
+    if T >= t_word:
+        st.impact_star(ctx, 640, 300, 230, T - t_word, c1="#fff3a8", c2="#ffb02e")
+        st.bold_text(ctx, "1", 640, 300, 330, st.GOLD, scale=pop(T - t_word))
+        st.label(ctx, "ONE SCHOOL", 640, 650, 70, fg=st.YELLOW, scale=pop(T - 4.35) if T >= 4.35 else 0.0)
+
+
+def s_hk_friday(ctx, T, t0, t_word=5.75):
+    st.burst(ctx, T, "#ffb3b3", "#c0303a", cx=640, cy=360, spin=0.6)
+    wob = math.sin(T * 40) * 0.04 if T >= t_word else 0.0
+    ctx.save()
+    ctx.translate(640, 360)
+    ctx.rotate(wob)
+    ss.calendar(ctx, 0, 0, 1.45, top="FRIDAY", big="5", col="#e8323a")
+    ctx.restore()
+    if T >= t_word:
+        st.stamp(ctx, 640, 420, "EXAM DAY!", T - t_word, size=120)
+
+
+def s_hk_charge(ctx, T, t0, t_hit=7.78):
+    ss.gym(ctx, T, dark_k=0.2)
+    p = clamp((T - t0) / 1.6)
+    for i, who in enumerate(("kid", "leo", "priya", "emma")):
+        x = lerp(-120 - i * 150, 760 - i * 170, ease(p))
+        stand(ctx, who, x, "scream" if T < t_hit else "determined", T, s=0.82, y=GROUND + 40, pose="run",
+              walk_phase=T * 4 + i, arms=("up", "up"))
+        ss.pencil(ctx, x + 70, GROUND - 260, 0.9, -1.2)
+    st.speed_lines(ctx, T, 1000, 360, n=22, r0=240, r1=900, a=0.35)
+    st.sfx_word(ctx, 640, 150, "CHAAARGE!", T - t0 - 0.1, col=st.RED, size=76)
+    if T >= t_hit:
+        st.flash(ctx, 0.6 * (1 - clamp((T - t_hit) / 0.25)))
+
+
+def s_hk_boss(ctx, T, t0, t_rise=8.2, t_roar=8.46):
+    k = clamp((T - t_rise) / 0.3)
+    roar = clamp((T - t_roar) / 0.12) * (1.0 if T < 9.3 else 0.6)
+    boss_gym(ctx, T, boss_x=640, boss_s=0.6, jaw=roar, rage=1.0, dark_k=0.55)
+    if k < 1:                                                          # rising from the floor
+        ss.gym(ctx, T, dark_k=0.55)
+        ctx.save()
+        ctx.rectangle(-300, -300, 1900, GROUND + 330)
+        ctx.clip()
+        ss.exam_boss(ctx, 640, GROUND + 20 + (1 - ease(k)) * 700, 0.6, T, jaw=0.2, rage=1.0)
+        ctx.restore()
+    if T >= t_roar:
+        style.shake_lines(ctx, 640, 200, 420, 200, T, n=3, lw=10)
+        st.label(ctx, "THE FINAL EXAM", 640, 600, 76, bg=st.RED, scale=pop(T - t_roar))
+    if T >= 8.83:
+        ctx.save()
+        ctx.translate(0, -40 * (1 - clamp((T - 8.83) / 0.2)))
+        health(ctx, 1.0)
+        ctx.restore()
+
+
 def s_school_wide(ctx, T, t0, sign=None, sign_t=0.0, label=None, label_t=None, kid=None, crowd=False, bell=None,
                   walk=None, s=0.9, cx=640):
     ss.school_ext(ctx, T, cx=cx, s=s, sign=sign, sign_k=(T - sign_t) / 0.5 if sign else 1.0, bell_T=bell)
@@ -1117,10 +1283,23 @@ PNK = ("#ffc4ec", "#c0307a")
 GRY = ("#c4c8e8", "#4a4f8a")
 
 # ---- intro (0 - 34.7)
-shot(0.0, s_title, punch(0.0, 1.75, 1.12, (640, 340)), sfx=[(0.0, "sting_low.wav", 0.9), (1.75, HIT, 1.0)])
-shot(2.74, s_big, sfx=[(0.0, BOOM, 1.2)], shake=(0.0, 10), text="5 DAYS", bg=PUR, size=170)
-shot(4.06, s_school_wide, punch(4.06, 4.3, 1.08), sfx=[(0.1, POP, 0.8)], label="ONE SCHOOL", label_t=4.2)
-shot(5.18, s_fight, push(5.18), sfx=[(0.0, SW, 0.6), (2.96, "sting.wav", 0.9)], phase="class")
+shot(0.0, s_hk_face, punch(0.0, 0.05, 1.06, (640, 360)), sfx=[(0.0, "sting.wav", 1.0), (0.05, HIT, 0.9)],
+     shake=(0.05, 14))
+shot(0.44, s_hk_slam, [(0.44, 1.0, C), (0.82, 1.05, (640, 380), 0.08)], sfx=[(0.1, "whoosh.wav", 0.8),
+                                                                       (0.38, BOOM, 1.4)], shake=(0.38, 24))
+shot(1.33, s_hk_become, push(1.33), sfx=[(0.03, SPARK, 1.0), (0.1, "whoosh.wav", 0.6)])
+shot(1.8, s_hk_roblox, punch(1.8, 1.85, 1.08, (640, 330)), sfx=[(0.05, HIT, 1.0), (0.3, "chaching.wav", 0.7)],
+     shake=(0.05, 16), hud=True)
+shot(2.4, s_hk_days, push(2.4), sfx=[(0.05, POP, 0.7), (0.17, POP, 0.7), (0.29, POP, 0.7), (0.41, POP, 0.7),
+                                     (0.53, POP, 0.8), (0.56, DING, 0.8)])
+shot(4.06, s_hk_one, punch(4.06, 4.1, 1.08, (640, 330)), sfx=[(0.04, HIT, 1.0), (0.29, POP, 0.7)], shake=(0.04, 12))
+shot(5.18, s_hk_friday, punch(5.18, 5.75, 1.1), sfx=[(0.0, TICK, 0.7), (0.3, TICK, 0.7), (0.57, HIT, 1.1)],
+     shake=(0.57, 16))
+shot(6.4, s_hk_charge, push(6.4), sfx=[(0.03, "whoosh.wav", 0.9), (0.4, "step.wav", 0.6), (0.8, "step.wav", 0.6),
+                                       (1.38, HIT, 1.0)], whip=1)
+shot(8.2, s_hk_boss, [(8.2, 1.0, C), (8.46, 1.06, (640, 360), 0.1)], sfx=[(0.0, "sting_low.wav", 0.9),
+                                                                     (0.26, BOOM, 1.4), (0.63, HIT, 0.8)],
+     shake=(0.26, 24))
 shot(9.62, s_cu, sfx=[(0.1, TICK, 0.6)], who="kid", expr="cold", bg=RED_, arms=("hold", "hold"),
      prop=lambda c, T, hx, hy, s: ss.pencil(c, hx + 230, hy + 260, 1.6, -0.9), label="LITERALLY.", label_t=9.7)
 shot(10.48, s_coldopen, punch(10.48, 10.6, 1.06, (520, 360)), sfx=[(0.0, BOOM, 1.2), (0.6, "buzz.wav", 0.5)],

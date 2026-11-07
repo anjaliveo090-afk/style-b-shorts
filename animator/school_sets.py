@@ -52,14 +52,15 @@ def wall(ctx, col, y1=GROUND, stud=True):
 
 
 # ================================================================ places
-def school_ext(ctx, T, cx=640, s=1.0, sign=None, sign_k=1.0, lights=1.0, bell_T=None):
+def school_ext(ctx, T, cx=640, s=1.0, sign=None, sign_k=1.0, lights=1.0, bell_T=None, lift=0.0, ground=True):
     """The school as a giant Roblox build: red studded blocks, white trim, windows, a door, a bell tower, a flag.
     (cx, GROUND) = middle of the front door. sign = text on the banner over the door (pops in with sign_k)."""
-    st.game_sky(ctx)
-    st.block_clouds(ctx, T, y0=40, y1=260, n=6)
-    st.baseplate(ctx, GROUND)
+    if ground:
+        st.game_sky(ctx)
+        st.block_clouds(ctx, T, y0=40, y1=260, n=6)
+        st.baseplate(ctx, GROUND)
     ctx.save()
-    ctx.translate(cx, GROUND)
+    ctx.translate(cx, GROUND - lift)
     ctx.scale(s, s)
     red = hexc("#d8433a")
     block(ctx, -560, -420, 1120, 420, 10, red, 6)                     # main block

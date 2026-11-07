@@ -46,7 +46,8 @@ def main():
     story, old, new, voice = sys.argv[1:5]
     starts = [float(x) for x in sys.argv[5:]]
     mod = importlib.import_module(story)
-    safezone.fit(mod.SHOTS, mod, verbose=False)
+    if engine.ASPECT != "16x9":                  # long 16:9 videos are not fitted to the Shorts safe zone
+        safezone.fit(mod.SHOTS, mod, verbose=False)
     engine.set_voice(voice)
     fps = engine.FPS
     n = frame_count(old)
