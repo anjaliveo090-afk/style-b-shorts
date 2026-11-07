@@ -335,7 +335,7 @@ def s_hk_one(ctx, T, t0, t_word=4.1):
     if T >= t_word:
         st.impact_star(ctx, 640, 300, 230, T - t_word, c1="#fff3a8", c2="#ffb02e")
         st.bold_text(ctx, "1", 640, 300, 330, st.GOLD, scale=pop(T - t_word))
-        st.label(ctx, "ONE SCHOOL", 640, 650, 70, fg=st.YELLOW, scale=pop(T - 4.35) if T >= 4.35 else 0.0)
+        st.label(ctx, "ONE SCHOOL", 640, 600, 70, fg=st.YELLOW, scale=pop(T - 4.35) if T >= 4.35 else 0.0)
 
 
 def s_hk_friday(ctx, T, t0, t_word=5.75):
