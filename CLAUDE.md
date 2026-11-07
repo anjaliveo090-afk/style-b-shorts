@@ -155,6 +155,29 @@ The user's rule (2026-11-07): long videos are delivered in **16:9, 1920x1080**. 
 - **Music:** a situation score with a cue at every situation change (~50 cues, `SCORE` / `STINGS` in
   `animator/whole_school.py`, `sound_design.md` section 5), never one tune for the whole video.
 
+## A 60 s Short cut from a long video (the user, 2026-11-07: "60 sec ki short ... yahi audio se, cut cut na lage, 9:16")
+Example: `animator/school_short.py` (from whole_school, 47 shots + rewind, 60.0 s), plan in `output/school_short/plan.md`.
+1. **Pick the lines** from the long SRT: hook (title line + the stake) → the trigger or Day 1 by ~5 s (lessons rule 2)
+   → 1-2 of the best jokes, one with a callback later → the danger → the boss → the win + the callback → the
+   system-message twist as the last line (loop). No subscribe / comment CTA (lessons rules 3-4). About 55 s of speech.
+2. **Cut the voice**: `python3 assembler/cut_voice.py <long voice> <long srt> <long words.json> output/<story>
+   <old_start:old_end> ... --pause 0.28` (one `start:end` per piece; end = the cue END of its last line).
+   - It cuts at the real pause between lines, never inside a word (SRT ends are often early: it looks up to the next
+     line; a dip inside a word such as "re-STORED" is skipped), keeps the breath-free lead-in and release, and joins with
+     30 ms fades at 0.28 s word to word, the voice's own sentence pause.
+   - It writes `voice.wav`, a retimed `subs.srt`, `words/srt_words.json` and `segments.json` (copy the offsets into the
+     story's `SEGMENTS`; remap the long story's `DIALOGUE` with them).
+   - Check every join: print the 10 ms energy around each `new_end`; the word must fade fully before the gap.
+3. **Hide the joins** ("cut cut na lage"):
+   - every join lands on a new picture that continues the last one: the same room (the class → its PA speaker), the
+     answer to the last line (Friday's announcement → the Friday gym), the same character;
+   - the music does NOT change at every join: one mood per chapter, running through the joins inside it (school_short:
+     8 cues for 10 joins);
+   - the hard cuts every ~1.2 s inside the pieces stay (the style), so a join is just one more cut.
+4. **Build in 9:16** like any Short (set3, `SAFE_BODY`, `closeup()`, HUD shots, both safe audits at 0). The long
+   video's landscape places are drawn through `land()` in `school_short.py` (world (640, 640) → portrait (360, 1000));
+   set `ss.W, ss.H = 1280, 720` so the places keep their landscape width. Mix at `--music-volume 0.45`.
+
 ## Defaults
 - **Captions are OFF by default, and only ONE video is delivered: the caption-free `<story>_final.mp4`** (the user's rule, 2026-11-05: "jab bhi mangu bina caption ke hi do"; it replaces the older "captions on" rule). Do not make or send a captioned copy unless the user asks for captions. When they do, burn reference-style captions onto the finished mp4 without re-rendering:
   1. Write `animator/captions/<story>.json`: `[[first_word_index_or_time, "TEXT", colour or null], ...]`, one entry per caption, using the rules in `style_bible.md` section 1 (example: `animator/captions/no_break.json`).
