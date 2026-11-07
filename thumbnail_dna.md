@@ -157,3 +157,60 @@ V = visible on the image, I = interpretation.
 
 ## 8. 16:9 wrap (only if the user explicitly asks)
 The references show it this way because YouTube displays Shorts like this. Take the 9:16 panel and scale it to 720 px high (404 px wide), placed at x 438. Fill the background with the same panel scaled to 1280 px wide, centred, Gaussian-blurred (radius ~20) and darkened by ~15%.
+
+## 9. LONG VIDEO thumbnails (16:9), learned from 3 references (2026-11-07)
+The user sent 3 long-video thumbnails (ZIP `youtube-thumbnails-bulk-1794045316451`; the images stay local in `output/ref_thumbs_long/`; titles from the file names, the id removed):
+1. What If the WHOLE WORLD Became Roblox
+2. What If You Got Sucked INTO Roblox
+3. What If the BACON KING Went to War with … (cut in the file name; probably "…the NOOB KING")
+
+**Format.** Unlike the Shorts thumbnails (a 9:16 panel inside 1280×720), these are **full 16:9 frames designed edge to edge** (1280×720). Long-video thumbnails are delivered at **1920×1080, 16:9**. The Shorts rule (9:16 only) stays for Shorts.
+
+### 9.1 Individual analysis
+V = visible on the image, I = interpretation.
+
+| # | Composition (V) | Subject, expression, pose (V) | Background (V) | Text (V) | Proof / FX (V) | Story and curiosity (I) |
+|---|---|---|---|---|---|---|
+| 1 | The kid big, centre-left, from the chest up; the frame split by a glowing vertical seam just right of centre | The kid: shocked O-mouth, white eyes, sweat drop. His right arm, reaching into the right half, is **turning into studded blocks** that break into flying cubes | **Split world**: left = a real suburb (house, car, tree, round sun, blue sky); right = the same street as Roblox (a cube sun, studs, block houses) | "THE WORLD IS" (white, navy outline) / "ROBLOX?!" (big gold gradient, brown outline), top centre, 2 lines | A **giant mouse cursor** clicking his arm, with a click ring (the "owner" of the story); flying cubes, sparkles | The transformation is shown happening, half done. The cursor is a story easter egg. What happens next stays open |
+| 2 | The kid big, bottom-left, arms up; a **tablet** filling the right half | The kid: screaming, sweat drop, being pulled toward the screen | Blue speed-line burst with flying cubes | "SUCKED INTO" (white) / "ROBLOX?!" (gold), top-left | A **blue/pink swirl vortex** from his hand into the tablet. On the screen: the kid inside the game **in a pink tutu and bunny ears** with a **"HELP!" bubble**, Mom's giant smiling face behind, another player dancing | The premise plus the funniest consequence (the tutu) and the antagonist (Mom). Many small details reward the viewer |
+| 3 | **VS layout**: one character each side, a "VS" starburst in the centre | Left: the classic brown-hair avatar with a bacon crown, angry shout. Right: the yellow noob with a jewelled crown and glasses, deadpan | A sunset sky over a battlefield, an **army** of each side behind its king | "ROBLOX WAR?!" (gold), top centre, one line; name labels "BACON" (orange-white) and "NOOB" (gold) at the bottom under each | The VS starburst; the two armies | A clash of two Roblox icons. Who wins stays open |
+
+### 9.2 Long-thumbnail DNA (what all 3 share)
+- **Text:** 1-2 lines, top-centre or top-left, filling the top ~30 %.
+  - The word **ROBLOX** is always in it, and the payoff line ends with "?!" ("THE WORLD IS / ROBLOX?!", "SUCKED INTO / ROBLOX?!", "ROBLOX WAR?!").
+  - Line 1 is smaller, white with a dark navy/brown outline. "ROBLOX?!" is the biggest: gold gradient, brown outline, white outer stroke, drop shadow.
+- **Subject:**
+  - The kid (or the 2 rivals) **big**: the head is 30-45 % of the frame height, cut at the chest or waist, never shown whole.
+  - Placed on the left or in the middle, with **shocked O-mouth + sweat drop** (2/3) or **angry shout vs deadpan** (VS).
+- **The premise is shown as a spectacle, mid-action:**
+  - the world splitting into Roblox;
+  - a vortex sucking him into a tablet;
+  - two armies.
+- **Story easter eggs (2/3):** small details from the video (the cursor, the tutu, the bunny ears, Mom's face, "HELP!").
+- **No red circle (0/3):** motion FX lead the eye instead: a click ring, a swirl, a VS burst, flying cubes, speed lines, sparkles.
+- **Background:** a full illustrated scene (a street, a battlefield, a tablet screen), not only a burst.
+  - Bright day or sunset.
+  - A split (real vs Roblox) when the title is about crossing over.
+- **Look:** the same as the Shorts: a thick white sticker stroke on characters, props and text, flat shading, saturated colour.
+- **Safe area:** keep text and faces out of the **bottom-right ~15 %** (the YouTube duration badge). Keep the text inside the top ~32 %.
+
+### 9.3 Title → long-thumbnail text
+- Drop "What if". Make a 2-4 word statement or question with ROBLOX:
+  - "What If the WHOLE WORLD Became Roblox" → "THE WORLD IS ROBLOX?!";
+  - "What If You Got Sucked INTO Roblox" → "SUCKED INTO ROBLOX?!";
+  - a rivalry → "ROBLOX WAR?!" plus two name labels.
+- Ours, for example: "What If the WHOLE SCHOOL Became Roblox?" → **"SCHOOL IS / ROBLOX?!"**.
+
+### 9.4 Layout families (long)
+- **L1 "Crossover split"** (ref 1): the kid in the middle, the background split real | Roblox, and his body turning into blocks where it crosses the seam. Add one story easter egg.
+- **L2 "Pulled into the screen"** (ref 2): the kid big on one side, a device or portal on the other with the consequence visible inside it, and a swirl between them.
+- **L3 "VS"** (ref 3): two rivals, a VS burst, armies behind, name labels at the bottom.
+
+### 9.5 Workflow
+1. **Pick a family** from the title.
+2. **Draw at 1920×1080:** `thumbkit.landscape()` before `thumbkit.new()`.
+3. **Characters and props:** use our cast (style.py) and the landscape props (`school_sets.py`, `sets.py`).
+   - Never copy the reference channel's kid, the bacon character or their compositions.
+   - Our kid stays our KID (green shirt, star).
+4. **Save** to `output/thumbnails/<title>.png` (filename = title).
+5. **QC:** run the section 7 list; the safe area is from 9.2.

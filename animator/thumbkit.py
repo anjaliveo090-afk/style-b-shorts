@@ -40,6 +40,12 @@ def font_name():
 FONT = font_name()
 
 
+def landscape():
+    """Switch the kit to 16:9, 1920x1080 (long-video thumbnails, thumbnail_dna.md section 9)."""
+    global W, H
+    W, H = 1920, 1080
+
+
 def new():
     surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, W, H)
     return surf, cairo.Context(surf)

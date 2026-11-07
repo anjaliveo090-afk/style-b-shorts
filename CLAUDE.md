@@ -186,6 +186,7 @@ The user's rule (2026-11-07): long videos are delivered in **16:9, 1920x1080**. 
 - Sounds are synthesised (`audio.py`). They match the measured kinds and levels, not the exact timbres of the reference channel's sound files, which must never be copied.
 - The music matches the measured key, tempo, density and level. Its percussive share (0.07) is below the references' (0.14-0.22).
 - `animator/thumbnail.py` is still the old kit's version (it imports `home`, `office`, `mom_owner`). Thumbnails now follow **`thumbnail_dna.md`** (the LOCKED REFERENCE THUMBNAIL DNA learned from the user's 7 reference thumbnails). When the user sends a title for a thumbnail, follow its section 7: **only 9:16, 1080x1920** (the user's rule, for Shorts; no 16:9 copy unless asked), drawn with `style.py` / `sets.py`. Build it with `animator/thumbkit.py`, copying `animator/thumb_reset_noob.py`. The output goes to `output/thumbnails/<title>.png` (filename = title).
+- **Long-video thumbnails are 16:9, 1920x1080** (the user's 3 long references, `thumbnail_dna.md` section 9: text with ROBLOX?! at the top, the kid big, the premise as a mid-action spectacle, story easter eggs, no red circle, bottom-right kept free). Call `thumbkit.landscape()` first and copy `animator/thumb_whole_school.py` (family L1 crossover split).
 
 ## New reference videos of this style
 Run, for each video:
