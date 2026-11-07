@@ -16,8 +16,13 @@ import subprocess
 import sys
 import tempfile
 
-import engine
-import safezone
+if len(sys.argv) > 1:                            # a 16:9 story sets STYLEB_ASPECT before its imports: do the same
+    _src = os.path.join(os.path.dirname(os.path.abspath(__file__)), sys.argv[1] + ".py")
+    if os.path.exists(_src) and 'STYLEB_ASPECT"] = "16x9"' in open(_src).read():
+        os.environ["STYLEB_ASPECT"] = "16x9"
+
+import engine     # noqa: E402
+import safezone   # noqa: E402
 
 
 def ranges_for(shots, total, fps, starts):
