@@ -190,6 +190,13 @@ Example: `animator/school_short.py` (from whole_school, 47 shots + rewind, 60.0 
   - Set `engine.LIPSYNC = True` and a `DIALOGUE = {"mom": [(t0, t1)], ...}` dict from the SRT.
   - Draw the speaker with `talk=talking("mom", T)` and call `engine.set_voice(voice)` in `__main__` (see `animator/robux10.py`).
   - Mouths snap between closed, half open and wide open.
+- **3D camera (the user, 2026-11-12: "3d camera moment ... Zack D Films ki animation style me")**: `animator/cam3d.py`
+  fakes a 3D set with parallax. Each shot gets one smooth move over its whole length (`CAM3D = {start: move}` in the
+  story, applied in `shot()`): `orbit_l/_r` (the background slides the other way), `push` / `pull` (dolly),
+  `vertigo` (dolly zoom on shocks), `crane_up/_down`, `track_l/_r`, `low` (hero low angle). Every background helper
+  draws through `cam3d.bg(ctx, fn, blur)` (far layer: its own smaller move, drawn 14 % larger, soft depth-of-field
+  blur in the real render only: `cam3d.STATE["blur_on"] = True` after `safezone.fit`). Example: `school_short.py`.
+  Change the move every shot; both safe audits still must print 0.
 - **No camera whoosh.** Only `whip.wav` on the loop rewind, and `swish` on a physical throw or a panel sliding in.
 - **Hard cuts** (`render(xfade=0)`), grain 2, `vignette` 0.15 (flat vector look).
 - **`engine.profile("set3")` at the top of every new story** (then `engine.ENERGY = 3.0`). It is the motion measured frame by frame at 60 fps on reference set 3 (`visual_grammar.md` section 2b):

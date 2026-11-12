@@ -15,6 +15,7 @@ import math
 import os
 import sys
 
+import cam3d
 import engine
 import school_sets as ss
 import sets as st
@@ -114,17 +115,33 @@ def outside(ctx, T, y=GY):
     st.baseplate(ctx, y)
 
 
-def school(ctx, T, s=0.62, y=GY, sign=None, sign_k=1.0, lift=0.0, cx=640):
-    outside(ctx, T, y)
-    land(ctx, lambda c: ss.school_ext(c, T, cx=cx, s=s, sign=sign, sign_k=sign_k, lift=lift, ground=False), gy=y)
+def school(ctx, T, s=0.62, y=GY, sign=None, sign_k=1.0, lift=0.0, cx=640, blur=0.7):
+    def fn(c):
+        outside(c, T, y)
+        land(c, lambda c2: ss.school_ext(c2, T, cx=cx, s=s, sign=sign, sign_k=sign_k, lift=lift, ground=False), gy=y)
+    cam3d.bg(ctx, fn, blur)
 
 
-def classroom(ctx, T, board="", y=GY):
-    land(ctx, lambda c: ss.classroom(c, T, board=board, clock_h=9.0), gy=y, fill="#8fd0e8")
+def classroom(ctx, T, board="", y=GY, blur=0.45):
+    cam3d.bg(ctx, lambda c: land(c, lambda c2: ss.classroom(c2, T, board=board, clock_h=9.0), gy=y, fill="#8fd0e8"),
+             blur)
 
 
-def gym(ctx, T, dark_k=0.0, doors=0.0):
-    land(ctx, lambda c: ss.gym(c, T, dark_k=dark_k, doors=doors), fill="#f0b866")
+def gym(ctx, T, dark_k=0.0, doors=0.0, blur=1.0):
+    cam3d.bg(ctx, lambda c: land(c, lambda c2: ss.gym(c2, T, dark_k=dark_k, doors=doors), fill="#f0b866"), blur)
+
+
+# ---------------------------------------------------------------- far layers for the 3D camera (cam3d.py)
+def burst(ctx, T, *a, **k):
+    cam3d.bg(ctx, lambda c: st.burst(c, T, *a, **k), 0.35)
+
+
+def void_bg(ctx, **k):
+    cam3d.bg(ctx, lambda c: st.void_bg(c, **k), 0.0)
+
+
+def night_bedroom(ctx, T, **k):
+    cam3d.bg(ctx, lambda c: st.night_bedroom(c, T, **k), 0.6)
 
 
 def falling_blocks(ctx, T, n=12, speed=620):
@@ -189,7 +206,7 @@ LBL_Y = 520
 
 # ================================================================ hook (0 - 5.24)
 def s_hook(ctx, T, d):
-    st.burst(ctx, T, "#ffd27a", "#ff4f2a", cy=560, spin=0.8)
+    burst(ctx, T, "#ffd27a", "#ff4f2a", cy=560, spin=0.8)
     falling_blocks(ctx, T)
     m, k = closeup(ctx, KID, "scream", T, arms=("up", "up"), snap=snap_at(T, 0.04), bob=0.6)
     style.shake_lines(ctx, *m(360, 560), 300 * k, 260 * k, T, n=3, lw=9)
@@ -210,15 +227,18 @@ def normal_school(c):
 
 
 def s_become(ctx, T, d, t_sweep=1.10, dur=0.45):
-    st.game_sky(ctx, top="#b8c4d8", bottom="#e0e6ee")
-    st.baseplate(ctx, GY, col="#7a9a6a")
-    land(ctx, normal_school)
     sx = lerp(-120, 860, clamp((T - t_sweep) / dur))
-    ctx.save()
-    ctx.rectangle(-200, -200, sx + 200, 1800)
-    ctx.clip()
-    school(ctx, T)
-    ctx.restore()
+
+    def far(c):
+        st.game_sky(c, top="#b8c4d8", bottom="#e0e6ee")
+        st.baseplate(c, GY, col="#7a9a6a")
+        land(c, normal_school)
+        c.save()
+        c.rectangle(-200, -200, sx + 200, 1800)
+        c.clip()
+        school(c, T)
+        c.restore()
+    cam3d.bg(ctx, far, 0.4)
     st.glow(ctx, sx, 700, 220, (1, 1, 0.85), 0.9)
     ctx.set_source_rgba(1, 1, 1, 0.85)
     ctx.rectangle(sx - 12, -100, 24, 1500)
@@ -238,7 +258,7 @@ def s_roblox(ctx, T, d, t_word=2.25):
 
 
 def s_days(ctx, T, d, t0=2.90):
-    st.burst(ctx, T, "#e2c8ff", "#7a3fd8", cy=560, spin=0.4)
+    burst(ctx, T, "#e2c8ff", "#7a3fd8", cy=560, spin=0.4)
     for i, day in enumerate(("MON", "TUE", "WED", "THU", "FRI")):
         k = T - (t0 + 0.05 + i * 0.1)
         if k < 0:
@@ -260,7 +280,7 @@ def s_one(ctx, T, d, t_word=4.22):
 
 # ================================================================ Day 1 (5.24 - 10.03)
 def s_day1(ctx, T, d, t0=5.24):
-    st.burst(ctx, T, "#e2c8ff", "#7a3fd8", cy=560, spin=0.3)
+    burst(ctx, T, "#e2c8ff", "#7a3fd8", cy=560, spin=0.3)
     st.day_write(ctx, "DAY", 1, 360, 520, T - t0, size=130, T=T)
     lbl(ctx, "MONDAY", 360, 760, 64, T, 5.95, bg=st.UI_DARK, fg=st.YELLOW)
 
@@ -275,8 +295,8 @@ def s_walk(ctx, T, d, t0=6.85):
 
 
 def s_blocks(ctx, T, d, t_word=9.07):
-    land(ctx, lambda c: ss.wall(c, "#d8433a", ss.GROUND), fill="#d8433a")
-    st.baseplate(ctx, GY)
+    cam3d.bg(ctx, lambda c: (land(c, lambda c2: ss.wall(c2, "#d8433a", ss.GROUND), fill="#d8433a"),
+                             st.baseplate(c, GY)), 0.3)
     poke = T >= 8.85
     KID.draw(ctx, 330, GY, 1.35, keyed(T, [(0, "happy"), (t_word, "shock")]), T,
              arms=("point" if poke else "down", "down"), look=0.4, snap=snap_at(T, t_word))
@@ -344,7 +364,7 @@ def s_list(ctx, T, d, t0=10.96):
 
 
 def s_pebble_cu(ctx, T, d, t0=12.95):
-    st.burst(ctx, T, "#c8e6ff", "#2f6bd8", cy=560, spin=0.4)
+    burst(ctx, T, "#c8e6ff", "#2f6bd8", cy=560, spin=0.4)
     m, k = closeup(ctx, PEBBLE, keyed(T, [(0, "neutral"), (14.03, "shock")]), T, arms=("hold", "down"),
                    talk=talking("pebble", T), snap=snap_at(T, 14.03))
     tablet(ctx, *m(500, 760), 0.5 * k * 2.2, T, list_screen(NAMES, T, -10))
@@ -354,7 +374,7 @@ def s_pebble_cu(ctx, T, d, t0=12.95):
 
 
 def s_zoom_name(ctx, T, d, t0=14.03):
-    st.void_bg(ctx, top="#2a2d50", bottom="#0d0f18", y0=0, y1=1280)
+    void_bg(ctx, top="#2a2d50", bottom="#0d0f18", y0=0, y1=1280)
     for i, nm in enumerate(NAMES[:4]):
         yy = 170 + i * 72
         style.block(ctx, 80, yy, 560, 58, 12, hexc("#2b2f45"), 3, gloss=False)
@@ -395,7 +415,7 @@ def s_stare(ctx, T, d, t0=15.0):
 
 
 def s_flashback(ctx, T, d, t0=15.99):
-    st.night_bedroom(ctx, T, y_floor=1000)
+    night_bedroom(ctx, T, y_floor=1000)
     KID.draw(ctx, 250, GY, 0.5, "laugh", T, arms=("hold", "hold"), look=0.6)
     ss.desk(ctx, 470, GY, 1.15)
     st.monitor(ctx, 470, GY - 146, 0.5, T, lambda c, x, y, w, h, TT: (
@@ -404,11 +424,11 @@ def s_flashback(ctx, T, d, t0=15.99):
         st.bold_text(c, typed("ToiletDestroyer9000", TT, t0 + 0.2, 17), x + w / 2, y + h * 0.62, h * 0.12,
                      (1, 1, 1), shadow=False, stroke=0.0)))
     st.tint(ctx, (0.55, 0.42, 0.2), 0.25)
-    lbl(ctx, "AGE 6", 360, 300, 80, T, t0 + 0.1, bg=st.UI_DARK, fg=st.YELLOW)
+    lbl(ctx, "AGE 6", 360, 340, 80, T, t0 + 0.1, bg=st.UI_DARK, fg=st.YELLOW)
 
 
 def s_cringe(ctx, T, d, t_word=18.03):
-    st.burst(ctx, T, "#ffc4ec", "#c0307a", cy=560, spin=0.4)
+    burst(ctx, T, "#ffc4ec", "#c0307a", cy=560, spin=0.4)
     m, k = closeup(ctx, KID, "forced", T, arms=("cover", "down"), snap=snap_at(T, 17.25))
     style.sweat(ctx, *m(470, 470), 1.6 * k * 2, T)
     st.thought_cloud(ctx, 520, 260, 260, 190, T - 17.35, tail=(-1, 1))
@@ -432,7 +452,7 @@ def s_speaker(ctx, T, d, t0=18.68):
 
 
 def s_stone(ctx, T, d, t_fri=19.94):
-    st.burst(ctx, T, "#ffb3b3", "#c0303a", cy=560, spin=0.3)
+    burst(ctx, T, "#ffb3b3", "#c0303a", cy=560, spin=0.3)
     m, k = closeup(ctx, STONE, "smug", T, arms=("hold", "down"), talk=talking("stone", T))
     mx, my = m(560, 760)
     style.block(ctx, mx - 10 * k, my - 40 * k, 20 * k, 330 * k, 6, hexc("#3a3f55"), 4)        # the mic stand
@@ -448,7 +468,7 @@ def s_stone(ctx, T, d, t_fri=19.94):
 
 
 def s_kids_shock(ctx, T, d, t0=21.59):
-    st.burst(ctx, T, "#ffe27a", "#f29a2e", cy=560, spin=0.5)
+    burst(ctx, T, "#ffe27a", "#f29a2e", cy=560, spin=0.5)
     for i, (x, ch) in enumerate(((140, LEO), (360, KID), (580, PRIYA))):
         ch.draw(ctx, x, GY, 1.1, "scream" if i == 1 else "shock", T, arms=("up", "up"), snap=snap_at(T, t0 + 0.05))
     st.sfx_word(ctx, 360, 380, "THIS YEAR?!", T - t0 - 0.1, col=st.RED, size=60)
@@ -483,13 +503,13 @@ PANEL_LINES = ("Players: 412", "Chat bubbles: ON", "UPDATE: FRI 3 PM", "Summer: 
 
 
 def s_panel(ctx, T, d):
-    st.void_bg(ctx, top="#141a2e", bottom="#05060f", y0=0, y1=1280)
+    void_bg(ctx, top="#141a2e", bottom="#05060f", y0=0, y1=1280)
     st.monitor(ctx, 360, 860, 1.12, T, panel_screen(2 if T >= 24.43 else None, PANEL_LINES))
     lbl(ctx, "UPDATE SCHEDULED", 360, 260, 60, T, 24.43, bg=st.RED)
 
 
 def s_friday3(ctx, T, d, t_three=25.93):
-    st.burst(ctx, T, "#ffb3b3", "#c0303a", cy=560, spin=0.4)
+    burst(ctx, T, "#ffb3b3", "#c0303a", cy=560, spin=0.4)
     ss.calendar(ctx, 360, 420, 0.95, top="FRIDAY", big="5", col="#e8323a")
     if T >= t_three:
         sc = min(1.0, pop(T - t_three) + 0.05)
@@ -498,7 +518,7 @@ def s_friday3(ctx, T, d, t_three=25.93):
 
 
 def s_summer(ctx, T, d, deleted_t=None):
-    st.burst(ctx, T, "#fff6c4", "#8fd0ff", cy=560, spin=0.3)
+    burst(ctx, T, "#fff6c4", "#8fd0ff", cy=560, spin=0.3)
     dk = clamp((T - deleted_t) / 0.35) if deleted_t is not None and T >= deleted_t else 0.0
     ss.summer_card(ctx, 360, 580, 1.15, T, deleted=dk)
     if deleted_t is None:
@@ -506,7 +526,7 @@ def s_summer(ctx, T, d, deleted_t=None):
 
 
 def s_kid_deleted(ctx, T, d, t0=29.43):
-    st.burst(ctx, T, "#ff8a8a", "#c0303a", cy=560, spin=0.9)
+    burst(ctx, T, "#ff8a8a", "#c0303a", cy=560, spin=0.9)
     m, k = closeup(ctx, KID, "scream", T, arms=("up", "up"), talk=talking("kid", T), snap=snap_at(T, t0 + 0.03))
     style.shake_lines(ctx, *m(360, 560), 300 * k, 260 * k, T, n=3, lw=9)
     st.speech_bubble(ctx, 470, 220, "DELETED?!", 58, T - t0, tail=(-1, 1))
@@ -554,7 +574,7 @@ def s_teeth(ctx, T, d, t0=34.71):
     gym(ctx, T, dark_k=0.5)
     chomp = 0.5 + 0.5 * math.sin((T - t0) * 22)
     boss(ctx, T, s=1.25, y=GY + 560, jaw=chomp)
-    st.sfx_word(ctx, 360, 250, "CHOMP!", T - t0 - 0.05, col=st.RED, size=70)
+    st.sfx_word(ctx, 360, 310, "CHOMP!", T - t0 - 0.05, col=st.RED, size=70)
     lbl(ctx, "TEETH!", 360, 880, 86, T, t0 + 0.05, fg=st.YELLOW)
 
 
@@ -580,7 +600,7 @@ def s_leap(ctx, T, d, t0=37.48):
 
 
 def s_swing(ctx, T, d, t0=38.48):
-    st.burst(ctx, T, "#fff3a8", "#ff8a3d", cy=560, spin=1.0)
+    burst(ctx, T, "#fff3a8", "#ff8a3d", cy=560, spin=1.0)
     m, k = closeup(ctx, KID, "scream", T, arms=("up", "up"), snap=snap_at(T, t0))
     ang = -1.6 + 2.2 * ease(clamp((T - t0 - 0.2) / 0.45))
     hx, hy = m(360, 560)
@@ -606,7 +626,7 @@ def s_defeated(ctx, T, d, t0=40.28):
 
 
 def s_crown(ctx, T, d, t0=42.20):
-    st.burst(ctx, T, "#fff1a8", "#f2b02e", cy=560, spin=0.6)
+    burst(ctx, T, "#fff1a8", "#f2b02e", cy=560, spin=0.6)
     landk = clamp((T - t0 - 0.05) / 0.35)
     m, k = closeup(ctx, KID, "stars" if landk >= 1 else "shock", T, arms=("up", "up"), snap=snap_at(T, t0 + 0.4))
     hx, hy = m(360, 560)
@@ -615,7 +635,7 @@ def s_crown(ctx, T, d, t0=42.20):
 
 
 def s_admin_name(ctx, T, d, t0=43.11):
-    st.burst(ctx, T, "#fff1a8", "#f2b02e", cy=560, spin=0.5)
+    burst(ctx, T, "#fff1a8", "#f2b02e", cy=560, spin=0.5)
     m, k = closeup(ctx, KID, keyed(T, [(0, "grin"), (43.9, "forced")]), T, arms=("up", "down"),
                    snap=snap_at(T, 43.9))
     hx, hy = m(360, 560)
@@ -637,7 +657,7 @@ def s_cheer(ctx, T, d, t0=44.40):
 
 
 def s_facepalm(ctx, T, d, t0=45.86):
-    st.burst(ctx, T, "#e2c8ff", "#7a3fd8", cy=560, spin=0.3)
+    burst(ctx, T, "#e2c8ff", "#7a3fd8", cy=560, spin=0.3)
     m, k = closeup(ctx, KID, "forced", T, arms=("cover", "down"), talk=talking("kid", T), snap=snap_at(T, t0))
     hx, hy = m(360, 560)
     ss.crown(ctx, hx, hy - 0.85 * U1 * CU_S, 0.4, T)
@@ -645,7 +665,7 @@ def s_facepalm(ctx, T, d, t0=45.86):
 
 
 def s_rename(ctx, T, d, t0=47.07):
-    st.void_bg(ctx, top="#2a2d50", bottom="#0d0f18", y0=0, y1=1280)
+    void_bg(ctx, top="#2a2d50", bottom="#0d0f18", y0=0, y1=1280)
     st.roblox_dialog(ctx, 360, 560, 1.3, T - t0, "Change Username", "ToiletDestroyer9000", button="SAVE",
                      col="#2f6bd8")
     if T >= 47.94:
@@ -662,7 +682,7 @@ def s_command(ctx, T, d, t0=48.51):
 
 
 def s_restored(ctx, T, d, t0=49.99):
-    st.burst(ctx, T, "#fff6c4", "#ffb84a", cy=560, spin=0.5)
+    burst(ctx, T, "#fff6c4", "#ffb84a", cy=560, spin=0.5)
     r = clamp((T - t0) / 0.5)
     ss.summer_card(ctx, 360, 580, 1.15, T, deleted=1 - r, restored=r)
     st.sparkles(ctx, T, 360, 580, spread=330, n=14, seed=2, c=st.YELLOW)
@@ -679,7 +699,7 @@ def s_party(ctx, T, d, t0=51.02):
 
 # ================================================================ the twist (52.36 - 59.30)
 def s_update(ctx, T, d, t0=52.36):
-    st.night_bedroom(ctx, T, y_floor=1000)
+    night_bedroom(ctx, T, y_floor=1000)
     st.tint(ctx, (0.05, 0.06, 0.1), 0.45)
     st.roblox_dialog(ctx, 360, 560, 1.3, T - t0, "New update available", "Roblox School 2", button="INSTALL",
                      col="#2f6bd8")
@@ -697,7 +717,7 @@ def s_rs2(ctx, T, d, t2=55.51):
 
 
 def s_install(ctx, T, d, t0=56.01):
-    st.night_bedroom(ctx, T, y_floor=1000)
+    night_bedroom(ctx, T, y_floor=1000)
     st.tint(ctx, (0.05, 0.06, 0.1), 0.45)
     st.roblox_dialog(ctx, 360, 560, 1.3, 1.0, "New update available", "Roblox School 2", button="INSTALL",
                      col="#2f6bd8")
@@ -707,7 +727,7 @@ def s_install(ctx, T, d, t0=56.01):
 
 
 def s_mom(ctx, T, d, t0=56.77):
-    st.burst(ctx, T, "#ffc4ec", "#c0307a", cy=560, spin=0.4)
+    burst(ctx, T, "#ffc4ec", "#c0307a", cy=560, spin=0.4)
     m, k = closeup(ctx, MOM, "happy", T, arms=("hold", "wave"), talk=talking("mom", T))
 
     def screen(c, x, y, w, h, TT):
@@ -724,7 +744,7 @@ def s_mom(ctx, T, d, t0=56.77):
 
 
 def s_mom_scream(ctx, T, d, t0=58.49):
-    st.burst(ctx, T, "#ff8a8a", "#c0303a", cy=560, spin=1.0)
+    burst(ctx, T, "#ff8a8a", "#c0303a", cy=560, spin=1.0)
     falling_blocks(ctx, T)
     m, k = closeup(ctx, KID, "scream", T, arms=("up", "up"), talk=talking("kid", T), snap=snap_at(T, t0 + 0.03))
     style.shake_lines(ctx, *m(360, 560), 300 * k, 260 * k, T, n=3, lw=9)
@@ -735,9 +755,20 @@ def s_mom_scream(ctx, T, d, t0=58.49):
 S = []
 
 
+# the 3D camera move of every shot (cam3d.py): a different move each shot; vertigo on the shocks, low on entrances
+CAM3D = {0.00: "vertigo", 0.83: "track_l", 1.83: "low", 2.90: "orbit_r", 4.22: "push", 5.24: "orbit_l",
+         6.85: "track_l", 8.11: "orbit_r", 10.03: "push", 10.96: "crane_up", 12.95: "orbit_l", 14.03: "push",
+         15.00: "vertigo", 15.99: "pull", 17.23: "orbit_r", 18.68: "crane_up", 19.94: "low", 21.59: "vertigo",
+         22.48: "push", 23.96: "push", 25.27: "orbit_l", 26.51: "orbit_r", 28.31: "vertigo", 29.43: "push",
+         30.43: "push", 31.18: "low", 32.52: "crane_up", 33.67: "orbit_l", 34.71: "push", 35.75: "orbit_r",
+         37.48: "track_l", 38.48: "orbit_l", 39.44: "pull", 40.28: "push", 42.20: "low", 43.11: "orbit_r",
+         44.40: "orbit_l", 45.86: "push", 47.07: "orbit_r", 48.51: "low", 49.99: "pull", 51.02: "crane_up",
+         52.36: "push", 53.75: "low", 56.01: "push", 56.77: "orbit_l", 58.49: "vertigo"}
+
+
 def shot(start, draw, keys, **kw):
     kw.setdefault("vignette", 0.15)
-    S.append(dict(start=start, draw=draw, keys=keys, **kw))
+    S.append(dict(start=start, draw=cam3d.wrap(draw, CAM3D.get(round(start, 2))), keys=keys, **kw))
 
 
 def punch(t0, z0, c0, t_key, z1, c1, m=0.13):
@@ -878,4 +909,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 4:
         kw["frames"] = (int(sys.argv[3]), int(sys.argv[4]))
     safezone.fit(SHOTS, sys.modules[__name__])
+    cam3d.STATE["blur_on"] = True                     # depth of field only in the real render
     render(SHOTS, TOTAL, sys.argv[1], xfade=0.0, grain=2, fade_out=0.0, fade_in=0.0, **kw)
