@@ -1,0 +1,118 @@
+{
+ "summary": {
+  "video": "blink_robux.mp4",
+  "duration": 56.68,
+  "speech_share": 0.911,
+  "gaps_total": 9,
+  "gaps_per_10s": 1.6,
+  "gap_median": 0.24,
+  "gap_p90": 0.33,
+  "gap_max": 0.33,
+  "gaps_over_0_6s": 0,
+  "gaps_with_sfx": 0,
+  "lead_in": 0.0,
+  "tail": 0.53
+ },
+ "gaps": [
+  {
+   "t0": 10.1,
+   "t1": 10.32,
+   "dur": 0.22,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": -3.0,
+   "before": "100 Robux!",
+   "after": "Day 2."
+  },
+  {
+   "t0": 22.14,
+   "t1": 22.35,
+   "dur": 0.21,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 7.3,
+   "before": "the game!",
+   "after": "Day 4."
+  },
+  {
+   "t0": 28.95,
+   "t1": 29.19,
+   "dur": 0.24,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 2.3,
+   "before": "yone who subscribes gets one free blink.",
+   "after": "Day 5."
+  },
+  {
+   "t0": 37.0,
+   "t1": 37.33,
+   "dur": 0.33,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 8.0,
+   "before": "If you blink, no more Robux.",
+   "after": "One hour, three hours."
+  },
+  {
+   "t0": 39.53,
+   "t1": 39.8,
+   "dur": 0.27,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 4.8,
+   "before": "Mom has never lost a staring contest.",
+   "after": "One hour, three hours."
+  },
+  {
+   "t0": 40.77,
+   "t1": 41.01,
+   "dur": 0.24,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 5.2,
+   "before": "One hour, three hours.",
+   "after": "Must."
+  },
+  {
+   "t0": 41.96,
+   "t1": 42.17,
+   "dur": 0.21,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 4.4,
+   "before": "One hour, three hours.",
+   "after": "Must."
+  },
+  {
+   "t0": 50.2,
+   "t1": 50.53,
+   "dur": 0.33,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 7.6,
+   "before": "No more Robux, sweetie!",
+   "after": "But then the game updated."
+  },
+  {
+   "t0": 54.17,
+   "t1": 54.41,
+   "dur": 0.24,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 6.4,
+   "before": "Now every blink costs one Robux.",
+   "after": "Comment blink if you just blinked!"
+  },
+  {
+   "t0": 56.15,
+   "t1": 56.68,
+   "dur": 0.53,
+   "position": "end",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 11.2,
+   "before": "Comment blink if you just blinked!",
+   "after": ""
+  }
+ ]
+}

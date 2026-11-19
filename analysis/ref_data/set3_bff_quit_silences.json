@@ -1,0 +1,48 @@
+{
+ "summary": {
+  "video": "ref.mp4",
+  "duration": 55.06,
+  "speech_share": 0.901,
+  "gaps_total": 2,
+  "gaps_per_10s": 0.4,
+  "gap_median": 0.33,
+  "gap_p90": 0.39,
+  "gap_max": 0.4,
+  "gaps_over_0_6s": 0,
+  "gaps_with_sfx": 1,
+  "lead_in": 0.0,
+  "tail": 0.99
+ },
+ "gaps": [
+  {
+   "t0": 28.52,
+   "t1": 28.77,
+   "dur": 0.25,
+   "position": "middle",
+   "sfx_in_gap": false,
+   "peak_vs_music_db": 2.6,
+   "before": "never quits.",
+   "after": "Day 5."
+  },
+  {
+   "t0": 46.92,
+   "t1": 47.32,
+   "dur": 0.4,
+   "position": "middle",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 17.5,
+   "before": "The tutorial one.",
+   "after": "Bro, I'll carry you."
+  },
+  {
+   "t0": 54.07,
+   "t1": 55.06,
+   "dur": 0.99,
+   "position": "end",
+   "sfx_in_gap": true,
+   "peak_vs_music_db": 16.6,
+   "before": "I fell again.",
+   "after": ""
+  }
+ ]
+}

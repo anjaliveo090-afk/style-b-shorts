@@ -1,0 +1,65 @@
+# Style B Shorts: blocky game animation toolkit
+
+Turns **any voiceover + SRT** into a 9:16 animated Short in one fixed visual style. The style was measured frame by frame and sound by sound from the user's reference videos ("what if your mom… Roblox" type Shorts).
+
+**The look:** flat-vector blocky game avatars with big expressive faces, a navy night bedroom and bright game worlds (obbies over lava, boss arenas, leaderboards, shops), game UI overlays, hard cuts, punch-ins on key words, loud punchy SFX over a cheeky G-centred game tune.
+
+Everything is drawn and synthesised in code (pycairo + numpy + ffmpeg). Only the style is copied, never the reference channel's characters, logos, text or sound files.
+
+## Make a video (new chat)
+Open a new Claude Code chat on this repo, attach your voiceover and its SRT, and send:
+
+```
+I am attaching a voiceover and its SRT. Run bash setup.sh, then read MASTER_PROMPT.md and follow the prompt inside it exactly.
+```
+
+## What is in here
+| Path | What |
+|---|---|
+| `CLAUDE.md` | The workflow Claude follows for every voice + SRT |
+| `lessons.md`, `videos.md`, `analysis/drop_point.py` | Learning from YouTube analytics: rules from swipe-away points, the list of delivered videos, and the tool that shows what was on screen at a drop |
+| `MASTER_PROMPT.md` | The full prompt (voice + SRT → video), defaults and measured targets |
+| `style_bible.md` | The look: proportions in head-widths, faces and expressions, palette, sets |
+| `visual_grammar.md` | Measured pace and camera, and the phrase type → shot → reaction table |
+| `sound_design.md` | Measured music and SFX, mix defaults and check targets |
+| `script_guide.md` | How to write titles and scripts (characters + emotions) in the reference style, bend other topics, and handle silent parts |
+| `animator/style.py` | `Block` characters (19 expressions, 12 arm poses, 6 leg poses) and our own cast |
+| `animator/sets.py` | Rooms, game worlds, props, game UI, FX |
+| `animator/sample.py` | Template story (22 s sample) |
+| `animator/report_noob.py` | Full 60 s story on a real voiceover ("This noob is the reason Roblox invented the report button") |
+| `animator/contact.py` | Contact sheet of a story with the safe zone drawn, before rendering |
+| `animator/thumbkit.py`, `animator/thumb_<story>.py` | 9:16 thumbnails (1080x1920) in the LOCKED REFERENCE THUMBNAIL DNA: sticker stroke, headline text, red circle; output in `output/thumbnails/<title>.png` |
+| `animator/safe_audit.py` | Frame-by-frame safe-zone check of a story (heads, all text, keep boxes); must print 0 before delivery |
+| `animator/test_sheet.py`, `animator/set_sheet.py` | Style test sheets (characters × expressions × poses, all sets) |
+| `animator/engine.py`, `audio.py`, `safezone.py`, `thumbnail.py` | Render engine, synthesised sound + music, safe-zone fitter, thumbnail template |
+| `assembler/` | Joins animation + voice + music + SFX into the final mp4; `captions.py` burns reference-style captions onto it |
+| `animator/no_break.py` | Full 60 s story on a real voiceover ("How long could you survive playing Roblox without a break?"), with a playtime HUD; captions in `animator/captions/no_break.json` |
+| `animator/robux10.py` | 44 s "Second 10 → 5" countdown story (timer pill, SECOND cards, mystery box, refund twist); captions in `animator/captions/robux10.json` |
+| `animator/grandma_pro.py` | 47 s story written with `script_guide.md` (Day ladder, lip-sync on Grandma/Kid, REWIND ending); captions in `animator/captions/grandma_pro.json` |
+| `animator/sneeze.py` | 47 s sneeze story (pepper, dusty cat, attic, launch, mom's clean-up twist); captions in `animator/captions/sneeze.json` |
+| `animator/chat_filter_v2.py` | The chat filter story remade for engagement on the same voice: a new picture every 1.13 s, a sticker on every action, the CHAT FILTER machine, peephole, CCTV wall, siren |
+| `animator/chat_filter.py` | 60 s story "This noob is the reason Roblox has a chat filter" (Benny; chat box, filter hashtags, roleplay house, security booth, MODs; captions in `animator/captions/chat_filter.json`) |
+| `animator/friend_noob.py` | 60 s story "This noob is the reason Roblox has a friend limit" (Milo; 60 fps set-3 motion, Roblox UI: friend requests, invites, FULL servers, Friend Limit dialog; captions in `animator/captions/friend_noob.json`) |
+| `animator/reset_noob.py` | 76 s story "This noob is the reason Roblox has a reset button" (Oliver stuck in a vending machine, an obby gap, under the map; RESET CHARACTER button; lip-sync on his two lines; REWIND ending) |
+| `assembler/make_voice.py` | Test voiceover + SRT from a script in the `Narrator: [emotion] …` format (Kokoro TTS, one voice per character) |
+| `analysis/silences.py`, `assembler/tighten_voice.py` | Measure the pauses in a voice; shorten pauses that are too long |
+| `analysis/` | Reference analysis tools (frame logs, SFX/music measure, pace, camera flow, word alignment) and `ref_data/` |
+| `analysis/frame60.py` | Frame-exact analysis (every frame at 60 fps): cuts, held drawings, punch-ins, impact bumps, whip pans, caption pops |
+| `animator/set3_test.py` | 6 s side-by-side test of the reference set 3 motion (`engine.profile("set3")`: 60 fps, bumps, whip, DAY write-on, sound-word stickers, system message) |
+| `reference_examples/` | The older toolkit (another style) this repo was bootstrapped from, kept as worked examples |
+
+## Quick test
+```bash
+bash setup.sh
+```
+```bash
+python3 animator/audio.py output/sample/sfx 22.3
+```
+```bash
+cd animator && python3 sample.py ../output/sample/clips/animation.mp4 ../output/sample/cues.json && cd ..
+```
+```bash
+python3 assembler/assemble.py --clips output/sample/clips --voice <a 22 s voice file> \
+  --sfx output/sample/cues.json --sfx-dir output/sample/sfx --music output/sample/music.wav \
+  --music-volume 0.5 --out output/sample/sample_final.mp4
+```
