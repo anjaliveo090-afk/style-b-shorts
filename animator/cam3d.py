@@ -86,7 +86,7 @@ def layer(name, p, k):
 
 def move(name, t, dur):
     """(subject matrix, background matrix, depth of field 0..1) at shot time t of a shot lasting dur."""
-    if name not in MOVES:
+    if name not in MOVES or STATE.get("off"):
         return cairo.Matrix(), cairo.Matrix(), 0.0
     p = (t + LEAD) / (dur + 2 * LEAD)
     fg, d = layer(name, p, 1.0)
@@ -111,11 +111,26 @@ def wrap(draw, name):
     return fn
 
 
-def bg(ctx, draw, blur=1.0):
+def bg(ctx, draw, blur=1.0, floor=None):
     """Draw a background layer at the far depth: the background move instead of the subject move, a little larger
     (BG_BASE) so no edge shows, and blurred for depth of field in the final render (blur 0 = sharp)."""
     if STATE.get("in_bg"):                                  # already inside a background layer
         draw(ctx)
+        return
+    if STATE.get("layer") == "fg":                          # diorama.py: the subject layer only
+        return
+    if STATE.get("layer") == "bg":                          # diorama.py: the background goes to its own surface
+        c2 = STATE["bg_ctx"]
+        c2.save()
+        c2.set_matrix(ctx.get_matrix())
+        STATE["in_bg"] = True
+        try:
+            draw(c2)
+        finally:
+            STATE["in_bg"] = False
+            c2.restore()
+        if floor is not None:
+            STATE["floor_y"] = floor
         return
     STATE["in_bg"] = True
     try:

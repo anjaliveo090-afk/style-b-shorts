@@ -119,16 +119,16 @@ def school(ctx, T, s=0.62, y=GY, sign=None, sign_k=1.0, lift=0.0, cx=640, blur=0
     def fn(c):
         outside(c, T, y)
         land(c, lambda c2: ss.school_ext(c2, T, cx=cx, s=s, sign=sign, sign_k=sign_k, lift=lift, ground=False), gy=y)
-    cam3d.bg(ctx, fn, blur)
+    cam3d.bg(ctx, fn, blur, floor=y)
 
 
 def classroom(ctx, T, board="", y=GY, blur=0.45):
     cam3d.bg(ctx, lambda c: land(c, lambda c2: ss.classroom(c2, T, board=board, clock_h=9.0), gy=y, fill="#8fd0e8"),
-             blur)
+             blur, floor=y)
 
 
 def gym(ctx, T, dark_k=0.0, doors=0.0, blur=1.0):
-    cam3d.bg(ctx, lambda c: land(c, lambda c2: ss.gym(c2, T, dark_k=dark_k, doors=doors), fill="#f0b866"), blur)
+    cam3d.bg(ctx, lambda c: land(c, lambda c2: ss.gym(c2, T, dark_k=dark_k, doors=doors), fill="#f0b866"), blur, floor=GY)
 
 
 # ---------------------------------------------------------------- far layers for the 3D camera (cam3d.py)
@@ -141,7 +141,7 @@ def void_bg(ctx, **k):
 
 
 def night_bedroom(ctx, T, **k):
-    cam3d.bg(ctx, lambda c: st.night_bedroom(c, T, **k), 0.6)
+    cam3d.bg(ctx, lambda c: st.night_bedroom(c, T, **k), 0.6, floor=k.get("y_floor"))
 
 
 def falling_blocks(ctx, T, n=12, speed=620):
