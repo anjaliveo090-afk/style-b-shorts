@@ -691,7 +691,7 @@ def s_restored(ctx, T, d, t0=49.99):
 
 def s_party(ctx, T, d, t0=51.02):
     school(ctx, T, sign="SUMMER!!!", sign_k=(T - t0) / 0.4)
-    for i, (x, ch) in enumerate(((100, LEO), (230, PRIYA), (490, P[6]), (620, P[7]))):
+    for i, (x, ch) in enumerate(((110, LEO), (235, PRIYA), (485, P[6]), (610, P[7]))):
         ch.draw(ctx, x, GY, 0.62, "laugh", T, arms=("up", "up"), bob=1.5)
     KID.draw(ctx, 360, GY - 40, 0.7, "laugh", T, arms=("up", "up"), pose="jump")
     st.confetti(ctx, T, t0, n=40)
@@ -755,15 +755,15 @@ def s_mom_scream(ctx, T, d, t0=58.49):
 S = []
 
 
-# the 3D camera move of every shot (cam3d.py): a different move each shot; vertigo on the shocks, low on entrances
-CAM3D = {0.00: "vertigo", 0.83: "track_l", 1.83: "low", 2.90: "orbit_r", 4.22: "push", 5.24: "orbit_l",
+# the 3D camera move of every shot (cam3d.py): a different move each shot; rush (a fast push that lands) on the shocks; gym shots keep orbiting one way, low on entrances
+CAM3D = {0.00: "rush", 0.83: "track_l", 1.83: "low", 2.90: "orbit_r", 4.22: "push", 5.24: "orbit_l",
          6.85: "track_l", 8.11: "orbit_r", 10.03: "push", 10.96: "crane_up", 12.95: "orbit_l", 14.03: "push",
-         15.00: "vertigo", 15.99: "pull", 17.23: "orbit_r", 18.68: "crane_up", 19.94: "low", 21.59: "vertigo",
-         22.48: "push", 23.96: "push", 25.27: "orbit_l", 26.51: "orbit_r", 28.31: "vertigo", 29.43: "push",
-         30.43: "push", 31.18: "low", 32.52: "crane_up", 33.67: "orbit_l", 34.71: "push", 35.75: "orbit_r",
-         37.48: "track_l", 38.48: "orbit_l", 39.44: "pull", 40.28: "push", 42.20: "low", 43.11: "orbit_r",
+         15.00: "rush", 15.99: "pull", 17.23: "orbit_r", 18.68: "crane_up", 19.94: "low", 21.59: "rush",
+         22.48: "push", 23.96: "push", 25.27: "orbit_l", 26.51: "orbit_r", 28.31: "rush", 29.43: "push",
+         30.43: "push", 31.18: "low", 32.52: "orbit_r", 33.67: "orbit_r", 34.71: "push", 35.75: "orbit_r",
+         37.48: "track_r", 38.48: "orbit_r", 39.44: "pull", 40.28: "push", 42.20: "low", 43.11: "orbit_r",
          44.40: "orbit_l", 45.86: "push", 47.07: "orbit_r", 48.51: "low", 49.99: "pull", 51.02: "crane_up",
-         52.36: "push", 53.75: "low", 56.01: "push", 56.77: "orbit_l", 58.49: "vertigo"}
+         52.36: "push", 53.75: "low", 56.01: "push", 56.77: "orbit_l", 58.49: "rush"}
 
 
 def shot(start, draw, keys, **kw):

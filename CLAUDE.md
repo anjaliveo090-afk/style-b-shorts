@@ -58,6 +58,7 @@ Read `lessons.md` rules and then `script_guide.md`. The guide was learned from 8
 | `animator/sets.py` | Places, props, game UI and FX (list at the top of the file) |
 | `animator/audio.py` | Synthesised SFX + `music_game()` |
 | `animator/score.py` | **The situation score**: the music changes mood with the story (`SCORE` / `STINGS` in the story, `sound_design.md` section 5) |
+| `camera_guide.md` | 3D camera rules and moves (`animator/cam3d.py`): rails, parallax, depth of field, comfort check |
 | `animator/engine.py` | Camera keys and render. Do not change unless broken |
 | `animator/safezone.py` | Keeps characters, labels and `keep` boxes in the Shorts safe zone |
 
@@ -197,6 +198,10 @@ Example: `animator/school_short.py` (from whole_school, 47 shots + rewind, 60.0 
   draws through `cam3d.bg(ctx, fn, blur)` (far layer: its own smaller move, drawn 14 % larger, soft depth-of-field
   blur in the real render only: `cam3d.STATE["blur_on"] = True` after `safezone.fit`). Example: `school_short.py`.
   Change the move every shot; both safe audits still must print 0.
+  - **Read `camera_guide.md` before choosing moves** (learned 2026-11-19 from the user's 3D-animator reference, camera only):
+    one Bezier rail + one eased value per move, curved paths, no zoom (`rush` replaces the dolly zoom), parallax from
+    layer depth, thin depth of field racked with the dolly, cut on motion, continuous rails across cuts in one place,
+    and `python3 cam3d.py <story>` must print `0 jerky moves`.
 - **No camera whoosh.** Only `whip.wav` on the loop rewind, and `swish` on a physical throw or a panel sliding in.
 - **Hard cuts** (`render(xfade=0)`), grain 2, `vignette` 0.15 (flat vector look).
 - **`engine.profile("set3")` at the top of every new story** (then `engine.ENERGY = 3.0`). It is the motion measured frame by frame at 60 fps on reference set 3 (`visual_grammar.md` section 2b):
